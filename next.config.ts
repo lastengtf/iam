@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // output: "export", // Dinonaktifkan untuk mendukung dynamic route NextAuth (/api/auth/*)
+  output: "export",
   images: {
     unoptimized: true,
   },

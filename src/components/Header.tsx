@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut } from "@/components/AuthProvider";
 import { PROFILE_DATA } from "@/data/profileData";
 
 const NAV_ITEMS = [

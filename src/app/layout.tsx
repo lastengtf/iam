@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ten.my.id"),
@@ -128,11 +129,13 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="app-container">
-          <Header />
-          <main className="content-wrapper">{children}</main>
-          <Footer />
-        </div>
+        <AuthProvider>
+          <div className="app-container">
+            <Header />
+            <main className="content-wrapper">{children}</main>
+            <Footer />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

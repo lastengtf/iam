@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { PROFILE_DATA } from "@/data/profileData";
 
 const NAV_ITEMS = [
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const cleanPath = pathname.replace(/\/$/, "");
   const isDetailPage =
@@ -117,6 +119,52 @@ export default function Header() {
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
         </a>
+      </div>
+
+      {/* SSO Status / Login Action */}
+      <div className="profile-auth-bar">
+        {status === "loading" ? (
+          <div className="auth-loading-pill">
+            <span className="auth-dot pulse"></span> Memeriksa SSO...
+          </div>
+        ) : session?.user ? (
+          <div className="auth-user-pill">
+            <span className="auth-dot connected" title="Terhubung ke accounts.ten.my.id"></span>
+            <span className="auth-user-name" title={session.user.email || ""}>
+              {session.user.name || session.user.email}
+            </span>
+            {session.user.role && (
+              <span className={`auth-role-tag ${session.user.role}`}>
+                {session.user.role}
+              </span>
+            )}
+            <Link href="/admin" className="auth-action-link" title="Buka Portal Admin">
+              Admin
+            </Link>
+            <button
+              type="button"
+              onClick={() => signOut()}
+              className="auth-action-btn"
+              title="Keluar dari sesi ini"
+            >
+              Keluar
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => signIn("ten-accounts")}
+            className="auth-login-pill"
+            title="Masuk menggunakan akun SSO TEN (accounts.ten.my.id)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            <span>Masuk Akun TEN</span>
+          </button>
+        )}
       </div>
 
       {/* Statistik Minimalis di Atas Navigasi */}

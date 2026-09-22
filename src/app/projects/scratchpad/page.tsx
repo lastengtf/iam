@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 export default function ScratchpadApp() {
-  const [content, setContent] = useState<string>("");
+  const [content, setContent] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("ten_next_scratchpad") || "";
+    }
+    return "";
+  });
   const [status, setStatus] = useState<string>("Tersimpan secara lokal");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("ten_next_scratchpad");
-    if (saved) setContent(saved);
-  }, []);
 
   const handleChange = (val: string) => {
     setContent(val);

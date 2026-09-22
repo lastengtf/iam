@@ -44,6 +44,30 @@ Platform profil personal, arsip karya, catatan perjalanan, eksplorasi inisiatif,
 
 ---
 
+## 🔐 Konfigurasi Autentikasi SSO (accounts.ten.my.id)
+
+Platform ini terintegrasi dengan Identity Provider terpusat **TEN Accounts** (`https://accounts.ten.my.id`) via NextAuth (Auth.js v5):
+
+### Variabel Lingkungan (`.env.local` / Cloudflare Environment Variables):
+
+```env
+# Secret key NextAuth (generate: npx auth secret atau openssl rand -base64 32)
+AUTH_SECRET="your-generated-secret-key"
+
+# Base URL aplikasi
+AUTH_URL="http://localhost:3000"
+
+# Kredensial SSO Satelit (didapatkan dari https://accounts.ten.my.id/admin/clients)
+TEN_CLIENT_ID="iam-app"
+TEN_CLIENT_SECRET="your-satellite-client-secret"
+```
+
+### Registered Callback URLs di IdP:
+- **Lokal Dev**: `http://localhost:3000/api/auth/callback/ten-accounts`
+- **Produksi**: `https://ten.my.id/api/auth/callback/ten-accounts`
+
+---
+
 ## 🚀 Menjalankan Secara Lokal
 
 1. Instal dependensi:

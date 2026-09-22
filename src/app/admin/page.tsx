@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useSession, signIn, signOut } from "next-auth/react";
 import {
   PROFILE_DATA,
   WORK_ITEMS,
@@ -18,6 +19,7 @@ type AdminTab = "overview" | "content" | "profile" | "sso" | "backup";
 type ContentCategory = "all" | "work" | "projects" | "publications" | "news";
 
 export default function AdminPage() {
+  const { data: session, status: authStatus } = useSession();
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [contentCategory, setContentCategory] = useState<ContentCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,15 +33,6 @@ export default function AdminPage() {
   const [projectList, setProjectList] = useState<ProjectItem[]>(PROJECT_ITEMS);
   const [pubList, setPubList] = useState<PublicationItem[]>(PUBLICATION_ITEMS);
   const [newsList, setNewsList] = useState<NewsItem[]>(NEWS_ITEMS);
-
-  // SSO Settings State
-  const [ssoConfig, setSsoConfig] = useState({
-    host: "https://auth.ten.my.id",
-    clientId: "www-ten-my-id-prod",
-    role: "admin",
-    status: "CONNECTED",
-    lastSynced: "Baru saja",
-  });
 
   // Modal State for adding/editing content
   const [showModal, setShowModal] = useState(false);
@@ -160,7 +153,12 @@ export default function AdminPage() {
       projectList,
       pubList,
       newsList,
-      ssoConfig,
+      sso: {
+        provider: "ten-accounts",
+        issuer: "https://accounts.ten.my.id/api/auth",
+        status: authStatus,
+        user: session?.user || null,
+      },
     };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
     const downloadAnchor = document.createElement("a");
@@ -414,12 +412,20 @@ export default function AdminPage() {
             <div className="admin-stat-card">
               <div className="admin-stat-header">
                 <span className="admin-stat-label">Status SSO Auth</span>
-                <span className="admin-stat-badge">Active</span>
+                <span className={`admin-stat-badge ${authStatus === "authenticated" ? "active" : ""}`}>
+                  {authStatus === "loading" ? "Memeriksa" : authStatus === "authenticated" ? "Active" : "Guest"}
+                </span>
               </div>
-              <div className="admin-stat-value" style={{ fontSize: "1.25rem", color: "var(--mono-black)" }}>
-                auth.ten.my.id
+              <div className="admin-stat-value" style={{ fontSize: "1.1rem", color: "var(--mono-black)" }}>
+                {authStatus === "authenticated"
+                  ? (session?.user?.name || session?.user?.email || "accounts.ten.my.id")
+                  : "accounts.ten.my.id"}
               </div>
-              <div className="admin-stat-desc">Peran akun: Administrator</div>
+              <div className="admin-stat-desc">
+                {authStatus === "authenticated"
+                  ? `Peran: ${session?.user?.role || "user"} • Sesi OIDC Aktif`
+                  : "Belum terautentikasi (Tamu)"}
+              </div>
             </div>
           </div>
 
@@ -742,68 +748,99 @@ export default function AdminPage() {
             <div>
               <h2 className="admin-section-title">Konfigurasi Single Sign-On (SSO)</h2>
               <p className="admin-section-subtitle">
-                Otorisasi terpusat via Cloudflare Edge dan TEN ID Identity Gateway.
+                Otorisasi terpusat via TEN Accounts IdP (<code>https://accounts.ten.my.id</code>) berbasis OIDC & OAuth 2.1.
               </p>
             </div>
-            <button
-              type="button"
-              className="admin-btn-outline"
-              onClick={() => showToast("Token verifikasi SSO aktif dan valid.")}
-            >
-              Uji Validitas Sesi
-            </button>
+            {authStatus === "authenticated" ? (
+              <button
+                type="button"
+                className="admin-btn-outline"
+                style={{ color: "#e11d48", borderColor: "#fecdd3" }}
+                onClick={() => signOut()}
+              >
+                Keluar Akun (Logout)
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="admin-btn-primary"
+                onClick={() => signIn("ten-accounts")}
+              >
+                Login via TEN Accounts
+              </button>
+            )}
           </div>
 
           <div className="admin-grid-two">
             <div className="admin-box-card">
-              <h3 className="admin-card-title">Parameter Klien SSO</h3>
+              <h3 className="admin-card-title">Status Sesi Pengguna</h3>
+              
               <div className="admin-form-group">
-                <label className="admin-label">SSO Authentication Host</label>
-                <input
-                  type="text"
-                  value={ssoConfig.host}
-                  readOnly
-                  className="admin-input readonly"
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-label">Application Client ID</label>
-                <input
-                  type="text"
-                  value={ssoConfig.clientId}
-                  readOnly
-                  className="admin-input readonly"
-                />
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-label">Tingkat Hak Akses (Role)</label>
+                <label className="admin-label">Status Autentikasi</label>
                 <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <span className="admin-status-pill active">{ssoConfig.role.toUpperCase()}</span>
+                  <span className={`admin-status-pill ${authStatus === "authenticated" ? "active" : ""}`}>
+                    {authStatus === "loading" ? "MEMERIKSA..." : authStatus === "authenticated" ? "CONNECTED (Aktif)" : "BELUM LOGIN"}
+                  </span>
                   <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
-                    Memiliki hak akses penuh ke seluruh pengelolaan platform.
+                    {authStatus === "authenticated" ? "Sesi OIDC valid via Better Auth / NextAuth" : "Masuk untuk mendapatkan akses penuh"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-label">Nama Pengguna (Profile)</label>
+                <input
+                  type="text"
+                  value={session?.user?.name || "(Belum masuk)"}
+                  readOnly
+                  className="admin-input readonly"
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-label">Email Terverifikasi</label>
+                <input
+                  type="text"
+                  value={session?.user?.email || "(Belum masuk)"}
+                  readOnly
+                  className="admin-input readonly"
+                />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-label">Peran Pengguna (Role)</label>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <span className="admin-status-pill active">
+                    {(session?.user?.role || "GUEST").toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
+                    {session?.user?.role === "admin"
+                      ? "Hak akses administrator penuh."
+                      : "Hak akses pengguna terautentikasi."}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="admin-box-card">
-              <h3 className="admin-card-title">Keamanan & Domain Whitelist</h3>
+              <h3 className="admin-card-title">Parameter IdP TEN Accounts</h3>
               <p className="admin-card-text">
-                Origin yang diizinkan untuk bertukar payload token SSO secara aman:
+                Integrasi identitas satelit berbasis OpenID Connect (OIDC) & PKCE:
               </p>
               <ul className="admin-info-list" style={{ marginBottom: "1.25rem" }}>
-                <li><code>https://ten.my.id</code> (Produksi Utama)</li>
-                <li><code>https://auth.ten.my.id</code> (SSO Authority)</li>
-                <li><code>http://127.0.0.1:8787</code> (Wrangler Local Dev)</li>
+                <li><strong>Issuer:</strong> <code>https://accounts.ten.my.id/api/auth</code></li>
+                <li><strong>Discovery:</strong> <code>/.well-known/openid-configuration</code></li>
+                <li><strong>Authorize:</strong> <code>/api/auth/oauth2/authorize</code></li>
+                <li><strong>Token:</strong> <code>/api/auth/oauth2/token</code></li>
+                <li><strong>UserInfo:</strong> <code>/api/auth/oauth2/userinfo</code></li>
+                <li><strong>Callback URI:</strong> <code>/api/auth/callback/ten-accounts</code></li>
               </ul>
               <button
                 type="button"
-                className="admin-btn-primary"
-                onClick={() => showToast("Koneksi KV & SSO terverifikasi aman.")}
+                className="admin-btn-outline"
+                onClick={() => showToast("Endpoint IdP accounts.ten.my.id aktif dan responsif.")}
               >
-                Verifikasi Keamanan Sambungan
+                Uji Konektivitas SSO
               </button>
             </div>
           </div>
@@ -877,7 +914,7 @@ export default function AdminPage() {
                 <select
                   className="admin-select"
                   value={newItemType}
-                  onChange={(e) => setNewItemType(e.target.value as any)}
+                  onChange={(e) => setNewItemType(e.target.value as "work" | "project" | "publication" | "news")}
                 >
                   <option value="project">Karya & Proyek Digital</option>
                   <option value="work">Riwayat Pekerjaan</option>

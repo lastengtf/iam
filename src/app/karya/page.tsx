@@ -126,21 +126,29 @@ export default function KaryaPage() {
           className={`karya-tab-btn ${activeTab === "all" ? "active" : ""}`}
           onClick={() => handleTabChange("all")}
         >
-          Semua Koleksi ({projectItemsUnified.length + publicationItemsUnified.length})
+          <span className="tab-label-full">Semua Koleksi</span>
+          <span className="tab-label-short">Semua</span>
+          <span>({projectItemsUnified.length + publicationItemsUnified.length})</span>
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${activeTab === "projects" ? "active" : ""}`}
           onClick={() => handleTabChange("projects")}
         >
-          🛠️ Proyek & Aplikasi ({projectItemsUnified.length})
+          <span>🛠️</span>
+          <span className="tab-label-full">Proyek & Aplikasi</span>
+          <span className="tab-label-short">Proyek</span>
+          <span>({projectItemsUnified.length})</span>
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${activeTab === "research" ? "active" : ""}`}
           onClick={() => handleTabChange("research")}
         >
-          📜 Riset & Karya Ilmiah ({publicationItemsUnified.length})
+          <span>📜</span>
+          <span className="tab-label-full">Riset & Karya Ilmiah</span>
+          <span className="tab-label-short">Riset</span>
+          <span>({publicationItemsUnified.length})</span>
         </button>
       </div>
 

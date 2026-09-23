@@ -71,7 +71,9 @@ export default function KeseharianPage() {
           className={`karya-tab-btn ${selectedSense === "all" ? "active" : ""}`}
           onClick={() => handleSenseChange("all")}
         >
-          Semua Catatan ({DAILY_LOG_ITEMS.length})
+          <span className="tab-label-full">Semua Catatan</span>
+          <span className="tab-label-short">Semua</span>
+          <span>({DAILY_LOG_ITEMS.length})</span>
         </button>
         <button
           type="button"

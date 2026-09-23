@@ -32,11 +32,10 @@ const MAX_WIDTH = 500;
 const DEFAULT_WIDTH = 320;
 
 const ALL_CATEGORIES = [
-  { label: "Beranda", href: "/", icon: "🏠", desc: "Beranda utama & aktivitas" },
-  { label: "Pengalaman", href: "/pengalaman", icon: "💼", desc: "Rekam jejak karier & peran" },
-  { label: "Riset & Karya", href: "/karya", icon: "🛠️", desc: "Aplikasi, karya & riset ilmiah" },
-  { label: "Alat", href: "/alat", icon: "⚙️", desc: "Stack perangkat & ulasan" },
-  { label: "Keseharian", href: "/keseharian", icon: "☕", desc: "Jurnal rasa, buku & visual" },
+  { label: "Pengalaman", href: "/pengalaman/details", catalogHref: "/pengalaman", icon: "💼", desc: "Rekam jejak karier & peran" },
+  { label: "Riset & Karya", href: "/karya/details", catalogHref: "/karya", icon: "🛠️", desc: "Aplikasi, karya & riset ilmiah" },
+  { label: "Alat", href: "/alat/details", catalogHref: "/alat", icon: "⚙️", desc: "Stack perangkat & ulasan" },
+  { label: "Keseharian", href: "/keseharian/details", catalogHref: "/keseharian", icon: "☕", desc: "Jurnal rasa, buku & visual" },
 ];
 
 export default function MasterDetailLayout({
@@ -56,9 +55,19 @@ export default function MasterDetailLayout({
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+  const [isDrawerClosing, setIsDrawerClosing] = useState<boolean>(false);
   const [isCatMenuOpen, setIsCatMenuOpen] = useState<boolean>(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const catMenuRef = useRef<HTMLDivElement>(null);
+
+  const closeMobileDrawer = () => {
+    if (isDrawerClosing) return;
+    setIsDrawerClosing(true);
+    setTimeout(() => {
+      setIsMobileDrawerOpen(false);
+      setIsDrawerClosing(false);
+    }, 230);
+  };
 
   // Close category dropdown when clicking outside
   useEffect(() => {
@@ -169,6 +178,9 @@ export default function MasterDetailLayout({
   const resolvedCategory = categoryLabel || (categoryTitle ? categoryTitle.replace(/^Daftar\s+/i, "") : backLabel || "Kategori");
   const resolvedSidebarTitle = categoryTitle || (categoryLabel ? `Daftar ${categoryLabel}` : "Daftar Item");
   const resolvedDetailTitle = detailTitle || sidebarItems.find((item) => item.id === selectedId)?.title || "Detail";
+  const categoryDetailHref = backHref.endsWith("/details")
+    ? backHref
+    : `${backHref.replace(/\/$/, "")}/details`;
 
   // Filter items in sidebar
   const filteredSidebarItems = sidebarItems.filter((item) => {
@@ -191,7 +203,11 @@ export default function MasterDetailLayout({
             type="button"
             onClick={() => {
               if (typeof window !== "undefined" && window.innerWidth <= 768) {
-                setIsMobileDrawerOpen((prev) => !prev);
+                if (isMobileDrawerOpen) {
+                  closeMobileDrawer();
+                } else {
+                  setIsMobileDrawerOpen(true);
+                }
               } else {
                 toggleCollapse();
               }
@@ -246,9 +262,9 @@ export default function MasterDetailLayout({
               onMouseLeave={() => setIsCatMenuOpen(false)}
             >
               <Link
-                href={backHref}
+                href={categoryDetailHref}
                 className="md-breadcrumb-link md-breadcrumb-cat-trigger"
-                title={`Ke Halaman ${resolvedCategory} (Arahkan kursor atau klik untuk pilih kategori lain)`}
+                title={`Ke Detail ${resolvedCategory} (Arahkan kursor atau klik untuk pilih kategori lain)`}
                 onClick={() => setIsCatMenuOpen(false)}
               >
                 <span>{resolvedCategory}</span>
@@ -260,8 +276,8 @@ export default function MasterDetailLayout({
                   <div className="md-cat-dropdown-header">Pindah Kategori:</div>
                   {ALL_CATEGORIES.map((cat) => {
                     const isCurrentCat =
-                      cat.href === backHref ||
-                      (backHref.startsWith(cat.href) && cat.href !== "/");
+                      cat.href === categoryDetailHref ||
+                      cat.catalogHref === backHref;
                     return (
                       <Link
                         key={cat.href}
@@ -420,15 +436,22 @@ export default function MasterDetailLayout({
       </div>
 
       {/* Mobile Drawer Overlay */}
-      {isMobileDrawerOpen && (
-        <div className="md-drawer-backdrop" onClick={() => setIsMobileDrawerOpen(false)}>
-          <div className="md-drawer-sheet" onClick={(e) => e.stopPropagation()}>
+      {(isMobileDrawerOpen || isDrawerClosing) && (
+        <div
+          className={`md-drawer-backdrop ${isDrawerClosing ? "closing" : ""}`}
+          onClick={closeMobileDrawer}
+        >
+          <div
+            className={`md-drawer-sheet ${isDrawerClosing ? "closing" : ""}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="md-drawer-header">
               <span className="md-sidebar-title">{resolvedSidebarTitle}</span>
               <button
                 type="button"
                 className="md-drawer-close-btn"
-                onClick={() => setIsMobileDrawerOpen(false)}
+                onClick={closeMobileDrawer}
+                aria-label="Tutup daftar"
               >
                 ✕
               </button>
@@ -441,27 +464,58 @@ export default function MasterDetailLayout({
                 placeholder="Cari dalam daftar..."
                 className="md-sidebar-search-input"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="md-search-clear-btn"
+                  title="Hapus pencarian"
+                >
+                  ×
+                </button>
+              )}
             </div>
             <div className="md-sidebar-list">
-              {filteredSidebarItems.map((item) => {
-                const isCurrent = item.id === selectedId;
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    onClick={() => setIsMobileDrawerOpen(false)}
-                    className={`md-sidebar-item ${isCurrent ? "active" : ""}`}
-                  >
-                    <div className="md-item-icon-box">{item.icon || "📄"}</div>
-                    <div className="md-item-info">
-                      <div className="md-item-top-meta">
-                        {item.badge && <span className="md-item-badge">{item.badge}</span>}
+              {filteredSidebarItems.length === 0 ? (
+                <div className="md-sidebar-empty">
+                  Tidak ada item yang cocok dengan &quot;{searchQuery}&quot;
+                </div>
+              ) : (
+                filteredSidebarItems.map((item) => {
+                  const isCurrent = item.id === selectedId;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      onClick={closeMobileDrawer}
+                      className={`md-sidebar-item ${isCurrent ? "active" : ""}`}
+                      title={item.title}
+                    >
+                      {item.imageUrl ? (
+                        <div className="md-item-thumb-box">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="md-item-thumb-img"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className="md-item-icon-box">{item.icon || "📄"}</div>
+                      )}
+
+                      <div className="md-item-info">
+                        <div className="md-item-top-meta">
+                          {item.badge && <span className="md-item-badge">{item.badge}</span>}
+                          {item.subtitle && <span className="md-item-sub">{item.subtitle}</span>}
+                        </div>
+                        <h4 className="md-item-title">{item.title}</h4>
                       </div>
-                      <h4 className="md-item-title">{item.title}</h4>
-                    </div>
-                  </Link>
-                );
-              })}
+                    </Link>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

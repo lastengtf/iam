@@ -106,28 +106,36 @@ export default function AlatPage() {
           className={`karya-tab-btn ${selectedCategory === "all" ? "active" : ""}`}
           onClick={() => handleCategoryChange("all")}
         >
-          Semua Instrumen ({STACK_ITEMS.length})
+          <span className="tab-label-full">Semua Instrumen</span>
+          <span className="tab-label-short">Semua</span>
+          <span>({STACK_ITEMS.length})</span>
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${selectedCategory === "Hardware & EDC" ? "active" : ""}`}
           onClick={() => handleCategoryChange("Hardware & EDC")}
         >
-          💻 Hardware & EDC
+          <span>💻</span>
+          <span className="tab-label-full">Hardware & EDC</span>
+          <span className="tab-label-short">Hardware</span>
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${selectedCategory === "Software & Otomasi" ? "active" : ""}`}
           onClick={() => handleCategoryChange("Software & Otomasi")}
         >
-          🛠️ Software & Otomasi
+          <span>🛠️</span>
+          <span className="tab-label-full">Software & Otomasi</span>
+          <span className="tab-label-short">Software</span>
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${selectedCategory === "Infrastruktur & Cloud" ? "active" : ""}`}
           onClick={() => handleCategoryChange("Infrastruktur & Cloud")}
         >
-          ☁️ Infrastruktur
+          <span>☁️</span>
+          <span className="tab-label-full">Infrastruktur & Cloud</span>
+          <span className="tab-label-short">Cloud</span>
         </button>
       </div>
 

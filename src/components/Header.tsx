@@ -7,11 +7,11 @@ import { useSession, signIn, signOut } from "@/components/AuthProvider";
 import { PROFILE_DATA } from "@/data/profileData";
 
 const NAV_ITEMS = [
-  { label: "Home", href: "/" },
-  { label: "Work", href: "/work" },
-  { label: "Projects", href: "/projects" },
-  { label: "Publications", href: "/publications" },
-  { label: "News", href: "/news" },
+  { label: "Beranda", shortLabel: "Beranda", href: "/" },
+  { label: "Pengalaman", shortLabel: "Pengalaman", href: "/pengalaman" },
+  { label: "Riset & Karya", shortLabel: "Karya", href: "/karya" },
+  { label: "Alat", shortLabel: "Alat", href: "/alat" },
+  { label: "Keseharian", shortLabel: "Harian", href: "/keseharian" },
 ];
 
 export default function Header() {
@@ -180,22 +180,27 @@ export default function Header() {
         ))}
       </div>
 
-      {/* Navigasi Utama (Tanpa Contact) */}
+      {/* Navigasi Utama (5 Pilar) */}
       <nav className="bio-nav-bar" aria-label="Navigasi Utama">
         <ul className="bio-nav-list">
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === "/"
                 ? cleanPath === "" || cleanPath === "/"
-                : cleanPath === item.href || cleanPath.startsWith(item.href + "/");
+                : cleanPath === item.href ||
+                  cleanPath.startsWith(item.href + "/") ||
+                  (item.href === "/pengalaman" && (cleanPath === "/work" || cleanPath.startsWith("/work/"))) ||
+                  (item.href === "/karya" && (cleanPath === "/projects" || cleanPath.startsWith("/projects/") || cleanPath === "/publications" || cleanPath.startsWith("/publications/")));
 
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={`bio-nav-btn ${isActive ? "active" : ""}`}
+                  title={item.label}
                 >
-                  {item.label}
+                  <span className="bio-nav-label-full">{item.label}</span>
+                  <span className="bio-nav-label-short">{item.shortLabel || item.label}</span>
                 </Link>
               </li>
             );

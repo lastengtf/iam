@@ -3,13 +3,14 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { NEWS_ITEMS } from "@/data/profileData";
+import { useNewsData } from "@/data/contentStore";
 import ShareButton from "@/components/ShareButton";
 
 function NewsDetailContent() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
-  const news = NEWS_ITEMS.find((n) => n.slug === slug) || NEWS_ITEMS[0];
+  const { news: newsList } = useNewsData();
+  const news = newsList.find((n) => n.slug === slug) || newsList[0];
 
   return (
     <div style={{ paddingBottom: "2.5rem" }}>

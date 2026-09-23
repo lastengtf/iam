@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { NEWS_ITEMS } from "@/data/profileData";
+import { useNewsData } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -12,13 +12,14 @@ export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const { news: newsList } = useNewsData();
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setCurrentPage(1);
   };
 
-  const filteredNews = NEWS_ITEMS.filter((news) => {
+  const filteredNews = newsList.filter((news) => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (

@@ -2,7 +2,8 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { DAILY_LOG_ITEMS, SenseCategory } from "@/data/profileData";
+import { SenseCategory } from "@/data/profileData";
+import { useDailyData } from "@/data/contentStore";
 import MasterDetailLayout, { MasterDetailSidebarItem } from "@/components/MasterDetailLayout";
 
 const SENSE_ICONS: Record<SenseCategory, string> = {
@@ -15,9 +16,10 @@ const SENSE_ICONS: Record<SenseCategory, string> = {
 function KeseharianDetailInner() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const selectedLog = DAILY_LOG_ITEMS.find((item) => item.id === id) || DAILY_LOG_ITEMS[0];
+  const { dailyLogs } = useDailyData();
+  const selectedLog = dailyLogs.find((item) => item.id === id) || dailyLogs[0];
 
-  const sidebarItems: MasterDetailSidebarItem[] = DAILY_LOG_ITEMS.map((item) => ({
+  const sidebarItems: MasterDetailSidebarItem[] = dailyLogs.map((item) => ({
     id: item.id,
     title: item.title,
     subtitle: item.date,

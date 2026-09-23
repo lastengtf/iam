@@ -2,38 +2,43 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { STACK_ITEMS, StackItem } from "@/data/profileData";
+import { useStackData } from "@/data/contentStore";
 import MasterDetailLayout, { MasterDetailSidebarItem } from "@/components/MasterDetailLayout";
 
 function AlatDetailInner() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const selectedItem = STACK_ITEMS.find((item) => item.id === id) || STACK_ITEMS[0];
+  const { stack: stackList } = useStackData();
+  const selectedItem = stackList.find((item) => item.id === id) || stackList[0];
 
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const initialLikes: Record<string, number> = {};
-    STACK_ITEMS.forEach((item) => {
-      initialLikes[item.id] = item.likes;
-    });
+    const frame = requestAnimationFrame(() => {
+      const initialLikes: Record<string, number> = {};
+      stackList.forEach((item) => {
+        initialLikes[item.id] = item.likes;
+      });
 
-    try {
-      const storedLikes = localStorage.getItem("ten_stack_likes");
-      const storedLiked = localStorage.getItem("ten_stack_user_liked");
-      if (storedLikes) {
-        setLikesMap({ ...initialLikes, ...JSON.parse(storedLikes) });
-      } else {
+      try {
+        const storedLikes = localStorage.getItem("ten_stack_likes");
+        const storedLiked = localStorage.getItem("ten_stack_user_liked");
+        if (storedLikes) {
+          setLikesMap({ ...initialLikes, ...JSON.parse(storedLikes) });
+        } else {
+          setLikesMap(initialLikes);
+        }
+        if (storedLiked) {
+          setLikedItems(JSON.parse(storedLiked));
+        }
+      } catch {
         setLikesMap(initialLikes);
       }
-      if (storedLiked) {
-        setLikedItems(JSON.parse(storedLiked));
-      }
-    } catch {
-      setLikesMap(initialLikes);
-    }
-  }, []);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [stackList]);
 
   const handleLike = (itemId: string) => {
     const isLiked = likedItems[itemId];
@@ -50,7 +55,7 @@ function AlatDetailInner() {
     } catch {}
   };
 
-  const sidebarItems: MasterDetailSidebarItem[] = STACK_ITEMS.map((item) => ({
+  const sidebarItems: MasterDetailSidebarItem[] = stackList.map((item) => ({
     id: item.id,
     title: item.name,
     subtitle: item.category,

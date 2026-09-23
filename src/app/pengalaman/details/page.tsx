@@ -2,15 +2,16 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { WORK_ITEMS } from "@/data/profileData";
+import { useWorkData } from "@/data/contentStore";
 import MasterDetailLayout, { MasterDetailSidebarItem } from "@/components/MasterDetailLayout";
 
 function PengalamanDetailInner() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const selectedWork = WORK_ITEMS.find((w) => w.id === id) || WORK_ITEMS[0];
+  const { work: workList } = useWorkData();
+  const selectedWork = workList.find((w) => w.id === id) || workList[0];
 
-  const sidebarItems: MasterDetailSidebarItem[] = WORK_ITEMS.map((w) => ({
+  const sidebarItems: MasterDetailSidebarItem[] = workList.map((w) => ({
     id: w.id,
     title: w.role,
     subtitle: `${w.company} • ${w.period}`,

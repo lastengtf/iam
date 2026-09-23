@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { STACK_ITEMS, StackItem } from "@/data/profileData";
+import { useStackData } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -16,28 +16,34 @@ export default function AlatPage() {
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    // Initialize likes from data
-    const initialLikes: Record<string, number> = {};
-    STACK_ITEMS.forEach((item) => {
-      initialLikes[item.id] = item.likes;
-    });
+  const { stack: stackList } = useStackData();
 
-    try {
-      const storedLikes = localStorage.getItem("ten_stack_likes");
-      const storedLiked = localStorage.getItem("ten_stack_user_liked");
-      if (storedLikes) {
-        setLikesMap({ ...initialLikes, ...JSON.parse(storedLikes) });
-      } else {
+  useEffect(() => {
+    // Read stored likes asynchronously to prevent cascading synchronous render
+    const frame = requestAnimationFrame(() => {
+      const initialLikes: Record<string, number> = {};
+      stackList.forEach((item) => {
+        initialLikes[item.id] = item.likes;
+      });
+
+      try {
+        const storedLikes = localStorage.getItem("ten_stack_likes");
+        const storedLiked = localStorage.getItem("ten_stack_user_liked");
+        if (storedLikes) {
+          setLikesMap({ ...initialLikes, ...JSON.parse(storedLikes) });
+        } else {
+          setLikesMap(initialLikes);
+        }
+        if (storedLiked) {
+          setLikedItems(JSON.parse(storedLiked));
+        }
+      } catch {
         setLikesMap(initialLikes);
       }
-      if (storedLiked) {
-        setLikedItems(JSON.parse(storedLiked));
-      }
-    } catch {
-      setLikesMap(initialLikes);
-    }
-  }, []);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [stackList]);
 
   const handleLike = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,7 +73,7 @@ export default function AlatPage() {
     setCurrentPage(1);
   };
 
-  const filteredItems = STACK_ITEMS.filter((item) => {
+  const filteredItems = stackList.filter((item) => {
     const matchesCat =
       selectedCategory === "all" || item.category === selectedCategory;
     const q = searchQuery.toLowerCase().trim();
@@ -108,7 +114,7 @@ export default function AlatPage() {
         >
           <span className="tab-label-full">Semua Instrumen</span>
           <span className="tab-label-short">Semua</span>
-          <span>({STACK_ITEMS.length})</span>
+          <span>({stackList.length})</span>
         </button>
         <button
           type="button"

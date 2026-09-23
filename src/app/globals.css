@@ -2002,6 +2002,24 @@ body {
   border: 1px solid #a7f3d0;
 }
 
+.admin-status-pill.progress {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.admin-status-pill.planned {
+  background: #fefce8;
+  color: #ca8a04;
+  border: 1px solid #fef08a;
+}
+
+.admin-status-pill.retired {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
 .admin-table-actions {
   display: flex;
   gap: 0.35rem;
@@ -2011,10 +2029,14 @@ body {
 .admin-btn-sm {
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.55rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.12s ease;
 }
 
 .admin-btn-view {
@@ -2023,10 +2045,108 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+.admin-btn-view:hover {
+  background: var(--mono-gray-light);
+  border-color: var(--mono-gray-mid);
+}
+
+.admin-btn-edit {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.admin-btn-edit:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.admin-btn-dup {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-btn-dup:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
 .admin-btn-del {
   background: #fef2f2;
   color: #dc2626;
   border: 1px solid #fecaca;
+}
+
+.admin-btn-del:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.admin-thumb-img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  flex-shrink: 0;
+}
+
+.admin-table-item-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-field-help {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+  line-height: 1.35;
+}
+
+.admin-img-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-subtle);
+  margin-top: 0.5rem;
+}
+
+.admin-img-preview-box img {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+}
+
+.admin-img-preview-info {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.admin-avatar-preview-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: var(--bg-soft);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-subtle);
+}
+
+.admin-avatar-preview-img {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--mono-black);
 }
 
 .admin-form-grid {
@@ -2080,8 +2200,9 @@ body {
 .admin-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 200;
   display: flex;
   justify-content: center;
@@ -2096,8 +2217,31 @@ body {
   max-width: 520px;
   width: 100%;
   padding: 1.5rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   animation: fadeInDown 0.15s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-modal-box.admin-modal-lg {
+  max-width: 680px;
+  max-height: 88vh;
+}
+
+.admin-modal-scroll-body {
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  margin-right: -0.35rem;
+  flex: 1;
+}
+
+.admin-modal-scroll-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-modal-scroll-body::-webkit-scrollbar-thumb {
+  background: var(--mono-gray-light);
+  border-radius: 4px;
 }
 
 .admin-modal-header {
@@ -2107,6 +2251,7 @@ body {
   margin-bottom: 1.25rem;
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 0.65rem;
+  flex-shrink: 0;
 }
 
 .admin-modal-title {
@@ -2118,9 +2263,16 @@ body {
 .admin-modal-close {
   background: transparent;
   border: none;
-  font-size: 1rem;
+  font-size: 1.15rem;
+  line-height: 1;
   cursor: pointer;
   color: var(--text-dim);
+  padding: 0.25rem;
+  transition: color 0.12s ease;
+}
+
+.admin-modal-close:hover {
+  color: var(--mono-black);
 }
 
 .admin-modal-actions {
@@ -2128,6 +2280,9 @@ body {
   justify-content: flex-end;
   gap: 0.6rem;
   margin-top: 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
 /* Mobile Adjustments for Admin (Native Android-Style App Experience) */

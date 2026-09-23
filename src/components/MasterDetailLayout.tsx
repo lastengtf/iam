@@ -90,19 +90,23 @@ export default function MasterDetailLayout({
 
   // Load saved sidebar width from localStorage
   useEffect(() => {
-    try {
-      const savedWidth = localStorage.getItem("ten_md_sidebar_width");
-      const savedCollapsed = localStorage.getItem("ten_md_sidebar_collapsed");
-      if (savedWidth) {
-        const parsed = parseInt(savedWidth, 10);
-        if (parsed >= MIN_WIDTH && parsed <= MAX_WIDTH) {
-          setSidebarWidth(parsed);
+    const frame = requestAnimationFrame(() => {
+      try {
+        const savedWidth = localStorage.getItem("ten_md_sidebar_width");
+        const savedCollapsed = localStorage.getItem("ten_md_sidebar_collapsed");
+        if (savedWidth) {
+          const parsed = parseInt(savedWidth, 10);
+          if (parsed >= MIN_WIDTH && parsed <= MAX_WIDTH) {
+            setSidebarWidth(parsed);
+          }
         }
-      }
-      if (savedCollapsed === "true") {
-        setIsCollapsed(true);
-      }
-    } catch {}
+        if (savedCollapsed === "true") {
+          setIsCollapsed(true);
+        }
+      } catch {}
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Handle Drag Resizing

@@ -2,27 +2,29 @@
 
 import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { PROJECT_ITEMS, PUBLICATION_ITEMS } from "@/data/profileData";
+import { useProjectsData, usePublicationsData } from "@/data/contentStore";
 import MasterDetailLayout, { MasterDetailSidebarItem } from "@/components/MasterDetailLayout";
 
 function KaryaDetailInner() {
   const searchParams = useSearchParams();
   const rawId = searchParams.get("id") || searchParams.get("slug") || "";
 
+  const { projects } = useProjectsData();
+  const { publications } = usePublicationsData();
+
   // Normalize ID (handle "proj-views-counter" or just "views-counter")
   const cleanId = rawId.replace(/^proj-/, "").replace(/^pub-/, "");
 
-  const projectMatch = PROJECT_ITEMS.find((p) => p.slug === cleanId || p.slug === rawId);
-  const pubMatch = PUBLICATION_ITEMS.find((pub) => pub.id === cleanId || pub.id === rawId);
+  const projectMatch = projects.find((p) => p.slug === cleanId || p.slug === rawId);
+  const pubMatch = publications.find((pub) => pub.id === cleanId || pub.id === rawId);
 
   // If neither, fallback to first project
-  const currentType = projectMatch ? "project" : pubMatch ? "research" : "project";
-  const currentProject = projectMatch || (!pubMatch ? PROJECT_ITEMS[0] : null);
+  const currentProject = projectMatch || (!pubMatch ? projects[0] : null);
   const currentPub = pubMatch;
 
   // Build unified sidebar list
   const sidebarItems: MasterDetailSidebarItem[] = [
-    ...PROJECT_ITEMS.map((p) => ({
+    ...projects.map((p) => ({
       id: `proj-${p.slug}`,
       title: p.name,
       subtitle: p.category,
@@ -30,7 +32,7 @@ function KaryaDetailInner() {
       imageUrl: p.imageUrl,
       href: `/karya/details?id=proj-${p.slug}`,
     })),
-    ...PUBLICATION_ITEMS.map((pub) => ({
+    ...publications.map((pub) => ({
       id: `pub-${pub.id}`,
       title: pub.title,
       subtitle: `${pub.publisher} (${pub.year})`,

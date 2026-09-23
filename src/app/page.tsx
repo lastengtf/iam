@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { UPDATE_FEED_ITEMS } from "@/data/profileData";
+import { useUpdatesFeed } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -12,13 +12,14 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const updatesFeed = useUpdatesFeed();
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setCurrentPage(1);
   };
 
-  const filteredUpdates = UPDATE_FEED_ITEMS.filter((item) => {
+  const filteredUpdates = updatesFeed.filter((item) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
     return (

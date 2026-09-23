@@ -69,37 +69,47 @@ export default function AuthProvider({
   const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
 
   useEffect(() => {
-    // Check local storage session override first
-    try {
-      const local = localStorage.getItem("ten_session_override");
-      if (local) {
-        const parsed = JSON.parse(local);
-        if (parsed?.user) {
-          setSession(parsed);
-          setStatus("authenticated");
-          return;
+    let isMounted = true;
+    const timer = setTimeout(() => {
+      try {
+        const local = localStorage.getItem("ten_session_override");
+        if (local) {
+          const parsed = JSON.parse(local);
+          if (parsed?.user && isMounted) {
+            setSession(parsed);
+            setStatus("authenticated");
+            return;
+          }
         }
-      }
-    } catch {}
+      } catch {}
 
-    fetch("/api/auth/session")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch session");
-        return res.json();
-      })
-      .then((data) => {
-        if (data?.user) {
-          setSession(data);
-          setStatus("authenticated");
-        } else {
-          setSession(null);
-          setStatus("unauthenticated");
-        }
-      })
-      .catch(() => {
-        setSession(null);
-        setStatus("unauthenticated");
-      });
+      fetch("/api/auth/session")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch session");
+          return res.json();
+        })
+        .then((data) => {
+          if (!isMounted) return;
+          if (data?.user) {
+            setSession(data);
+            setStatus("authenticated");
+          } else {
+            setSession(null);
+            setStatus("unauthenticated");
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setSession(null);
+            setStatus("unauthenticated");
+          }
+        });
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   return (

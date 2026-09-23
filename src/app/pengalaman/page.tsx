@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { WORK_ITEMS } from "@/data/profileData";
+import { useWorkData } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -12,13 +12,14 @@ export default function PengalamanPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const { work: workList } = useWorkData();
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setCurrentPage(1);
   };
 
-  const filteredWork = WORK_ITEMS.filter((work) => {
+  const filteredWork = workList.filter((work) => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (

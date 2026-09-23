@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PROFILE_DATA } from "@/data/profileData";
+import { useProfileData } from "@/data/contentStore";
 
 const NAV_ITEMS = [
   { label: "Beranda", shortLabel: "Beranda", href: "/" },
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const { profile } = useProfileData();
   const cleanPath = pathname.replace(/\/$/, "");
   const isDetailPage =
     cleanPath.includes("/details") ||
@@ -37,26 +38,26 @@ export default function Header() {
       <div className="profile-avatar-box">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={PROFILE_DATA.avatarUrl}
-          alt={PROFILE_DATA.name}
+          src={profile.avatarUrl}
+          alt={profile.name}
           className="profile-avatar-img"
         />
-        <div className="profile-status-dot" title={PROFILE_DATA.status}></div>
+        <div className="profile-status-dot" title={profile.status}></div>
       </div>
 
       {/* Nama & Tagline Netral */}
-      <h1 className="profile-name">{PROFILE_DATA.name}</h1>
-      <div className="profile-tagline">{PROFILE_DATA.tagline}</div>
+      <h1 className="profile-name">{profile.name}</h1>
+      <div className="profile-tagline">{profile.tagline}</div>
 
       {/* Deskripsi Bio Netral */}
-      <p className="profile-bio">{PROFILE_DATA.bio}</p>
+      <p className="profile-bio">{profile.bio}</p>
 
       {/* Kontak & Media Icons di Bawah Bio - Halus & Tidak Mencolok */}
       <div className="profile-media-icons-row">
         <a
-          href={`mailto:${PROFILE_DATA.contact.email}`}
+          href={`mailto:${profile.contact.email}`}
           className="profile-contact-icon"
-          title={`Email: ${PROFILE_DATA.contact.email}`}
+          title={`Email: ${profile.contact.email}`}
           aria-label="Email"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -66,7 +67,7 @@ export default function Header() {
         </a>
 
         <a
-          href={PROFILE_DATA.contact.website}
+          href={profile.contact.website}
           target="_blank"
           rel="noopener noreferrer"
           className="profile-contact-icon"
@@ -94,7 +95,7 @@ export default function Header() {
         </a>
 
         <a
-          href={PROFILE_DATA.contact.docsUrl}
+          href={profile.contact.docsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="profile-contact-icon"
@@ -108,7 +109,7 @@ export default function Header() {
         </a>
 
         <a
-          href={PROFILE_DATA.contact.ssoPortal}
+          href={profile.contact.ssoPortal}
           target="_blank"
           rel="noopener noreferrer"
           className="profile-contact-icon"
@@ -123,7 +124,7 @@ export default function Header() {
 
       {/* Statistik Minimalis di Atas Navigasi */}
       <div className="stats-bar">
-        {PROFILE_DATA.stats.map((stat, idx) => (
+        {profile.stats.map((stat: { label: string; value: string }, idx: number) => (
           <React.Fragment key={stat.label}>
             {idx > 0 && <span className="stat-sep">•</span>}
             <div className="stat-pill">

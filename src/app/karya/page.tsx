@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PROJECT_ITEMS, PUBLICATION_ITEMS, ProjectItem, PublicationItem } from "@/data/profileData";
+import { useProjectsData, usePublicationsData } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -30,6 +30,9 @@ export default function KaryaPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { projects } = useProjectsData();
+  const { publications } = usePublicationsData();
+
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
     setCurrentPage(1);
@@ -41,7 +44,7 @@ export default function KaryaPage() {
   };
 
   // Convert Projects to unified format
-  const projectItemsUnified: UnifiedKaryaItem[] = PROJECT_ITEMS.map((p) => {
+  const projectItemsUnified: UnifiedKaryaItem[] = projects.map((p) => {
     let statusText = "Selesai";
     let statusClass = "status-completed";
     if (p.status === "in-progress") {
@@ -68,7 +71,7 @@ export default function KaryaPage() {
   });
 
   // Convert Publications to unified format
-  const publicationItemsUnified: UnifiedKaryaItem[] = PUBLICATION_ITEMS.map((pub) => ({
+  const publicationItemsUnified: UnifiedKaryaItem[] = publications.map((pub) => ({
     id: `pub-${pub.id}`,
     type: "research",
     title: pub.title,

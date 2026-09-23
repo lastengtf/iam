@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { DAILY_LOG_ITEMS, DailyLogItem, SenseCategory } from "@/data/profileData";
+import { SenseCategory } from "@/data/profileData";
+import { useDailyData } from "@/data/contentStore";
 import CardToolbar, { ViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
@@ -20,6 +21,7 @@ export default function KeseharianPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [currentPage, setCurrentPage] = useState(1);
+  const { dailyLogs } = useDailyData();
 
   const handleSearchChange = (q: string) => {
     setSearchQuery(q);
@@ -31,7 +33,7 @@ export default function KeseharianPage() {
     setCurrentPage(1);
   };
 
-  const filteredLogs = DAILY_LOG_ITEMS.filter((item) => {
+  const filteredLogs = dailyLogs.filter((item) => {
     const matchesSense =
       selectedSense === "all" || item.category === selectedSense;
     const q = searchQuery.toLowerCase().trim();
@@ -73,7 +75,7 @@ export default function KeseharianPage() {
         >
           <span className="tab-label-full">Semua Catatan</span>
           <span className="tab-label-short">Semua</span>
-          <span>({DAILY_LOG_ITEMS.length})</span>
+          <span>({dailyLogs.length})</span>
         </button>
         <button
           type="button"

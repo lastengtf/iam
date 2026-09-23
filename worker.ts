@@ -1,7 +1,30 @@
+interface D1PreparedStatement {
+  bind: (...values: unknown[]) => D1PreparedStatement;
+  first: <T = unknown>(colName?: string) => Promise<T | null>;
+  run: <T = unknown>() => Promise<D1Result<T>>;
+  all: <T = unknown>() => Promise<D1Result<T>>;
+  raw: <T = unknown>() => Promise<T[]>;
+}
+
+interface D1Result<T = unknown> {
+  results?: T[];
+  success: boolean;
+  error?: string;
+  meta: Record<string, unknown>;
+}
+
+interface D1Database {
+  prepare: (query: string) => D1PreparedStatement;
+  dump: () => Promise<ArrayBuffer>;
+  batch: <T = unknown>(statements: D1PreparedStatement[]) => Promise<D1Result<T>[]>;
+  exec: (query: string) => Promise<{ count: number; duration: number }>;
+}
+
 interface Env {
   ASSETS: {
     fetch: (request: Request) => Promise<Response>;
   };
+  DB?: D1Database;
   TEN_CLIENT_ID?: string;
   TEN_CLIENT_SECRET?: string;
   AUTH_SECRET?: string;
@@ -17,6 +40,14 @@ interface UserProfile {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    // 0. Proteksi Akses /admin: Jika belum ada cookie sesi, alihkan langsung ke /login
+    if (url.pathname === "/admin" || url.pathname === "/admin/") {
+      const cookieHeader = request.headers.get("Cookie") || "";
+      if (!cookieHeader.includes("ten_session=")) {
+        return Response.redirect(`${url.origin}/login`, 302);
+      }
+    }
 
     // 1. Sign In: Arahkan pengguna ke IdP accounts.ten.my.id
     if (url.pathname === "/api/auth/signin" || url.pathname.startsWith("/api/auth/signin/")) {
@@ -121,7 +152,7 @@ export default {
         "Set-Cookie",
         `ten_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${isHttps ? "; Secure" : ""}`
       );
-      headers.set("Location", "/");
+      headers.set("Location", "/login");
       return new Response(null, { status: 302, headers });
     }
 

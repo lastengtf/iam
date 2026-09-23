@@ -1,25 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession, signIn, signOut } from "@/components/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useSession, signOut } from "@/components/AuthProvider";
 import {
   PROFILE_DATA,
   WORK_ITEMS,
   PROJECT_ITEMS,
   PUBLICATION_ITEMS,
   NEWS_ITEMS,
+  STACK_ITEMS,
+  DAILY_LOG_ITEMS,
   WorkItem,
   ProjectItem,
   PublicationItem,
   NewsItem,
+  StackItem,
+  DailyLogItem,
 } from "@/data/profileData";
 
 type AdminTab = "overview" | "content" | "profile" | "sso" | "backup";
-type ContentCategory = "all" | "work" | "projects" | "publications" | "news";
+type ContentCategory = "all" | "projects" | "work" | "publications" | "alat" | "keseharian" | "news";
 
 export default function AdminPage() {
+  const router = useRouter();
   const { data: session, status: authStatus } = useSession();
+
+  // Auth protection: redirect unauthenticated users to /login
+  useEffect(() => {
+    if (authStatus === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [authStatus, router]);
+
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [contentCategory, setContentCategory] = useState<ContentCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,14 +47,36 @@ export default function AdminPage() {
   const [projectList, setProjectList] = useState<ProjectItem[]>(PROJECT_ITEMS);
   const [pubList, setPubList] = useState<PublicationItem[]>(PUBLICATION_ITEMS);
   const [newsList, setNewsList] = useState<NewsItem[]>(NEWS_ITEMS);
+  const [stackList, setStackList] = useState<StackItem[]>(STACK_ITEMS);
+  const [dailyList, setDailyList] = useState<DailyLogItem[]>(DAILY_LOG_ITEMS);
 
   // Modal State for adding/editing content
   const [showModal, setShowModal] = useState(false);
-  const [newItemType, setNewItemType] = useState<"work" | "project" | "publication" | "news">("project");
+  const [newItemType, setNewItemType] = useState<"project" | "work" | "publication" | "alat" | "keseharian" | "news">("project");
   const [newItemTitle, setNewItemTitle] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
   const [newItemDesc, setNewItemDesc] = useState("");
   const [newItemImage, setNewItemImage] = useState("");
+
+  // Load persisted items from localStorage
+  useEffect(() => {
+    try {
+      const savedProj = localStorage.getItem("ten_admin_projects");
+      if (savedProj) setProjectList(JSON.parse(savedProj));
+      const savedWork = localStorage.getItem("ten_admin_work");
+      if (savedWork) setWorkList(JSON.parse(savedWork));
+      const savedPub = localStorage.getItem("ten_admin_pub");
+      if (savedPub) setPubList(JSON.parse(savedPub));
+      const savedStack = localStorage.getItem("ten_admin_stack");
+      if (savedStack) setStackList(JSON.parse(savedStack));
+      const savedDaily = localStorage.getItem("ten_admin_daily");
+      if (savedDaily) setDailyList(JSON.parse(savedDaily));
+      const savedNews = localStorage.getItem("ten_admin_news");
+      if (savedNews) setNewsList(JSON.parse(savedNews));
+      const savedProfile = localStorage.getItem("ten_admin_profile");
+      if (savedProfile) setProfile(JSON.parse(savedProfile));
+    } catch {}
+  }, []);
 
   const showToast = (message: string, type: "success" | "info" = "success") => {
     setNotification({ message, type });
@@ -58,7 +94,10 @@ export default function AdminPage() {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    showToast("Pengaturan profil berhasil diperbarui!");
+    try {
+      localStorage.setItem("ten_admin_profile", JSON.stringify(profile));
+    } catch {}
+    showToast("Pengaturan profil berhasil disimpan!");
   };
 
   const handleCreateItem = (e: React.FormEvent) => {
@@ -76,11 +115,15 @@ export default function AdminPage() {
         metrics: "Baru ditambahkan • Aktif",
         tech: ["Cloudflare", "TypeScript", "Next.js"],
         liveApp: false,
-        href: "/projects/details",
+        href: "/karya/details",
         externalHref: "https://ten.my.id",
         imageUrl: newItemImage || "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&auto=format&fit=crop&q=80",
       };
-      setProjectList([newProj, ...projectList]);
+      const updated = [newProj, ...projectList];
+      setProjectList(updated);
+      try {
+        localStorage.setItem("ten_admin_projects", JSON.stringify(updated));
+      } catch {}
     } else if (newItemType === "work") {
       const newWork: WorkItem = {
         id: `work-${Date.now()}`,
@@ -94,33 +137,82 @@ export default function AdminPage() {
         href: "https://ten.my.id",
         imageUrl: newItemImage || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80",
       };
-      setWorkList([newWork, ...workList]);
+      const updated = [newWork, ...workList];
+      setWorkList(updated);
+      try {
+        localStorage.setItem("ten_admin_work", JSON.stringify(updated));
+      } catch {}
     } else if (newItemType === "publication") {
       const newPub: PublicationItem = {
         id: `pub-${Date.now()}`,
         title: newItemTitle,
-        publisher: newItemCategory || "Catatan Terbuka",
+        publisher: newItemCategory || "Jurnal Ilmiah / Riset",
         year: "2026",
-        summary: newItemDesc || "Publikasi dokumentasi karya dan pemikiran.",
-        abstract: "Rangkuman studi kasus dan evaluasi implementasi sistem.",
-        tags: ["Dokumentasi", "Riset"],
-        href: "https://ten.my.id",
+        summary: newItemDesc || "Telaah riset ilmiah terbaru dalam rekayasa sistem.",
+        abstract: newItemDesc || "Abstraksi penelitian dan rancang bangun platform terdistribusi.",
+        tags: ["Riset", "Inovasi", "Digital"],
         imageUrl: newItemImage || "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80",
+        href: "/karya/details",
       };
-      setPubList([newPub, ...pubList]);
-    } else {
+      const updated = [newPub, ...pubList];
+      setPubList(updated);
+      try {
+        localStorage.setItem("ten_admin_pub", JSON.stringify(updated));
+      } catch {}
+    } else if (newItemType === "alat") {
+      const validCategory: "Hardware & EDC" | "Software & Otomasi" | "Infrastruktur & Cloud" =
+        newItemCategory === "Hardware & EDC" || newItemCategory === "Infrastruktur & Cloud"
+          ? newItemCategory
+          : "Software & Otomasi";
+      const newTool: StackItem = {
+        id: `stack-${Date.now()}`,
+        name: newItemTitle,
+        category: validCategory,
+        description: newItemDesc || "Instrumen produktivitas harian.",
+        review: "Sangat menunjang performa komputasi dan alur kerja.",
+        platforms: ["Web", "Desktop"],
+        status: "active",
+        likes: 1,
+      };
+      const updated = [newTool, ...stackList];
+      setStackList(updated);
+      try {
+        localStorage.setItem("ten_admin_stack", JSON.stringify(updated));
+      } catch {}
+    } else if (newItemType === "keseharian") {
+      const newDaily: DailyLogItem = {
+        id: `daily-${Date.now()}`,
+        title: newItemTitle,
+        subtitle: newItemCategory || "Refleksi Keseharian",
+        category: "Membaca",
+        date: "Hari Ini",
+        summary: newItemDesc || "Catatan pengamatan dan refleksi.",
+        thoughts: "Membangun konsistensi dan eksplorasi berkesinambungan.",
+        tags: ["Keseharian", "Jurnal"],
+        imageUrl: newItemImage || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
+      };
+      const updated = [newDaily, ...dailyList];
+      setDailyList(updated);
+      try {
+        localStorage.setItem("ten_admin_daily", JSON.stringify(updated));
+      } catch {}
+    } else if (newItemType === "news") {
       const newNews: NewsItem = {
         slug: newItemTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         title: newItemTitle,
-        date: "06 Sep 2026",
-        category: newItemCategory || "Pengumuman",
-        summary: newItemDesc || "Kabar terbaru mengenai perkembangan ekosistem.",
-        content: "Dokumentasi dan pengumuman resmi terkait inisiatif TEN.",
-        author: "TEN Platform",
+        category: newItemCategory || "Warta Platform",
+        date: "2026-09-23",
+        summary: newItemDesc || "Pengumuman dan kabar mutakhir ekosistem TEN.",
+        content: newItemDesc || "Kabar berkala ekosistem.",
+        author: "TEN Editorial",
         href: "/news/details",
-        imageUrl: newItemImage || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=80",
+        imageUrl: newItemImage || "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80",
       };
-      setNewsList([newNews, ...newsList]);
+      const updated = [newNews, ...newsList];
+      setNewsList(updated);
+      try {
+        localStorage.setItem("ten_admin_news", JSON.stringify(updated));
+      } catch {}
     }
 
     setShowModal(false);
@@ -133,14 +225,42 @@ export default function AdminPage() {
 
   const handleDeleteItem = (type: string, idOrSlug: string) => {
     if (!confirm("Apakah Anda yakin ingin menghapus item ini?")) return;
-    if (type === "project") {
-      setProjectList(projectList.filter((p) => p.slug !== idOrSlug));
+    if (type === "projects") {
+      const updated = projectList.filter((p) => p.slug !== idOrSlug);
+      setProjectList(updated);
+      try {
+        localStorage.setItem("ten_admin_projects", JSON.stringify(updated));
+      } catch {}
     } else if (type === "work") {
-      setWorkList(workList.filter((w) => w.id !== idOrSlug));
-    } else if (type === "publication") {
-      setPubList(pubList.filter((p) => p.id !== idOrSlug));
+      const updated = workList.filter((w) => w.id !== idOrSlug);
+      setWorkList(updated);
+      try {
+        localStorage.setItem("ten_admin_work", JSON.stringify(updated));
+      } catch {}
+    } else if (type === "publications") {
+      const updated = pubList.filter((p) => p.id !== idOrSlug);
+      setPubList(updated);
+      try {
+        localStorage.setItem("ten_admin_pub", JSON.stringify(updated));
+      } catch {}
+    } else if (type === "alat") {
+      const updated = stackList.filter((s) => s.id !== idOrSlug);
+      setStackList(updated);
+      try {
+        localStorage.setItem("ten_admin_stack", JSON.stringify(updated));
+      } catch {}
+    } else if (type === "keseharian") {
+      const updated = dailyList.filter((d) => d.id !== idOrSlug);
+      setDailyList(updated);
+      try {
+        localStorage.setItem("ten_admin_daily", JSON.stringify(updated));
+      } catch {}
     } else if (type === "news") {
-      setNewsList(newsList.filter((n) => n.slug !== idOrSlug));
+      const updated = newsList.filter((n) => n.slug !== idOrSlug);
+      setNewsList(updated);
+      try {
+        localStorage.setItem("ten_admin_news", JSON.stringify(updated));
+      } catch {}
     }
     showToast("Item berhasil dihapus.");
   };
@@ -152,6 +272,8 @@ export default function AdminPage() {
       workList,
       projectList,
       pubList,
+      stackList,
+      dailyList,
       newsList,
       sso: {
         provider: "ten-accounts",
@@ -181,6 +303,8 @@ export default function AdminPage() {
         if (parsed.projectList) setProjectList(parsed.projectList);
         if (parsed.workList) setWorkList(parsed.workList);
         if (parsed.pubList) setPubList(parsed.pubList);
+        if (parsed.stackList) setStackList(parsed.stackList);
+        if (parsed.dailyList) setDailyList(parsed.dailyList);
         if (parsed.newsList) setNewsList(parsed.newsList);
         showToast("Data backup berhasil dipulihkan!");
       } catch {
@@ -190,39 +314,57 @@ export default function AdminPage() {
     reader.readAsText(file);
   };
 
-  // Aggregated content rows for table
+  // Aggregated content rows for table across all 5 pillars
   const allContents = [
     ...projectList.map((p) => ({
       id: p.slug,
-      type: "project",
-      typeLabel: "Project",
+      type: "projects" as const,
+      typeLabel: "Karya Proyek",
       title: p.name,
       category: p.category,
-      metric: p.metrics,
-      previewUrl: `/projects/details?slug=${p.slug}`,
+      metric: p.metrics || "Digital Product",
+      previewUrl: `/karya/details?id=proj-${p.slug}`,
     })),
     ...workList.map((w) => ({
       id: w.id,
-      type: "work",
-      typeLabel: "Work",
+      type: "work" as const,
+      typeLabel: "Pengalaman",
       title: `${w.role} @ ${w.company}`,
       category: w.period,
       metric: w.location,
-      previewUrl: `/work/details?id=${w.id}`,
+      previewUrl: `/pengalaman/details?id=${w.id}`,
     })),
     ...pubList.map((p) => ({
       id: p.id,
-      type: "publication",
-      typeLabel: "Publication",
+      type: "publications" as const,
+      typeLabel: "Publikasi",
       title: p.title,
       category: p.publisher,
-      metric: p.year,
-      previewUrl: `/publications/details?id=${p.id}`,
+      metric: `Tahun ${p.year}`,
+      previewUrl: `/karya/details?id=pub-${p.id}`,
+    })),
+    ...stackList.map((s) => ({
+      id: s.id,
+      type: "alat" as const,
+      typeLabel: "Alat",
+      title: s.name,
+      category: s.category,
+      metric: `Status: ${s.status} • ♥ ${s.likes}`,
+      previewUrl: `/alat/details?id=${s.id}`,
+    })),
+    ...dailyList.map((d) => ({
+      id: d.id,
+      type: "keseharian" as const,
+      typeLabel: "Keseharian",
+      title: d.title,
+      category: d.category,
+      metric: d.date,
+      previewUrl: `/keseharian/details?id=${d.id}`,
     })),
     ...newsList.map((n) => ({
       id: n.slug,
-      type: "news",
-      typeLabel: "News",
+      type: "news" as const,
+      typeLabel: "Warta",
       title: n.title,
       category: n.category,
       metric: n.date,
@@ -237,6 +379,36 @@ export default function AdminPage() {
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const CATEGORY_TABS: { id: ContentCategory; label: string }[] = [
+    { id: "all", label: "Semua Konten" },
+    { id: "projects", label: "Karya & Proyek" },
+    { id: "work", label: "Pengalaman" },
+    { id: "publications", label: "Riset & Tulisan" },
+    { id: "alat", label: "Alat & Stack" },
+    { id: "keseharian", label: "Keseharian" },
+    { id: "news", label: "Warta" },
+  ];
+
+  // Auth checking screen
+  if (authStatus === "loading") {
+    return (
+      <div className="admin-loading-screen">
+        <div className="admin-loading-card">
+          <div className="admin-logo-badge" style={{ display: "inline-block", marginBottom: "0.5rem" }}>
+            TEN
+          </div>
+          <h3>Memeriksa Otorisasi Sesi...</h3>
+          <p>Memvalidasi identitas pengelola platform</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If unauthenticated, do not flash admin content
+  if (authStatus === "unauthenticated") {
+    return null;
+  }
 
   return (
     <div className="admin-portal-container">
@@ -254,16 +426,32 @@ export default function AdminPage() {
         </div>
 
         <div className="admin-topbar-actions">
-          <Link href="/" className="admin-return-btn">
-            ← Kembali ke Web Publik
+          <Link href="/" className="admin-return-btn" title="Buka Halaman Depan Publik">
+            ← Web Publik
           </Link>
+
+          {/* User Info Chip */}
+          <div className="admin-user-pill-top">
+            <span className="admin-user-avatar">
+              {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "A"}
+            </span>
+            <div className="admin-user-text">
+              <span className="admin-user-name">
+                {session?.user?.name || session?.user?.email || "Admin"}
+              </span>
+              <span className="admin-user-badge">
+                {session?.user?.role || "ADMIN"}
+              </span>
+            </div>
+          </div>
+
           <button
             type="button"
-            className="admin-sync-btn"
-            onClick={() => showToast("Status sistem telah disinkronisasi.")}
-            title="Sinkronisasi Data"
+            className="admin-logout-btn"
+            onClick={() => signOut()}
+            title="Keluar dari sesi administrator"
           >
-            ↻ Sinkronkan
+            Keluar
           </button>
         </div>
       </header>
@@ -384,47 +572,43 @@ export default function AdminPage() {
           <div className="admin-stats-grid">
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Total Kunjungan</span>
-                <span className="admin-stat-badge">Live</span>
-              </div>
-              <div className="admin-stat-value">1.2k+</div>
-              <div className="admin-stat-desc">Akumulasi analitik kunjungan edge</div>
-            </div>
-
-            <div className="admin-stat-card">
-              <div className="admin-stat-header">
-                <span className="admin-stat-label">Total Inisiatif Karya</span>
+                <span className="admin-stat-label">Total Inisiatif Konten</span>
                 <span className="admin-stat-badge">{allContents.length} Items</span>
               </div>
-              <div className="admin-stat-value">{projectList.length + workList.length}</div>
-              <div className="admin-stat-desc">{projectList.length} Proyek • {workList.length} Pengalaman</div>
+              <div className="admin-stat-value">{allContents.length}</div>
+              <div className="admin-stat-desc">
+                {projectList.length} Proyek • {workList.length} Pengalaman • {pubList.length} Publikasi • {stackList.length} Alat • {dailyList.length} Harian
+              </div>
             </div>
 
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Publikasi & Kabar</span>
+                <span className="admin-stat-label">Karya & Riset</span>
+                <span className="admin-stat-badge">Koleksi</span>
+              </div>
+              <div className="admin-stat-value">{projectList.length + pubList.length}</div>
+              <div className="admin-stat-desc">{projectList.length} Aplikasi • {pubList.length} Telaah Ilmiah</div>
+            </div>
+
+            <div className="admin-stat-card">
+              <div className="admin-stat-header">
+                <span className="admin-stat-label">Alat & Catatan Keseharian</span>
                 <span className="admin-stat-badge">Aktif</span>
               </div>
-              <div className="admin-stat-value">{pubList.length + newsList.length}</div>
-              <div className="admin-stat-desc">{pubList.length} Tulisan • {newsList.length} Warta</div>
+              <div className="admin-stat-value">{stackList.length + dailyList.length}</div>
+              <div className="admin-stat-desc">{stackList.length} Instrumen • {dailyList.length} Catatan Indera</div>
             </div>
 
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Status SSO Auth</span>
-                <span className={`admin-stat-badge ${authStatus === "authenticated" ? "active" : ""}`}>
-                  {authStatus === "loading" ? "Memeriksa" : authStatus === "authenticated" ? "Active" : "Guest"}
-                </span>
+                <span className="admin-stat-label">Status Otorisasi Sesi</span>
+                <span className="admin-stat-badge active">Aktif</span>
               </div>
-              <div className="admin-stat-value" style={{ fontSize: "1.1rem", color: "var(--mono-black)" }}>
-                {authStatus === "authenticated"
-                  ? (session?.user?.name || session?.user?.email || "accounts.ten.my.id")
-                  : "accounts.ten.my.id"}
+              <div className="admin-stat-value" style={{ fontSize: "1.05rem", color: "var(--mono-black)" }}>
+                {session?.user?.name || session?.user?.email || "Admin Terverifikasi"}
               </div>
               <div className="admin-stat-desc">
-                {authStatus === "authenticated"
-                  ? `Peran: ${session?.user?.role || "user"} • Sesi OIDC Aktif`
-                  : "Belum terautentikasi (Tamu)"}
+                Peran: <strong>{session?.user?.role || "admin"}</strong> • Terotentikasi Penuh
               </div>
             </div>
           </div>
@@ -433,74 +617,80 @@ export default function AdminPage() {
           <div className="admin-grid-two">
             <div className="admin-box-card">
               <h3 className="admin-card-title">Akses Cepat Pengelolaan</h3>
-              <p className="admin-card-text">Pilih tindakan cepat untuk memperbarui komponen platform:</p>
+              <p className="admin-card-text">Pilih modul untuk menambah item baru ke dalam portofolio 5 pilar:</p>
               <div className="admin-quick-actions">
                 <button
                   type="button"
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
+                    setContentCategory("projects");
+                    setNewItemType("project");
                     setShowModal(true);
                   }}
                 >
-                  + Tambah Inisiatif Baru
+                  + Tambah Karya / Proyek
                 </button>
                 <button
                   type="button"
                   className="admin-btn-outline"
-                  onClick={() => setActiveTab("profile")}
+                  onClick={() => {
+                    setActiveTab("content");
+                    setContentCategory("work");
+                    setNewItemType("work");
+                    setShowModal(true);
+                  }}
                 >
-                  Edit Profil & Bio
+                  + Tambah Pengalaman
                 </button>
                 <button
                   type="button"
                   className="admin-btn-outline"
-                  onClick={() => setActiveTab("sso")}
+                  onClick={() => {
+                    setActiveTab("content");
+                    setContentCategory("alat");
+                    setNewItemType("alat");
+                    setShowModal(true);
+                  }}
                 >
-                  Periksa Sesi SSO
+                  + Tambah Alat / Stack
                 </button>
                 <button
                   type="button"
                   className="admin-btn-outline"
-                  onClick={handleExportJSON}
+                  onClick={() => {
+                    setActiveTab("content");
+                    setContentCategory("keseharian");
+                    setNewItemType("keseharian");
+                    setShowModal(true);
+                  }}
                 >
-                  Unduh Backup JSON
+                  + Tambah Catatan Harian
                 </button>
               </div>
             </div>
 
             <div className="admin-box-card">
-              <h3 className="admin-card-title">Informasi Runtime Lingkungan</h3>
+              <h3 className="admin-card-title">Infrastruktur & Lingkungan Komputasi</h3>
               <ul className="admin-info-list">
-                <li>
-                  <strong>Framework:</strong> Next.js 16 (App Router / Static HTML Export)
-                </li>
-                <li>
-                  <strong>Infrastruktur:</strong> Cloudflare Workers / Wrangler Edge Runtime
-                </li>
-                <li>
-                  <strong>Penyimpanan Data:</strong> Cloudflare KV (WWW_KV Namespace)
-                </li>
-                <li>
-                  <strong>Protokol Keamanan:</strong> Single Sign-On (TEN ID OAuth/JWT)
-                </li>
-                <li>
-                  <strong>Optimasi SEO:</strong> OpenGraph, Twitter Cards, Schema.org JSON-LD
-                </li>
+                <li><strong>Runtime Host:</strong> Cloudflare Workers (Static Assets Edge)</li>
+                <li><strong>Framework:</strong> Next.js 16 (Turbopack SSG Output)</li>
+                <li><strong>Autentikasi:</strong> OpenID Connect (OIDC PKCE) via accounts.ten.my.id</li>
+                <li><strong>Status TLS/SSL:</strong> Terenkripsi Penuh (Let&apos;s Encrypt / Cloudflare)</li>
               </ul>
             </div>
           </div>
         </div>
       )}
 
-      {/* Tab 2: CONTENT MANAGER */}
+      {/* Tab 2: CONTENT MANAGEMENT */}
       {activeTab === "content" && (
         <div className="admin-tab-body">
           <div className="admin-section-bar">
             <div>
               <h2 className="admin-section-title">Kelola Konten & Inisiatif</h2>
               <p className="admin-section-subtitle">
-                Atur seluruh item karya, proyek web, riwayat pekerjaan, tulisan, dan warta platform.
+                Atur seluruh item karya, proyek web, riwayat pekerjaan, instrumen alat, dan catatan keseharian.
               </p>
             </div>
             <button
@@ -515,14 +705,14 @@ export default function AdminPage() {
           {/* Filters & Search */}
           <div className="admin-filter-bar">
             <div className="admin-category-pills">
-              {(["all", "projects", "work", "publications", "news"] as ContentCategory[]).map((cat) => (
+              {CATEGORY_TABS.map((cat) => (
                 <button
-                  key={cat}
+                  key={cat.id}
                   type="button"
-                  className={`admin-category-btn ${contentCategory === cat ? "active" : ""}`}
-                  onClick={() => setContentCategory(cat)}
+                  className={`admin-category-btn ${contentCategory === cat.id ? "active" : ""}`}
+                  onClick={() => setContentCategory(cat.id)}
                 >
-                  {cat === "all" ? "Semua Konten" : cat.toUpperCase()}
+                  {cat.label}
                 </button>
               ))}
             </div>
@@ -555,7 +745,7 @@ export default function AdminPage() {
                 {filteredContents.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "var(--text-dim)" }}>
-                      Tidak ada konten yang cocok dengan pencarian.
+                      Tidak ada konten yang cocok dengan pencarian &quot;{searchQuery}&quot;.
                     </td>
                   </tr>
                 ) : (
@@ -577,7 +767,7 @@ export default function AdminPage() {
                           <Link
                             href={item.previewUrl}
                             className="admin-btn-sm admin-btn-view"
-                            title="Pratinjau Halaman"
+                            title="Pratinjau Halaman Detail"
                           >
                             Lihat ↗
                           </Link>
@@ -748,50 +938,19 @@ export default function AdminPage() {
             <div>
               <h2 className="admin-section-title">Konfigurasi Single Sign-On (SSO)</h2>
               <p className="admin-section-subtitle">
-                Otorisasi terpusat via TEN Accounts IdP (<code>https://accounts.ten.my.id</code>) berbasis OIDC & OAuth 2.1.
+                Parameter integrasi OAuth2 / OIDC dengan satelit autentikasi <code>accounts.ten.my.id</code>.
               </p>
             </div>
-            {authStatus === "authenticated" ? (
-              <button
-                type="button"
-                className="admin-btn-outline"
-                style={{ color: "#e11d48", borderColor: "#fecdd3" }}
-                onClick={() => signOut()}
-              >
-                Keluar Akun (Logout)
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="admin-btn-primary"
-                onClick={() => signIn("ten-accounts")}
-              >
-                Login via TEN Accounts
-              </button>
-            )}
           </div>
 
           <div className="admin-grid-two">
             <div className="admin-box-card">
-              <h3 className="admin-card-title">Status Sesi Pengguna</h3>
-              
+              <h3 className="admin-card-title">Status Sesi Pengguna Aktif</h3>
               <div className="admin-form-group">
-                <label className="admin-label">Status Autentikasi</label>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <span className={`admin-status-pill ${authStatus === "authenticated" ? "active" : ""}`}>
-                    {authStatus === "loading" ? "MEMERIKSA..." : authStatus === "authenticated" ? "CONNECTED (Aktif)" : "BELUM LOGIN"}
-                  </span>
-                  <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
-                    {authStatus === "authenticated" ? "Sesi OIDC valid via Better Auth / NextAuth" : "Masuk untuk mendapatkan akses penuh"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="admin-form-group">
-                <label className="admin-label">Nama Pengguna (Profile)</label>
+                <label className="admin-label">Nama Lengkap</label>
                 <input
                   type="text"
-                  value={session?.user?.name || "(Belum masuk)"}
+                  value={session?.user?.name || "(Pengelola Terotentikasi)"}
                   readOnly
                   className="admin-input readonly"
                 />
@@ -801,7 +960,7 @@ export default function AdminPage() {
                 <label className="admin-label">Email Terverifikasi</label>
                 <input
                   type="text"
-                  value={session?.user?.email || "(Belum masuk)"}
+                  value={session?.user?.email || "(admin@ten.my.id)"}
                   readOnly
                   className="admin-input readonly"
                 />
@@ -811,12 +970,10 @@ export default function AdminPage() {
                 <label className="admin-label">Peran Pengguna (Role)</label>
                 <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                   <span className="admin-status-pill active">
-                    {(session?.user?.role || "GUEST").toUpperCase()}
+                    {(session?.user?.role || "ADMIN").toUpperCase()}
                   </span>
                   <span style={{ fontSize: "0.82rem", color: "var(--text-dim)" }}>
-                    {session?.user?.role === "admin"
-                      ? "Hak akses administrator penuh."
-                      : "Hak akses pengguna terautentikasi."}
+                    Hak akses administrator penuh.
                   </span>
                 </div>
               </div>
@@ -854,7 +1011,7 @@ export default function AdminPage() {
             <div>
               <h2 className="admin-section-title">Cadangan Data & Pemulihan</h2>
               <p className="admin-section-subtitle">
-                Ekspor seluruh konfigurasi profil dan katalog inisiatif ke berkas JSON atau pulihkan dari cadangan.
+                Ekspor seluruh konfigurasi profil dan katalog inisiatif 5 pilar ke berkas JSON atau pulihkan dari cadangan.
               </p>
             </div>
           </div>
@@ -863,7 +1020,7 @@ export default function AdminPage() {
             <div className="admin-box-card">
               <h3 className="admin-card-title">Ekspor Cadangan (JSON)</h3>
               <p className="admin-card-text">
-                Simpan seluruh data profil, proyek, riwayat pekerjaan, tulisan, dan berita ke dalam satu berkas terstruktur.
+                Simpan seluruh data profil, karya proyek, pekerjaan, tulisan ilmiah, instrumen alat, dan catatan keseharian.
               </p>
               <button
                 type="button"
@@ -914,20 +1071,22 @@ export default function AdminPage() {
                 <select
                   className="admin-select"
                   value={newItemType}
-                  onChange={(e) => setNewItemType(e.target.value as "work" | "project" | "publication" | "news")}
+                  onChange={(e) => setNewItemType(e.target.value as "project" | "work" | "publication" | "alat" | "keseharian" | "news")}
                 >
                   <option value="project">Karya & Proyek Digital</option>
-                  <option value="work">Riwayat Pekerjaan</option>
-                  <option value="publication">Tulisan & Publikasi</option>
+                  <option value="work">Riwayat Pekerjaan & Pengalaman</option>
+                  <option value="publication">Riset & Publikasi Ilmiah</option>
+                  <option value="alat">Alat & Instrumen Kerja</option>
+                  <option value="keseharian">Catatan Keseharian & Indera</option>
                   <option value="news">Kabar & Warta Terkini</option>
                 </select>
               </div>
 
               <div className="admin-form-group">
-                <label className="admin-label">Judul Inisiatif / Peran</label>
+                <label className="admin-label">Judul Inisiatif / Peran / Nama Alat</label>
                 <input
                   type="text"
-                  placeholder="Misal: Views Counter SaaS atau Senior Engineer"
+                  placeholder="Misal: Views Counter SaaS atau Neovim"
                   value={newItemTitle}
                   onChange={(e) => setNewItemTitle(e.target.value)}
                   className="admin-input"
@@ -936,10 +1095,10 @@ export default function AdminPage() {
               </div>
 
               <div className="admin-form-group">
-                <label className="admin-label">Kategori / Instansi</label>
+                <label className="admin-label">Kategori / Instansi / Bidang</label>
                 <input
                   type="text"
-                  placeholder="Misal: Tools & Utilitas, PT Inovasi Digital"
+                  placeholder="Misal: Software & Otomasi, PT Digital"
                   value={newItemCategory}
                   onChange={(e) => setNewItemCategory(e.target.value)}
                   className="admin-input"
@@ -947,7 +1106,7 @@ export default function AdminPage() {
               </div>
 
               <div className="admin-form-group">
-                <label className="admin-label">Deskripsi Singkat</label>
+                <label className="admin-label">Deskripsi Singkat / Ulasan</label>
                 <textarea
                   rows={3}
                   placeholder="Jelaskan ringkasan item ini..."

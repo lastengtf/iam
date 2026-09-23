@@ -7,5 +7,12 @@
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tenmyid_db",
+      "database_id": "67f82f52-6f07-457b-b971-861c8b4a15f0"
+    }
+  ]
 }

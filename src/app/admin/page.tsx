@@ -89,6 +89,15 @@ export default function AdminPage() {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [targetType, setTargetType] = useState<ItemType>("projects");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   // Form input fields
   const [formTitle, setFormTitle] = useState("");
@@ -436,6 +445,7 @@ export default function AdminPage() {
     setModalMode("create");
     setTargetType(type);
     setEditingId(null);
+    setShowAdvancedOptions(false);
 
     // Reset form fields
     setFormTitle("");
@@ -480,6 +490,7 @@ export default function AdminPage() {
     setModalMode("edit");
     setTargetType(row.type);
     setEditingId(row.id);
+    setShowAdvancedOptions(true);
 
     if (row.type === "projects") {
       const p = row.rawItem as ProjectItem;
@@ -1561,6 +1572,9 @@ export default function AdminPage() {
 
           {/* Table Container Specialized by Major Category */}
           <div className="admin-table-container">
+            <div className="admin-table-scroll-hint">
+              <span>↔ Geser tabel ke samping untuk melihat seluruh data</span>
+            </div>
             {/* 1. TABLE: PENGALAMAN */}
             {majorCategory === "pengalaman" && (
               <table className="admin-table">
@@ -2483,24 +2497,31 @@ export default function AdminPage() {
                 {targetType === "projects" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">🚀 1. Identitas Karya & Status</div>
+                      <div className="admin-form-section-title">🚀 Informasi Utama Karya</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Nama / Judul Karya</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Views Counter SaaS"
+                          value={formTitle}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormTitle(val);
+                            if (modalMode === "create") {
+                              setFormSlug(slugify(val));
+                            }
+                          }}
+                          className="admin-input"
+                          required
+                        />
+                      </div>
+
                       <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Nama / Judul Karya</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Views Counter SaaS"
-                            value={formTitle}
-                            onChange={(e) => setFormTitle(e.target.value)}
-                            className="admin-input"
-                            required
-                          />
-                        </div>
                         <div className="admin-form-group">
                           <label className="admin-label">Kategori Karya</label>
                           <input
                             type="text"
-                            placeholder="e.g. Tools & Utilitas"
+                            placeholder="Pilih atau ketik kategori..."
                             value={formCategory}
                             onChange={(e) => setFormCategory(e.target.value)}
                             className="admin-input"
@@ -2518,46 +2539,31 @@ export default function AdminPage() {
                             ))}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="admin-form-grid">
                         <div className="admin-form-group">
-                          <label className="admin-label">Status Pengembangan</label>
-                          <select
-                            className="admin-select"
-                            value={formStatus}
-                            onChange={(e) => setFormStatus(e.target.value as "completed" | "in-progress" | "planned")}
-                          >
-                            <option value="completed">✓ Selesai (Completed)</option>
-                            <option value="in-progress">⏳ Sedang Dibuat (In-Progress)</option>
-                            <option value="planned">📅 Rencana (Planned)</option>
-                          </select>
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Slug / ID URL</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. views-counter"
-                            value={formSlug}
-                            onChange={(e) => setFormSlug(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Ikon Emoji</label>
-                          <input
-                            type="text"
-                            placeholder="⚡"
-                            value={formIcon}
-                            onChange={(e) => setFormIcon(e.target.value)}
-                            className="admin-input"
-                            style={{ maxWidth: "90px" }}
-                          />
+                          <label className="admin-label">Status & Ikon</label>
+                          <div style={{ display: "flex", gap: "0.5rem" }}>
+                            <select
+                              className="admin-select"
+                              value={formStatus}
+                              onChange={(e) => setFormStatus(e.target.value as "completed" | "in-progress" | "planned")}
+                              style={{ flex: 1 }}
+                            >
+                              <option value="completed">✓ Selesai</option>
+                              <option value="in-progress">⏳ Dibuat</option>
+                              <option value="planned">📅 Rencana</option>
+                            </select>
+                            <input
+                              type="text"
+                              value={formIcon}
+                              onChange={(e) => setFormIcon(e.target.value)}
+                              className="admin-input"
+                              style={{ width: "65px", textAlign: "center", fontSize: "1.1rem" }}
+                              title="Ikon Emoji"
+                            />
+                          </div>
                           <div className="admin-chips-row">
-                            {["⚡", "🚀", "🛡️", "🌐", "📦", "💻", "🔥", "✨"].map((emoji) => (
+                            {["⚡", "🚀", "🛡️", "🌐", "💻", "🔥", "✨"].map((emoji) => (
                               <button
                                 key={emoji}
                                 type="button"
@@ -2569,26 +2575,13 @@ export default function AdminPage() {
                             ))}
                           </div>
                         </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Highlight Metrik / Info</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. 10k+ Queries • Edge Ready"
-                            value={formMetrics}
-                            onChange={(e) => setFormMetrics(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
                       </div>
-                    </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">⚙️ 2. Teknologi & Rincian Teknis</div>
                       <div className="admin-form-group">
-                        <label className="admin-label">Teknologi Utama (Pisahkan koma)</label>
+                        <label className="admin-label">Teknologi Utama</label>
                         <input
                           type="text"
-                          placeholder="e.g. TypeScript, Next.js, Cloudflare"
+                          placeholder="e.g. Next.js, TypeScript, Cloudflare"
                           value={formTech}
                           onChange={(e) => setFormTech(e.target.value)}
                           className="admin-input"
@@ -2600,9 +2593,9 @@ export default function AdminPage() {
                               type="button"
                               className="admin-chip-btn"
                               onClick={() => {
-                                const current = formTech ? formTech.split(",").map((s) => s.trim()) : [];
+                                const current = formTech ? formTech.split(",").map((s) => s.trim()).filter(Boolean) : [];
                                 if (!current.includes(tech)) {
-                                  setFormTech(current.concat(tech).join(", "));
+                                  setFormTech([...current, tech].join(", "));
                                 }
                               }}
                             >
@@ -2616,7 +2609,7 @@ export default function AdminPage() {
                         <label className="admin-label">Deskripsi Ringkas</label>
                         <textarea
                           rows={2}
-                          placeholder="Ringkasan inisiatif karya..."
+                          placeholder="Ringkasan inisiatif karya pada platform..."
                           value={formDescription}
                           onChange={(e) => setFormDescription(e.target.value)}
                           className="admin-textarea"
@@ -2624,31 +2617,65 @@ export default function AdminPage() {
                       </div>
 
                       <div className="admin-form-group">
-                        <label className="admin-label">Rincian Arsitektur / Fitur Teknis</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Penjelasan arsitektur, integrasi, dan keunggulan teknis..."
-                          value={formDetails}
-                          onChange={(e) => setFormDetails(e.target.value)}
-                          className="admin-textarea"
+                        <label className="admin-label">Tautan Demo / Web Publik</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formExternalHref}
+                          onChange={(e) => setFormExternalHref(e.target.value)}
+                          className="admin-input"
                         />
                       </div>
                     </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">🔗 3. Tautan Demo & Dokumentasi</div>
-                      <div className="admin-form-grid">
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Rincian Teknis" : "▼ Rincian Teknis Tambahan (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Slug, metrik, arsitektur & repo"}
+                      </span>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-grid">
+                          <div className="admin-form-group">
+                            <label className="admin-label">Slug / ID URL</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. views-counter"
+                              value={formSlug}
+                              onChange={(e) => setFormSlug(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-label">Highlight Metrik / Info</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. 10k+ Queries • Edge Ready"
+                              value={formMetrics}
+                              onChange={(e) => setFormMetrics(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                        </div>
+
                         <div className="admin-form-group">
-                          <label className="admin-label">Tautan Web Publik / Demo</label>
-                          <input
-                            type="url"
-                            placeholder="https://..."
-                            value={formExternalHref}
-                            onChange={(e) => setFormExternalHref(e.target.value)}
-                            className="admin-input"
+                          <label className="admin-label">Rincian Arsitektur / Fitur Teknis</label>
+                          <textarea
+                            rows={3}
+                            placeholder="Penjelasan arsitektur, integrasi, dan keunggulan teknis..."
+                            value={formDetails}
+                            onChange={(e) => setFormDetails(e.target.value)}
+                            className="admin-textarea"
                           />
                         </div>
-                        <div className="admin-form-group">
+
+                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
                           <label className="admin-label">Tautan Internal / Repositori</label>
                           <input
                             type="text"
@@ -2659,7 +2686,7 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -2667,7 +2694,7 @@ export default function AdminPage() {
                 {targetType === "work" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">🏢 1. Posisi & Lembaga</div>
+                      <div className="admin-form-section-title">💼 Informasi Riwayat Pengalaman</div>
                       <div className="admin-form-grid">
                         <div className="admin-form-group">
                           <label className="admin-label">Peran / Jabatan</label>
@@ -2697,7 +2724,7 @@ export default function AdminPage() {
                           <label className="admin-label">Periode Waktu</label>
                           <input
                             type="text"
-                            placeholder="e.g. 2023 — Sekarang"
+                            placeholder="e.g. 2024 — Sekarang"
                             value={formPeriod}
                             onChange={(e) => setFormPeriod(e.target.value)}
                             className="admin-input"
@@ -2714,10 +2741,7 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">📝 2. Ringkasan & Poin Tanggung Jawab</div>
                       <div className="admin-form-group">
                         <label className="admin-label">Ringkasan Peran</label>
                         <textarea
@@ -2730,21 +2754,10 @@ export default function AdminPage() {
                       </div>
 
                       <div className="admin-form-group">
-                        <label className="admin-label">Rincian Tanggung Jawab (1 baris per poin)</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Memimpin perencanaan program&#10;Mengoordinasikan tim lintas divisi&#10;Menyusun tata kelola kerja berkala"
-                          value={formDetails}
-                          onChange={(e) => setFormDetails(e.target.value)}
-                          className="admin-textarea"
-                        />
-                      </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Keahlian Kunci (Pisahkan koma)</label>
+                        <label className="admin-label">Keahlian Kunci</label>
                         <input
                           type="text"
-                          placeholder="e.g. Manajemen Inisiatif, Perencanaan Strategis, Kolaborasi Tim"
+                          placeholder="e.g. Manajemen Program, Arsitektur Sistem"
                           value={formTech}
                           onChange={(e) => setFormTech(e.target.value)}
                           className="admin-input"
@@ -2756,9 +2769,9 @@ export default function AdminPage() {
                               type="button"
                               className="admin-chip-btn"
                               onClick={() => {
-                                const current = formTech ? formTech.split(",").map((s) => s.trim()) : [];
+                                const current = formTech ? formTech.split(",").map((s) => s.trim()).filter(Boolean) : [];
                                 if (!current.includes(skill)) {
-                                  setFormTech(current.concat(skill).join(", "));
+                                  setFormTech([...current, skill].join(", "));
                                 }
                               }}
                             >
@@ -2769,19 +2782,42 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">🔗 3. Tautan Portofolio Lembaga</div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Tautan Web Perusahaan / Referensi</label>
-                        <input
-                          type="url"
-                          placeholder="https://..."
-                          value={formHref}
-                          onChange={(e) => setFormHref(e.target.value)}
-                          className="admin-input"
-                        />
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Rincian Lanjutan" : "▼ Rincian Tanggung Jawab & Tautan (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Poin tanggung jawab & web perusahaan"}
+                      </span>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Rincian Tanggung Jawab (1 baris per poin)</label>
+                          <textarea
+                            rows={3}
+                            placeholder="Memimpin perencanaan program&#10;Mengoordinasikan tim lintas divisi&#10;Menyusun tata kelola kerja berkala"
+                            value={formDetails}
+                            onChange={(e) => setFormDetails(e.target.value)}
+                            className="admin-textarea"
+                          />
+                        </div>
+
+                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                          <label className="admin-label">Tautan Web Perusahaan / Referensi</label>
+                          <input
+                            type="url"
+                            placeholder="https://..."
+                            value={formHref}
+                            onChange={(e) => setFormHref(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -2789,7 +2825,7 @@ export default function AdminPage() {
                 {targetType === "publications" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">📑 1. Dokumen Riset</div>
+                      <div className="admin-form-section-title">📑 Dokumen Riset & Publikasi</div>
                       <div className="admin-form-group">
                         <label className="admin-label">Judul Riset / Publikasi</label>
                         <input
@@ -2824,12 +2860,9 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">🔬 2. Intisari & Abstrak</div>
                       <div className="admin-form-group">
-                        <label className="admin-label">Ringkasan Riset</label>
+                        <label className="admin-label">Ringkasan Intisari</label>
                         <textarea
                           rows={2}
                           placeholder="Ringkasan temuan penting penelitian..."
@@ -2840,21 +2873,21 @@ export default function AdminPage() {
                       </div>
 
                       <div className="admin-form-group">
-                        <label className="admin-label">Abstrak Lengkap</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Abstraksi lengkap dan metodologi..."
-                          value={formAbstract}
-                          onChange={(e) => setFormAbstract(e.target.value)}
-                          className="admin-textarea"
+                        <label className="admin-label">Tautan Dokumen / DOI / PDF</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formHref}
+                          onChange={(e) => setFormHref(e.target.value)}
+                          className="admin-input"
                         />
                       </div>
 
-                      <div className="admin-form-group">
-                        <label className="admin-label">Kata Kunci / Tag (Pisahkan koma)</label>
+                      <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                        <label className="admin-label">Kata Kunci / Tag</label>
                         <input
                           type="text"
-                          placeholder="e.g. Riset, Komputasi Awan, Edge Computing"
+                          placeholder="e.g. Riset, Edge Computing, OIDC"
                           value={formTags}
                           onChange={(e) => setFormTags(e.target.value)}
                           className="admin-input"
@@ -2866,9 +2899,9 @@ export default function AdminPage() {
                               type="button"
                               className="admin-chip-btn"
                               onClick={() => {
-                                const current = formTags ? formTags.split(",").map((s) => s.trim()) : [];
+                                const current = formTags ? formTags.split(",").map((s) => s.trim()).filter(Boolean) : [];
                                 if (!current.includes(tag)) {
-                                  setFormTags(current.concat(tag).join(", "));
+                                  setFormTags([...current, tag].join(", "));
                                 }
                               }}
                             >
@@ -2879,19 +2912,31 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">🔗 3. Tautan Dokumen / DOI</div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Tautan Dokumen / DOI / PDF</label>
-                        <input
-                          type="url"
-                          placeholder="https://..."
-                          value={formHref}
-                          onChange={(e) => setFormHref(e.target.value)}
-                          className="admin-input"
-                        />
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Abstrak Lengkap" : "▼ Abstrak Lengkap (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Abstraksi metodologi komprehensif"}
+                      </span>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                          <label className="admin-label">Abstrak Lengkap</label>
+                          <textarea
+                            rows={4}
+                            placeholder="Abstraksi lengkap dan metodologi..."
+                            value={formAbstract}
+                            onChange={(e) => setFormAbstract(e.target.value)}
+                            className="admin-textarea"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -2899,7 +2944,7 @@ export default function AdminPage() {
                 {targetType === "alat" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">🛠️ 1. Identitas Alat & Kategori</div>
+                      <div className="admin-form-section-title">🛠️ Identitas Alat & Platform</div>
                       <div className="admin-form-grid">
                         <div className="admin-form-group">
                           <label className="admin-label">Nama Instrumen / Alat</label>
@@ -2914,25 +2959,27 @@ export default function AdminPage() {
                         </div>
                         <div className="admin-form-group">
                           <label className="admin-label">Ikon Emoji</label>
-                          <input
-                            type="text"
-                            placeholder="🛠"
-                            value={formIcon}
-                            onChange={(e) => setFormIcon(e.target.value)}
-                            className="admin-input"
-                            style={{ maxWidth: "90px" }}
-                          />
-                          <div className="admin-chips-row">
-                            {["💻", "⚙️", "☁️", "📱", "🛠️", "⚡", "🔒", "Terminal"].map((ico) => (
-                              <button
-                                key={ico}
-                                type="button"
-                                className={`admin-chip-btn ${formIcon === ico ? "active" : ""}`}
-                                onClick={() => setFormIcon(ico)}
-                              >
-                                {ico}
-                              </button>
-                            ))}
+                          <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                            <input
+                              type="text"
+                              placeholder="🛠"
+                              value={formIcon}
+                              onChange={(e) => setFormIcon(e.target.value)}
+                              className="admin-input"
+                              style={{ width: "65px", textAlign: "center", fontSize: "1.1rem" }}
+                            />
+                            <div className="admin-chips-row" style={{ marginTop: 0 }}>
+                              {["💻", "⚙️", "☁️", "📱", "🛠️", "⚡", "🔒"].map((ico) => (
+                                <button
+                                  key={ico}
+                                  type="button"
+                                  className={`admin-chip-btn ${formIcon === ico ? "active" : ""}`}
+                                  onClick={() => setFormIcon(ico)}
+                                >
+                                  {ico}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2963,51 +3010,47 @@ export default function AdminPage() {
                           </select>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">💻 2. Komputasi & Apresiasi</div>
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Platform Komputasi</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Web, macOS, Linux"
-                            value={formPlatforms}
-                            onChange={(e) => setFormPlatforms(e.target.value)}
-                            className="admin-input"
-                          />
-                          <div className="admin-chips-row">
-                            {["macOS", "Linux", "Windows", "Web", "iOS", "Android"].map((pl) => (
-                              <button
-                                key={pl}
-                                type="button"
-                                className="admin-chip-btn"
-                                onClick={() => {
-                                  const current = formPlatforms ? formPlatforms.split(",").map((s) => s.trim()) : [];
-                                  if (!current.includes(pl)) {
-                                    setFormPlatforms(current.concat(pl).join(", "));
-                                  }
-                                }}
-                              >
-                                +{pl}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Apresiasi (Likes ♥)</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={formLikes}
-                            onChange={(e) => setFormLikes(parseInt(e.target.value) || 1)}
-                            className="admin-input"
-                          />
-                        </div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Fungsi Utama</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Fungsi dan kegunaan alat ini..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
                       </div>
 
                       <div className="admin-form-group">
+                        <label className="admin-label">Platform Komputasi</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Web, macOS, Linux"
+                          value={formPlatforms}
+                          onChange={(e) => setFormPlatforms(e.target.value)}
+                          className="admin-input"
+                        />
+                        <div className="admin-chips-row">
+                          {["macOS", "Linux", "Windows", "Web", "iOS", "Android"].map((pl) => (
+                            <button
+                              key={pl}
+                              type="button"
+                              className="admin-chip-btn"
+                              onClick={() => {
+                                const current = formPlatforms ? formPlatforms.split(",").map((s) => s.trim()).filter(Boolean) : [];
+                                if (!current.includes(pl)) {
+                                  setFormPlatforms([...current, pl].join(", "));
+                                }
+                              }}
+                            >
+                              +{pl}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group" style={{ marginBottom: 0 }}>
                         <label className="admin-label">Tautan Resmi / Unduh</label>
                         <input
                           type="url"
@@ -3019,30 +3062,43 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">✍️ 3. Fungsi & Ulasan Pengalaman</div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Fungsi Utama Alat</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Fungsi dan kegunaan alat ini..."
-                          value={formDescription}
-                          onChange={(e) => setFormDescription(e.target.value)}
-                          className="admin-textarea"
-                        />
-                      </div>
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Ulasan & Likes" : "▼ Ulasan Pengalaman & Likes (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Alasan pemilihan & hitungan apresiasi"}
+                      </span>
+                    </button>
 
-                      <div className="admin-form-group">
-                        <label className="admin-label">Ulasan Pengalaman / Alasan Pemilihan</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Kesan dan manfaat penggunaan alat..."
-                          value={formReview}
-                          onChange={(e) => setFormReview(e.target.value)}
-                          className="admin-textarea"
-                        />
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Ulasan Pengalaman / Alasan Pemilihan</label>
+                          <textarea
+                            rows={2}
+                            placeholder="Kesan dan manfaat penggunaan alat..."
+                            value={formReview}
+                            onChange={(e) => setFormReview(e.target.value)}
+                            className="admin-textarea"
+                          />
+                        </div>
+
+                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                          <label className="admin-label">Apresiasi (Likes ♥)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={formLikes}
+                            onChange={(e) => setFormLikes(parseInt(e.target.value) || 1)}
+                            className="admin-input"
+                            style={{ maxWidth: "120px" }}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -3050,15 +3106,17 @@ export default function AdminPage() {
                 {targetType === "keseharian" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">☕ 1. Kategori Indera & Format Media</div>
+                      <div className="admin-form-section-title">☕ Catatan Keseharian & Indera</div>
+                      
+                      {/* Sense Selector Buttons */}
                       <div className="admin-form-group">
-                        <label className="admin-label">Kategori Indera / Rasa</label>
-                        <div className="admin-chips-row" style={{ marginBottom: "0.5rem" }}>
+                        <label className="admin-label">Kategori Indera / Aktivitas</label>
+                        <div className="admin-chips-row">
                           {[
-                            { id: "Melihat" as const, label: "👁️ Watched (Melihat)" },
-                            { id: "Membaca" as const, label: "📖 Read (Membaca)" },
-                            { id: "Mendengar" as const, label: "🎧 Listened (Mendengar)" },
-                            { id: "Mengecap" as const, label: "☕ Tasted (Mengecap)" },
+                            { id: "Melihat" as const, label: "👁️ Watched (Melihat)", defaultFmt: "Film" },
+                            { id: "Membaca" as const, label: "📖 Read (Membaca)", defaultFmt: "Buku" },
+                            { id: "Mendengar" as const, label: "🎧 Listened (Mendengar)", defaultFmt: "Album Musik" },
+                            { id: "Mengecap" as const, label: "☕ Tasted (Mengecap)", defaultFmt: "Seduh Manual V60" },
                           ].map((sense) => (
                             <button
                               key={sense.id}
@@ -3066,11 +3124,9 @@ export default function AdminPage() {
                               className={`admin-chip-btn ${formDailyCategory === sense.id ? "active" : ""}`}
                               onClick={() => {
                                 setFormDailyCategory(sense.id);
-                                if (sense.id === "Melihat") setFormItemType("Film");
-                                else if (sense.id === "Membaca") setFormItemType("Buku");
-                                else if (sense.id === "Mendengar") setFormItemType("Album Musik");
-                                else if (sense.id === "Mengecap") setFormItemType("Seduh Manual V60");
+                                setFormItemType(sense.defaultFmt);
                               }}
+                              style={{ padding: "0.3rem 0.75rem", fontSize: "0.78rem" }}
                             >
                               {sense.label}
                             </button>
@@ -3078,19 +3134,21 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Jenis / Format Media</label>
+                      {/* Format Media Chips */}
+                      <div className="admin-form-group">
+                        <label className="admin-label">Format Media</label>
+                        <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", alignItems: "center" }}>
                           <input
                             type="text"
-                            placeholder="e.g. Film Bioskop, Buku, Album Musik"
+                            placeholder="Format media..."
                             value={formItemType}
                             onChange={(e) => setFormItemType(e.target.value)}
                             className="admin-input"
+                            style={{ maxWidth: "160px" }}
                           />
-                          <div className="admin-chips-row">
+                          <div className="admin-chips-row" style={{ marginTop: 0 }}>
                             {(formDailyCategory === "Melihat"
-                              ? ["Film", "Video Podcast", "Dokumenter", "Seri TV", "Anime"]
+                              ? ["Film", "Serial TV", "Video Podcast", "Dokumenter", "Anime"]
                               : formDailyCategory === "Membaca"
                               ? ["Buku", "Esai", "Artikel", "Jurnal", "Newsletter"]
                               : formDailyCategory === "Mendengar"
@@ -3108,6 +3166,20 @@ export default function AdminPage() {
                             ))}
                           </div>
                         </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Judul Karya / Objek Catatan</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Oppenheimer / Atomic Habits / Kopi Flores"
+                            value={formTitle}
+                            onChange={(e) => setFormTitle(e.target.value)}
+                            className="admin-input"
+                            required
+                          />
+                        </div>
                         <div className="admin-form-group">
                           <label className="admin-label">Kreator / Pembuat / Sutradara</label>
                           <input
@@ -3120,43 +3192,16 @@ export default function AdminPage() {
                         </div>
                       </div>
 
+                      {/* Interactive Rating Chips */}
                       <div className="admin-form-group">
-                        <label className="admin-label">Judul Karya / Objek Catatan</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Oppenheimer / Atomic Habits / Kopi V60 Flores"
-                          value={formTitle}
-                          onChange={(e) => setFormTitle(e.target.value)}
-                          className="admin-input"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">⭐ 2. Rating & Penilaian Personal</div>
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">
-                            Rating Pengalaman ({formRating.toFixed(1)} / 5.0 ★)
-                          </label>
-                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <input
-                              type="number"
-                              step="0.1"
-                              min="1"
-                              max="5"
-                              placeholder="4.8"
-                              value={formRating}
-                              onChange={(e) => setFormRating(parseFloat(e.target.value) || 0)}
-                              className="admin-input"
-                              style={{ maxWidth: "100px" }}
-                            />
-                            <span className="admin-table-rating" style={{ fontSize: "0.85rem", padding: "0.3rem 0.6rem" }}>
-                              ★ {formRating.toFixed(1)}
-                            </span>
-                          </div>
-                          <div className="admin-chips-row">
+                        <label className="admin-label">
+                          Rating Pengalaman ({formRating.toFixed(1)} / 5.0 ★)
+                        </label>
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                          <span className="admin-table-rating" style={{ fontSize: "0.85rem", padding: "0.25rem 0.65rem" }}>
+                            ★ {formRating.toFixed(1)}
+                          </span>
+                          <div className="admin-chips-row" style={{ marginTop: 0 }}>
                             {[3.5, 4.0, 4.5, 4.8, 5.0].map((score) => (
                               <button
                                 key={score}
@@ -3169,79 +3214,91 @@ export default function AdminPage() {
                             ))}
                           </div>
                         </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Tanggal / Waktu Penikmatan</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Hari Ini atau 2026-09-23"
-                            value={formDate}
-                            onChange={(e) => setFormDate(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
                       </div>
 
-                      <div className="admin-form-group">
-                        <label className="admin-label">Subjudul / Sudut Pandang Catatan</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Refleksi Sinematografi & Sains"
-                          value={formSubtitle}
-                          onChange={(e) => setFormSubtitle(e.target.value)}
-                          className="admin-input"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">💭 3. Refleksi & Pemikiran</div>
-                      <div className="admin-form-group">
+                      <div className="admin-form-group" style={{ marginBottom: 0 }}>
                         <label className="admin-label">Ringkasan Pengamatan & Kesan Utama</label>
                         <textarea
                           rows={2}
-                          placeholder="Ringkasan pengalaman indera..."
+                          placeholder="Ringkasan kesan penikmatan..."
                           value={formDescription}
                           onChange={(e) => setFormDescription(e.target.value)}
                           className="admin-textarea"
                         />
                       </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Catatan Pemikiran & Refleksi Mendalam</label>
-                        <textarea
-                          rows={3}
-                          placeholder="Gagasan, renungan, dan refleksi pemikiran..."
-                          value={formThoughts}
-                          onChange={(e) => setFormThoughts(e.target.value)}
-                          className="admin-textarea"
-                        />
-                      </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Tag / Kata Kunci (Pisahkan koma)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Film, Nolan, Refleksi, Sains"
-                          value={formTags}
-                          onChange={(e) => setFormTags(e.target.value)}
-                          className="admin-input"
-                        />
-                      </div>
                     </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">🔗 4. Tautan Referensi Sumber</div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Tautan Referensi Eksternal (IMDb, Goodreads, Spotify, dsb.)</label>
-                        <input
-                          type="url"
-                          placeholder="https://..."
-                          value={formHref}
-                          onChange={(e) => setFormHref(e.target.value)}
-                          className="admin-input"
-                        />
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Refleksi & Detail" : "▼ Refleksi Mendalam & Tautan (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Subjudul, tanggal, refleksi & link eksternal"}
+                      </span>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-grid">
+                          <div className="admin-form-group">
+                            <label className="admin-label">Subjudul / Sudut Pandang Catatan</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Refleksi Sinematografi & Sains"
+                              value={formSubtitle}
+                              onChange={(e) => setFormSubtitle(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-label">Tanggal / Waktu Penikmatan</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Hari Ini atau 2026-10-02"
+                              value={formDate}
+                              onChange={(e) => setFormDate(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="admin-form-group">
+                          <label className="admin-label">Catatan Pemikiran & Refleksi Mendalam</label>
+                          <textarea
+                            rows={3}
+                            placeholder="Gagasan, renungan, dan refleksi pemikiran..."
+                            value={formThoughts}
+                            onChange={(e) => setFormThoughts(e.target.value)}
+                            className="admin-textarea"
+                          />
+                        </div>
+
+                        <div className="admin-form-grid">
+                          <div className="admin-form-group">
+                            <label className="admin-label">Tag / Kata Kunci</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Film, Nolan, Refleksi"
+                              value={formTags}
+                              onChange={(e) => setFormTags(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-label">Tautan Referensi (IMDb, Goodreads, Spotify)</label>
+                            <input
+                              type="url"
+                              placeholder="https://..."
+                              value={formHref}
+                              onChange={(e) => setFormHref(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </>
                 )}
 
@@ -3249,14 +3306,20 @@ export default function AdminPage() {
                 {targetType === "news" && (
                   <>
                     <div className="admin-form-section">
-                      <div className="admin-form-section-title">📰 1. Identitas Warta</div>
+                      <div className="admin-form-section-title">📰 Informasi Warta Platform</div>
                       <div className="admin-form-group">
                         <label className="admin-label">Judul Warta / Berita</label>
                         <input
                           type="text"
                           placeholder="e.g. Pemutakhiran Modul TEN v1.2"
                           value={formTitle}
-                          onChange={(e) => setFormTitle(e.target.value)}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormTitle(val);
+                            if (modalMode === "create") {
+                              setFormSlug(slugify(val));
+                            }
+                          }}
                           className="admin-input"
                           required
                         />
@@ -3286,29 +3349,6 @@ export default function AdminPage() {
                           </div>
                         </div>
                         <div className="admin-form-group">
-                          <label className="admin-label">Penulis / Redaksi</label>
-                          <input
-                            type="text"
-                            placeholder="TEN Editorial"
-                            value={formAuthor}
-                            onChange={(e) => setFormAuthor(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Slug / ID URL</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. update-v1-2"
-                            value={formSlug}
-                            onChange={(e) => setFormSlug(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
-                        <div className="admin-form-group">
                           <label className="admin-label">Tanggal Rilis</label>
                           <input
                             type="text"
@@ -3319,11 +3359,8 @@ export default function AdminPage() {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">✍️ 2. Isi & Narasi Warta</div>
-                      <div className="admin-form-group">
+                      <div className="admin-form-group" style={{ marginBottom: 0 }}>
                         <label className="admin-label">Ringkasan Warta (Cuplikan Depan)</label>
                         <textarea
                           rows={2}
@@ -3333,18 +3370,56 @@ export default function AdminPage() {
                           className="admin-textarea"
                         />
                       </div>
-
-                      <div className="admin-form-group">
-                        <label className="admin-label">Isi Lengkap Warta</label>
-                        <textarea
-                          rows={4}
-                          placeholder="Konten narasi lengkap warta..."
-                          value={formNewsContent}
-                          onChange={(e) => setFormNewsContent(e.target.value)}
-                          className="admin-textarea"
-                        />
-                      </div>
                     </div>
+
+                    <button
+                      type="button"
+                      className="admin-toggle-advanced-btn"
+                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                    >
+                      <span>{showAdvancedOptions ? "▲ Sembunyikan Isi Lengkap" : "▼ Isi Narasi Lengkap & Redaksi (Opsional)"}</span>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
+                        {showAdvancedOptions ? "Tutup" : "Slug kustom, penulis & narasi penuh"}
+                      </span>
+                    </button>
+
+                    {showAdvancedOptions && (
+                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
+                        <div className="admin-form-grid">
+                          <div className="admin-form-group">
+                            <label className="admin-label">Slug / ID URL</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. update-v1-2"
+                              value={formSlug}
+                              onChange={(e) => setFormSlug(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-label">Penulis / Redaksi</label>
+                            <input
+                              type="text"
+                              placeholder="TEN Editorial"
+                              value={formAuthor}
+                              onChange={(e) => setFormAuthor(e.target.value)}
+                              className="admin-input"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                          <label className="admin-label">Isi Lengkap Warta</label>
+                          <textarea
+                            rows={4}
+                            placeholder="Konten narasi lengkap warta..."
+                            value={formNewsContent}
+                            onChange={(e) => setFormNewsContent(e.target.value)}
+                            className="admin-textarea"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -3354,7 +3429,7 @@ export default function AdminPage() {
                   <div className="admin-form-group" style={{ marginBottom: 0 }}>
                     <label className="admin-label">
                       URL Gambar Sampul / Poster
-                      {targetType === "keseharian" && " (Disarankan foto berorientasi potret 3:4 untuk poster)"}
+                      {targetType === "keseharian" && " (Disarankan foto potret 3:4 untuk poster)"}
                       {targetType === "projects" && " (Disarankan format lanskap 16:9)"}
                     </label>
                     <input
@@ -3377,7 +3452,7 @@ export default function AdminPage() {
                         />
                         <div className="admin-img-preview-info">
                           <strong>Pratinjau Gambar Media:</strong>
-                          <div>Gambar akan otomatis dimuat dan disesuaikan secara proporsional pada platform.</div>
+                          <div>Gambar otomatis disesuaikan secara proporsional pada tampilan platform.</div>
                         </div>
                       </div>
                     )}

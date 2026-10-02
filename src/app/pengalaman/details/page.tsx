@@ -33,24 +33,23 @@ function PengalamanDetailInner() {
     >
       <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
         {/* Banner Gambar */}
-        <div style={{ width: "100%", height: "240px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)" }}>
+        <div className="detail-hero-banner">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={selectedWork.imageUrl}
             alt={selectedWork.role}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
-          <div>
+          <div style={{ flex: 1, minWidth: "240px" }}>
             <span className="card-badge-overlay" style={{ position: "static", display: "inline-block", marginBottom: "0.5rem" }}>
               {selectedWork.period}
             </span>
-            <h1 style={{ fontSize: "1.65rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.2rem" }}>
+            <h1 className="detail-main-title">
               {selectedWork.role}
             </h1>
-            <div style={{ fontSize: "0.9rem", color: "var(--mono-gray-mid)", fontFamily: "var(--font-mono)" }}>
+            <div className="detail-meta-subtitle" style={{ fontFamily: "var(--font-mono)" }}>
               {selectedWork.company} • {selectedWork.location}
             </div>
           </div>

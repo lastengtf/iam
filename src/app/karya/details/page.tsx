@@ -58,24 +58,23 @@ function KaryaDetailInner() {
     >
       {currentProject && (
         <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
-          <div style={{ width: "100%", height: "240px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)" }}>
+          <div className="detail-hero-banner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentProject.imageUrl}
               alt={currentProject.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
+            <div style={{ flex: 1, minWidth: "240px" }}>
               <span className="card-badge-overlay" style={{ position: "static", display: "inline-block", marginBottom: "0.5rem" }}>
                 {currentProject.status === "in-progress" ? "🟡 Sedang Dikerjakan" : currentProject.status === "planned" ? "🔵 Tahap Perencanaan" : "🟢 Selesai / Aktif"}
               </span>
-              <h1 style={{ fontSize: "1.65rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.2rem" }}>
+              <h1 className="detail-main-title">
                 {currentProject.icon} {currentProject.name}
               </h1>
-              <div style={{ fontSize: "0.9rem", color: "var(--mono-gray-mid)", fontFamily: "var(--font-mono)" }}>
+              <div className="detail-meta-subtitle" style={{ fontFamily: "var(--font-mono)" }}>
                 {currentProject.category} • {currentProject.metrics}
               </div>
             </div>
@@ -123,24 +122,23 @@ function KaryaDetailInner() {
 
       {currentPub && (
         <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
-          <div style={{ width: "100%", height: "240px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)" }}>
+          <div className="detail-hero-banner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentPub.imageUrl}
               alt={currentPub.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
-            <div>
+            <div style={{ flex: 1, minWidth: "240px" }}>
               <span className="card-badge-overlay" style={{ position: "static", display: "inline-block", marginBottom: "0.5rem" }}>
                 📜 Publikasi Ilmiah • {currentPub.year}
               </span>
-              <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.4rem", lineHeight: 1.35 }}>
+              <h1 className="detail-main-title">
                 {currentPub.title}
               </h1>
-              <div style={{ fontSize: "0.9rem", color: "var(--mono-gray-mid)", fontFamily: "var(--font-mono)" }}>
+              <div className="detail-meta-subtitle" style={{ fontFamily: "var(--font-mono)" }}>
                 Penerbit / Wadah: {currentPub.publisher}
               </div>
             </div>

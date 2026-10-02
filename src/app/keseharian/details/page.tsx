@@ -49,18 +49,20 @@ function KeseharianDetailInner() {
     >
       <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
         {selectedLog.imageUrl && (
-          <div style={{ width: "100%", maxHeight: "380px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)", background: "#0f172a" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={selectedLog.imageUrl}
-              alt={selectedLog.title}
-              style={{ width: "100%", height: "100%", maxHeight: "380px", objectFit: "cover", display: "block" }}
-            />
+          <div className="detail-keseharian-hero">
+            <div className="detail-portrait-poster-container">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedLog.imageUrl}
+                alt={selectedLog.title}
+                className="detail-portrait-poster"
+              />
+            </div>
           </div>
         )}
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
-          <div>
+          <div style={{ flex: 1, minWidth: "240px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
               <span className={`sensory-badge-overlay ${selectedLog.category.toLowerCase()}`} style={{ position: "static", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
                 {SENSE_ICONS[selectedLog.category]} {SENSE_LABELS_EN[selectedLog.category]}
@@ -72,12 +74,12 @@ function KeseharianDetailInner() {
               )}
             </div>
 
-            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.35rem", lineHeight: 1.25 }}>
+            <h1 className="detail-main-title">
               {selectedLog.title}
             </h1>
 
             {selectedLog.creator && (
-              <div style={{ fontSize: "0.95rem", color: "var(--text-secondary)", fontWeight: 600, marginBottom: "0.35rem" }}>
+              <div className="detail-meta-subtitle">
                 <span style={{ color: "var(--text-muted)" }}>
                   {selectedLog.category === "Melihat"
                     ? "Karya / Sutradara:"
@@ -87,18 +89,18 @@ function KeseharianDetailInner() {
                     ? "Musisi / Host:"
                     : "Asal / Roastery:"}{" "}
                 </span>
-                <span style={{ color: "var(--text-main)" }}>{selectedLog.creator}</span>
+                <span style={{ color: "var(--text-main)", fontWeight: 600 }}>{selectedLog.creator}</span>
                 {selectedLog.year ? ` • Tahun ${selectedLog.year}` : ""}
               </div>
             )}
 
             {selectedLog.subtitle && (
-              <div style={{ fontSize: "0.92rem", color: "var(--mono-gray-mid)", fontStyle: "italic", marginBottom: "0.45rem" }}>
+              <div style={{ fontSize: "0.88rem", color: "var(--mono-gray-mid)", fontStyle: "italic", marginBottom: "0.45rem" }}>
                 {selectedLog.subtitle}
               </div>
             )}
 
-            <div style={{ fontSize: "0.82rem", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
+            <div style={{ fontSize: "0.78rem", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
               Tanggal Catatan: {selectedLog.date}
             </div>
           </div>

@@ -80,18 +80,18 @@ function AlatDetailInner() {
     >
       <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
         {/* Header Kartu Alat */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem" }}>
-          <div style={{ width: "4rem", height: "4rem", borderRadius: "var(--radius-md)", background: "var(--bg-soft)", border: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+          <div style={{ width: "3.75rem", height: "3.75rem", borderRadius: "var(--radius-md)", background: "var(--bg-soft)", border: "1px solid var(--border-subtle)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.85rem", flexShrink: 0 }}>
             {selectedItem.icon || "⚙️"}
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: "200px" }}>
             <span className="card-badge-overlay" style={{ position: "static", display: "inline-block", marginBottom: "0.25rem" }}>
               {selectedItem.category}
             </span>
-            <h1 style={{ fontSize: "1.65rem", fontWeight: 800, color: "var(--text-main)", margin: "0.15rem 0" }}>
+            <h1 className="detail-main-title">
               {selectedItem.name}
             </h1>
-            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+            <div className="detail-meta-subtitle">
               Status: <span style={{ color: "#10b981", fontWeight: 600 }}>Aktif Digunakan Sehari-hari</span>
             </div>
           </div>

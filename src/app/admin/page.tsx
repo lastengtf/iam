@@ -25,9 +25,9 @@ import {
 } from "@/data/contentStore";
 
 type AdminTab = "overview" | "content" | "profile" | "sso" | "backup";
-type ContentCategory = "all" | "projects" | "work" | "publications" | "alat" | "keseharian" | "news";
-type MajorCategory = "pengalaman" | "riset-karya" | "alat" | "keseharian" | "warta";
-type ItemType = "projects" | "work" | "publications" | "alat" | "keseharian" | "news";
+type ContentCategory = "all" | "projects" | "work" | "publications" | "alat" | "keseharian";
+type MajorCategory = "pengalaman" | "riset-karya" | "alat" | "keseharian";
+type ItemType = "projects" | "work" | "publications" | "alat" | "keseharian";
 
 interface UnifiedRow {
   id: string;
@@ -40,7 +40,17 @@ interface UnifiedRow {
   statusText: string;
   imageUrl: string;
   previewUrl: string;
-  rawItem: ProjectItem | WorkItem | PublicationItem | StackItem | DailyLogItem | NewsItem;
+  rawItem: ProjectItem | WorkItem | PublicationItem | StackItem | DailyLogItem;
+}
+
+interface ConfirmState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  isDanger?: boolean;
+  onConfirm: () => void;
 }
 
 export default function AdminPage() {
@@ -65,6 +75,39 @@ export default function AdminPage() {
   const [sortBy, setSortBy] = useState<"default" | "title-asc" | "title-desc" | "rating-desc" | "likes-desc">("default");
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState<{ message: string; type: "success" | "info" } | null>(null);
+
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<ConfirmState>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmLabel: "Konfirmasi",
+    cancelLabel: "Batal",
+    isDanger: false,
+    onConfirm: () => {},
+  });
+
+  const requestConfirm = (options: {
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    isDanger?: boolean;
+    onConfirm: () => void;
+  }) => {
+    setConfirmModal({
+      isOpen: true,
+      title: options.title,
+      message: options.message,
+      confirmLabel: options.confirmLabel || "Konfirmasi",
+      cancelLabel: options.cancelLabel || "Batal",
+      isDanger: options.isDanger ?? false,
+      onConfirm: () => {
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        options.onConfirm();
+      },
+    });
+  };
 
   // Reactive Data from Content Store
   const { profile, updateProfile } = useProfileData();
@@ -227,21 +270,8 @@ export default function AdminPage() {
         previewUrl: `/keseharian/details?id=${d.id}`,
         rawItem: d,
       })),
-      ...news.map((n) => ({
-        id: n.slug,
-        type: "news" as const,
-        typeLabel: "Warta",
-        title: n.title,
-        category: n.category,
-        metric: `${n.date} • ${n.author}`,
-        status: "active" as const,
-        statusText: "Publikasi",
-        imageUrl: n.imageUrl,
-        previewUrl: `/news/details?slug=${n.slug}`,
-        rawItem: n,
-      })),
     ];
-  }, [projects, work, publications, stack, dailyLogs, news]);
+  }, [projects, work, publications, stack, dailyLogs]);
 
   // Specific Memoized Lists for Each Major Category
   const filteredWork = useMemo(() => {
@@ -397,26 +427,6 @@ export default function AdminPage() {
     return result;
   }, [dailyLogs, keseharianSubFilter, searchQuery, sortBy]);
 
-  const filteredNews = useMemo(() => {
-    let result = news.filter((n) => {
-      const q = searchQuery.toLowerCase().trim();
-      const matchSearch =
-        !q ||
-        n.title.toLowerCase().includes(q) ||
-        n.category.toLowerCase().includes(q) ||
-        n.author.toLowerCase().includes(q) ||
-        n.summary.toLowerCase().includes(q);
-      return matchSearch;
-    });
-
-    if (sortBy === "title-asc") {
-      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "title-desc") {
-      result = [...result].sort((a, b) => b.title.localeCompare(a.title));
-    }
-    return result;
-  }, [news, searchQuery, sortBy]);
-
   // General Filtered & Sorted Rows (fallback for unified search)
   const filteredContents = useMemo(() => {
     let result = allRows.filter((item) => {
@@ -552,17 +562,6 @@ export default function AdminPage() {
       setFormRating(d.rating ?? 4.8);
       setFormItemType(d.itemType || "");
       setFormCreator(d.creator || "");
-    } else if (row.type === "news") {
-      const n = row.rawItem as NewsItem;
-      setFormTitle(n.title);
-      setFormSlug(n.slug);
-      setFormCategory(n.category);
-      setFormDate(n.date);
-      setFormAuthor(n.author);
-      setFormDescription(n.summary);
-      setFormNewsContent(n.content);
-      setFormImageUrl(n.imageUrl);
-      setFormHref(n.href);
     }
 
     setShowModal(true);
@@ -570,78 +569,83 @@ export default function AdminPage() {
 
   // Duplicate an Item
   const handleDuplicateItem = (row: UnifiedRow) => {
-    const timestamp = Date.now().toString().slice(-4);
-    if (row.type === "projects") {
-      const p = row.rawItem as ProjectItem;
-      const clone: ProjectItem = {
-        ...p,
-        slug: `${p.slug}-salinan-${timestamp}`,
-        name: `${p.name} (Salinan)`,
-      };
-      updateProjects([clone, ...projects]);
-    } else if (row.type === "work") {
-      const w = row.rawItem as WorkItem;
-      const clone: WorkItem = {
-        ...w,
-        id: `work-${Date.now()}`,
-        role: `${w.role} (Salinan)`,
-      };
-      updateWork([clone, ...work]);
-    } else if (row.type === "publications") {
-      const pub = row.rawItem as PublicationItem;
-      const clone: PublicationItem = {
-        ...pub,
-        id: `pub-${Date.now()}`,
-        title: `${pub.title} (Salinan)`,
-      };
-      updatePublications([clone, ...publications]);
-    } else if (row.type === "alat") {
-      const s = row.rawItem as StackItem;
-      const clone: StackItem = {
-        ...s,
-        id: `stack-${Date.now()}`,
-        name: `${s.name} (Salinan)`,
-      };
-      updateStack([clone, ...stack]);
-    } else if (row.type === "keseharian") {
-      const d = row.rawItem as DailyLogItem;
-      const clone: DailyLogItem = {
-        ...d,
-        id: `daily-${Date.now()}`,
-        title: `${d.title} (Salinan)`,
-      };
-      updateDailyLogs([clone, ...dailyLogs]);
-    } else if (row.type === "news") {
-      const n = row.rawItem as NewsItem;
-      const clone: NewsItem = {
-        ...n,
-        slug: `${n.slug}-salinan-${timestamp}`,
-        title: `${n.title} (Salinan)`,
-      };
-      updateNews([clone, ...news]);
-    }
-    showToast(`Berhasil menduplikasi item "${row.title}"!`);
+    requestConfirm({
+      title: "Konfirmasi Duplikasi Konten",
+      message: `Apakah Anda yakin ingin menggandakan "${row.title}"? Salinan baru akan dibuat ke dalam daftar aktif.`,
+      confirmLabel: "Duplikasi",
+      cancelLabel: "Batal",
+      isDanger: false,
+      onConfirm: () => {
+        const timestamp = Date.now().toString().slice(-4);
+        if (row.type === "projects") {
+          const p = row.rawItem as ProjectItem;
+          const clone: ProjectItem = {
+            ...p,
+            slug: `${p.slug}-salinan-${timestamp}`,
+            name: `${p.name} (Salinan)`,
+          };
+          updateProjects([clone, ...projects]);
+        } else if (row.type === "work") {
+          const w = row.rawItem as WorkItem;
+          const clone: WorkItem = {
+            ...w,
+            id: `work-${Date.now()}`,
+            role: `${w.role} (Salinan)`,
+          };
+          updateWork([clone, ...work]);
+        } else if (row.type === "publications") {
+          const pub = row.rawItem as PublicationItem;
+          const clone: PublicationItem = {
+            ...pub,
+            id: `pub-${Date.now()}`,
+            title: `${pub.title} (Salinan)`,
+          };
+          updatePublications([clone, ...publications]);
+        } else if (row.type === "alat") {
+          const s = row.rawItem as StackItem;
+          const clone: StackItem = {
+            ...s,
+            id: `stack-${Date.now()}`,
+            name: `${s.name} (Salinan)`,
+          };
+          updateStack([clone, ...stack]);
+        } else if (row.type === "keseharian") {
+          const d = row.rawItem as DailyLogItem;
+          const clone: DailyLogItem = {
+            ...d,
+            id: `daily-${Date.now()}`,
+            title: `${d.title} (Salinan)`,
+          };
+          updateDailyLogs([clone, ...dailyLogs]);
+        }
+        showToast(`Berhasil menduplikasi item "${row.title}"!`);
+      },
+    });
   };
 
   // Delete an Item
   const handleDeleteItem = (type: ItemType, id: string, title: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus "${title}"?`)) return;
-
-    if (type === "projects") {
-      updateProjects(projects.filter((p) => p.slug !== id));
-    } else if (type === "work") {
-      updateWork(work.filter((w) => w.id !== id));
-    } else if (type === "publications") {
-      updatePublications(publications.filter((p) => p.id !== id));
-    } else if (type === "alat") {
-      updateStack(stack.filter((s) => s.id !== id));
-    } else if (type === "keseharian") {
-      updateDailyLogs(dailyLogs.filter((d) => d.id !== id));
-    } else if (type === "news") {
-      updateNews(news.filter((n) => n.slug !== id));
-    }
-
-    showToast(`Item "${title}" berhasil dihapus.`);
+    requestConfirm({
+      title: "Konfirmasi Hapus Konten",
+      message: `Apakah Anda yakin ingin menghapus "${title}"? Aksi ini akan menghapus data tersebut dari daftar platform.`,
+      confirmLabel: "Hapus Sekarang",
+      cancelLabel: "Batal",
+      isDanger: true,
+      onConfirm: () => {
+        if (type === "projects") {
+          updateProjects(projects.filter((p) => p.slug !== id));
+        } else if (type === "work") {
+          updateWork(work.filter((w) => w.id !== id));
+        } else if (type === "publications") {
+          updatePublications(publications.filter((p) => p.id !== id));
+        } else if (type === "alat") {
+          updateStack(stack.filter((s) => s.id !== id));
+        } else if (type === "keseharian") {
+          updateDailyLogs(dailyLogs.filter((d) => d.id !== id));
+        }
+        showToast(`Item "${title}" berhasil dihapus.`);
+      },
+    });
   };
 
   // Save / Update Form Submission
@@ -792,31 +796,6 @@ export default function AdminPage() {
         updateDailyLogs(dailyLogs.map((d) => (d.id === editingId ? itemPayload : d)));
         showToast("Catatan keseharian berhasil diperbarui!");
       }
-    } else if (targetType === "news") {
-      const slugVal = formSlug.trim()
-        ? formSlug.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-        : formTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      const defaultImg = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&auto=format&fit=crop&q=80";
-
-      const itemPayload: NewsItem = {
-        slug: slugVal,
-        title: formTitle,
-        category: formCategory || "Warta Platform",
-        date: formDate || new Date().toISOString().slice(0, 10),
-        author: formAuthor || "TEN Editorial",
-        summary: formDescription || "Pengumuman dan kabar mutakhir ekosistem TEN.",
-        content: formNewsContent || formDescription || "Kabar berkala ekosistem.",
-        href: formHref || `/news/details?slug=${slugVal}`,
-        imageUrl: formImageUrl || defaultImg,
-      };
-
-      if (modalMode === "create") {
-        updateNews([itemPayload, ...news]);
-        showToast("Warta baru berhasil ditambahkan!");
-      } else {
-        updateNews(news.map((n) => (n.slug === editingId ? itemPayload : n)));
-        showToast("Warta berhasil diperbarui!");
-      }
     }
 
     setShowModal(false);
@@ -860,14 +839,23 @@ export default function AdminPage() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        if (parsed.profile) updateProfile(parsed.profile);
-        if (parsed.projects) updateProjects(parsed.projects);
-        if (parsed.work) updateWork(parsed.work);
-        if (parsed.publications) updatePublications(parsed.publications);
-        if (parsed.stack) updateStack(parsed.stack);
-        if (parsed.dailyLogs) updateDailyLogs(parsed.dailyLogs);
-        if (parsed.news) updateNews(parsed.news);
-        showToast("Data backup berhasil dipulihkan & disinkronkan!");
+        requestConfirm({
+          title: "Pulihkan Cadangan Platform",
+          message: "Apakah Anda yakin ingin memulihkan data dari berkas cadangan ini? Seluruh data aktif di platform akan disinkronkan dengan isi cadangan.",
+          confirmLabel: "Pulihkan Cadangan",
+          cancelLabel: "Batal",
+          isDanger: true,
+          onConfirm: () => {
+            if (parsed.profile) updateProfile(parsed.profile);
+            if (parsed.projects) updateProjects(parsed.projects);
+            if (parsed.work) updateWork(parsed.work);
+            if (parsed.publications) updatePublications(parsed.publications);
+            if (parsed.stack) updateStack(parsed.stack);
+            if (parsed.dailyLogs) updateDailyLogs(parsed.dailyLogs);
+            if (parsed.news) updateNews(parsed.news);
+            showToast("Data backup berhasil dipulihkan & disinkronkan!");
+          },
+        });
       } catch {
         alert("Gagal membaca berkas JSON. Pastikan format cadangan valid.");
       }
@@ -877,10 +865,17 @@ export default function AdminPage() {
 
   // Factory Reset Handler
   const handleResetDefaults = () => {
-    if (confirm("PENTING: Apakah Anda yakin ingin mengembalikan seluruh konten dan profil ke data awal bawaan? Semua modifikasi lokal akan diatur ulang.")) {
-      resetAllToDefault();
-      showToast("Data platform berhasil diatur ulang ke kondisi awal bawaan.");
-    }
+    requestConfirm({
+      title: "Reset ke Pengaturan Awal (Factory Reset)",
+      message: "PENTING: Apakah Anda yakin ingin mengembalikan seluruh konten dan profil ke data awal bawaan? Semua modifikasi lokal akan diatur ulang.",
+      confirmLabel: "Reset Semua Data",
+      cancelLabel: "Batal",
+      isDanger: true,
+      onConfirm: () => {
+        resetAllToDefault();
+        showToast("Data platform berhasil diatur ulang ke kondisi awal bawaan.");
+      },
+    });
   };
 
   const CATEGORY_TABS: { id: ContentCategory; label: string; count: number }[] = [
@@ -890,7 +885,6 @@ export default function AdminPage() {
     { id: "publications", label: "Publikasi", count: publications.length },
     { id: "alat", label: "Alat", count: stack.length },
     { id: "keseharian", label: "Keseharian", count: dailyLogs.length },
-    { id: "news", label: "Warta", count: news.length },
   ];
 
   const MAJOR_CATEGORIES = [
@@ -926,14 +920,6 @@ export default function AdminPage() {
       description: "Watched, read, listened & tasted",
       unit: "catatan",
     },
-    {
-      id: "warta" as const,
-      label: "Warta",
-      icon: "📰",
-      count: news.length,
-      description: "Kabar rilis & catatan editorial",
-      unit: "artikel",
-    },
   ];
 
   const watchedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Melihat").length, [dailyLogs]);
@@ -965,8 +951,6 @@ export default function AdminPage() {
         return { icon: "🛠️", title: `${actionText} Alat & Stack`, desc: "Instrumen software produktivitas, hardware EDC, dan cloud" };
       case "keseharian":
         return { icon: "☕", title: `${actionText} Catatan Keseharian`, desc: "Dokumentasi tontonan (Watched), bacaan (Read), musik (Listened), dan seduhan (Tasted)" };
-      case "news":
-        return { icon: "📰", title: `${actionText} Warta Platform`, desc: "Pembaruan rilis platform, catatan fitur, dan kabar ekosistem" };
       default:
         return { icon: "✨", title: `${actionText} Konten`, desc: "Kelola data pada ekosistem platform TEN" };
     }
@@ -1027,7 +1011,18 @@ export default function AdminPage() {
           <button
             type="button"
             className="admin-logout-btn"
-            onClick={() => signOut()}
+            onClick={() => {
+              requestConfirm({
+                title: "Konfirmasi Keluar Sesi",
+                message: "Apakah Anda yakin ingin mengakhiri sesi administrator dan keluar?",
+                confirmLabel: "Keluar Sesi",
+                cancelLabel: "Batal",
+                isDanger: false,
+                onConfirm: () => {
+                  signOut();
+                },
+              });
+            }}
             title="Keluar dari sesi administrator"
           >
             Keluar
@@ -1132,13 +1127,13 @@ export default function AdminPage() {
               </div>
               <div className="admin-stat-value">{allRows.length}</div>
               <div className="admin-stat-desc">
-                {projects.length} Karya • {work.length} Pengalaman • {publications.length} Riset • {stack.length} Alat • {dailyLogs.length} Harian
+                {projects.length} Karya • {work.length} Pengalaman • {publications.length} Riset • {stack.length} Alat • {dailyLogs.length} Keseharian
               </div>
             </div>
 
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Karya & Riset</span>
+                <span className="admin-stat-label">Riset & Karya</span>
                 <span className="admin-stat-badge">Koleksi</span>
               </div>
               <div className="admin-stat-value">{projects.length + publications.length}</div>
@@ -1149,23 +1144,23 @@ export default function AdminPage() {
 
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Alat & Jurnal Harian</span>
+                <span className="admin-stat-label">Alat & Stack</span>
                 <span className="admin-stat-badge">Aktif</span>
               </div>
-              <div className="admin-stat-value">{stack.length + dailyLogs.length}</div>
+              <div className="admin-stat-value">{stack.length}</div>
               <div className="admin-stat-desc">
-                {stack.length} Instrumen • {dailyLogs.length} Catatan Indera
+                {softwareCount} Software • {hardwareCount} Hardware • {infraCount} Cloud
               </div>
             </div>
 
             <div className="admin-stat-card">
               <div className="admin-stat-header">
-                <span className="admin-stat-label">Warta & Kabar</span>
-                <span className="admin-stat-badge">Rilis</span>
+                <span className="admin-stat-label">Keseharian</span>
+                <span className="admin-stat-badge">Sensory</span>
               </div>
-              <div className="admin-stat-value">{news.length}</div>
+              <div className="admin-stat-value">{dailyLogs.length}</div>
               <div className="admin-stat-desc">
-                Kabar berkala ekosistem & pembaruan platform
+                {watchedCount} Watched • {readCount} Read • {listenedCount} Listened • {tastedCount} Tasted
               </div>
             </div>
           </div>
@@ -1315,14 +1310,6 @@ export default function AdminPage() {
                   </p>
                 </>
               )}
-              {majorCategory === "warta" && (
-                <>
-                  <h2 className="admin-section-title">Kelola Warta & Pembaruan Platform</h2>
-                  <p className="admin-section-subtitle">
-                    Kabar pemutakhiran, rilisan fitur, dan pengumuman ekosistem TEN.
-                  </p>
-                </>
-              )}
             </div>
 
             <div className="admin-header-actions">
@@ -1372,16 +1359,6 @@ export default function AdminPage() {
                   onClick={() => handleOpenCreateModal("keseharian")}
                 >
                   + Tambah Catatan Keseharian
-                </button>
-              )}
-
-              {majorCategory === "warta" && (
-                <button
-                  type="button"
-                  className="admin-btn-primary"
-                  onClick={() => handleOpenCreateModal("news")}
-                >
-                  + Tambah Warta Baru
                 </button>
               )}
             </div>
@@ -1496,11 +1473,6 @@ export default function AdminPage() {
                 </>
               )}
 
-              {majorCategory === "warta" && (
-                <button type="button" className="admin-category-btn active">
-                  Semua Warta ({news.length})
-                </button>
-              )}
             </div>
 
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
@@ -1558,9 +1530,7 @@ export default function AdminPage() {
                       ? "Cari karya, riset, kategori..."
                       : majorCategory === "alat"
                       ? "Cari nama alat, platform..."
-                      : majorCategory === "keseharian"
-                      ? "Cari judul, kreator, format..."
-                      : "Cari warta, topik, penulis..."
+                      : "Cari judul, kreator, format..."
                   }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -2006,81 +1976,6 @@ export default function AdminPage() {
                 </tbody>
               </table>
             )}
-
-            {/* 5. TABLE: WARTA */}
-            {majorCategory === "warta" && (
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Judul Warta</th>
-                    <th>Kategori</th>
-                    <th>Penulis / Redaksi</th>
-                    <th>Tanggal Rilis</th>
-                    <th style={{ textAlign: "right" }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredNews.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
-                        Tidak ada warta yang cocok dengan pencarian &quot;{searchQuery}&quot;.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredNews.map((n) => (
-                      <tr key={n.slug}>
-                        <td>
-                          <div className="admin-table-title">{n.title}</div>
-                          <div className="admin-field-help" style={{ marginTop: 0 }}>
-                            Slug: <code>{n.slug}</code>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="admin-table-badge">{n.category}</span>
-                        </td>
-                        <td className="admin-table-sub">{n.author}</td>
-                        <td className="admin-table-meta">{n.date}</td>
-                        <td style={{ textAlign: "right" }}>
-                          <div className="admin-table-actions">
-                            <Link
-                              href={`/news/details?slug=${n.slug}`}
-                              className="admin-btn-sm admin-btn-view"
-                              title="Buka pratinjau berita"
-                            >
-                              Lihat ↗
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditModal({ type: "news", id: n.slug, title: n.title, rawItem: n } as UnifiedRow)}
-                              className="admin-btn-sm admin-btn-edit"
-                              title="Sunting warta ini"
-                            >
-                              ✎ Sunting
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDuplicateItem({ type: "news", id: n.slug, title: n.title, rawItem: n } as UnifiedRow)}
-                              className="admin-btn-sm admin-btn-dup"
-                              title="Duplikasi warta ini"
-                            >
-                              ⎘ Duplikat
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteItem("news", n.slug, n.title)}
-                              className="admin-btn-sm admin-btn-del"
-                              title="Hapus warta ini"
-                            >
-                              ✕ Hapus
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            )}
           </div>
         </div>
       )}
@@ -2478,7 +2373,6 @@ export default function AdminPage() {
                       { id: "publications" as const, label: "Riset", icon: "📑" },
                       { id: "alat" as const, label: "Alat", icon: "🛠️" },
                       { id: "keseharian" as const, label: "Keseharian", icon: "☕" },
-                      { id: "news" as const, label: "Warta", icon: "📰" },
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -3302,127 +3196,6 @@ export default function AdminPage() {
                   </>
                 )}
 
-                {/* 6. NEWS (WARTA PLATFORM) */}
-                {targetType === "news" && (
-                  <>
-                    <div className="admin-form-section">
-                      <div className="admin-form-section-title">📰 Informasi Warta Platform</div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Judul Warta / Berita</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Pemutakhiran Modul TEN v1.2"
-                          value={formTitle}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setFormTitle(val);
-                            if (modalMode === "create") {
-                              setFormSlug(slugify(val));
-                            }
-                          }}
-                          className="admin-input"
-                          required
-                        />
-                      </div>
-
-                      <div className="admin-form-grid">
-                        <div className="admin-form-group">
-                          <label className="admin-label">Kategori Warta</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Warta Platform"
-                            value={formCategory}
-                            onChange={(e) => setFormCategory(e.target.value)}
-                            className="admin-input"
-                          />
-                          <div className="admin-chips-row">
-                            {["Warta Platform", "Catatan Rilis", "Pengumuman", "Dokumentasi"].map((cat) => (
-                              <button
-                                key={cat}
-                                type="button"
-                                className={`admin-chip-btn ${formCategory === cat ? "active" : ""}`}
-                                onClick={() => setFormCategory(cat)}
-                              >
-                                {cat}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="admin-form-group">
-                          <label className="admin-label">Tanggal Rilis</label>
-                          <input
-                            type="text"
-                            placeholder="e.g. 2026-10-02"
-                            value={formDate}
-                            onChange={(e) => setFormDate(e.target.value)}
-                            className="admin-input"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                        <label className="admin-label">Ringkasan Warta (Cuplikan Depan)</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Ringkasan warta untuk kartu depan..."
-                          value={formDescription}
-                          onChange={(e) => setFormDescription(e.target.value)}
-                          className="admin-textarea"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="admin-toggle-advanced-btn"
-                      onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                    >
-                      <span>{showAdvancedOptions ? "▲ Sembunyikan Isi Lengkap" : "▼ Isi Narasi Lengkap & Redaksi (Opsional)"}</span>
-                      <span style={{ fontSize: "0.7rem", opacity: 0.7 }}>
-                        {showAdvancedOptions ? "Tutup" : "Slug kustom, penulis & narasi penuh"}
-                      </span>
-                    </button>
-
-                    {showAdvancedOptions && (
-                      <div className="admin-form-section" style={{ background: "var(--bg-soft)" }}>
-                        <div className="admin-form-grid">
-                          <div className="admin-form-group">
-                            <label className="admin-label">Slug / ID URL</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. update-v1-2"
-                              value={formSlug}
-                              onChange={(e) => setFormSlug(e.target.value)}
-                              className="admin-input"
-                            />
-                          </div>
-                          <div className="admin-form-group">
-                            <label className="admin-label">Penulis / Redaksi</label>
-                            <input
-                              type="text"
-                              placeholder="TEN Editorial"
-                              value={formAuthor}
-                              onChange={(e) => setFormAuthor(e.target.value)}
-                              className="admin-input"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                          <label className="admin-label">Isi Lengkap Warta</label>
-                          <textarea
-                            rows={4}
-                            placeholder="Konten narasi lengkap warta..."
-                            value={formNewsContent}
-                            onChange={(e) => setFormNewsContent(e.target.value)}
-                            className="admin-textarea"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
                 {/* MEDIA & IMAGE COVER SECTION */}
                 <div className="admin-form-section">
                   <div className="admin-form-section-title">🖼️ Media & Sampul Gambar</div>
@@ -3488,7 +3261,6 @@ export default function AdminPage() {
             else if (majorCategory === "riset-karya") handleOpenCreateModal(risetKaryaSubFilter === "publications" ? "publications" : "projects");
             else if (majorCategory === "alat") handleOpenCreateModal("alat");
             else if (majorCategory === "keseharian") handleOpenCreateModal("keseharian");
-            else if (majorCategory === "warta") handleOpenCreateModal("news");
             else handleOpenCreateModal("projects");
           }}
           title="Tambah Konten Baru"
@@ -3499,6 +3271,51 @@ export default function AdminPage() {
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </button>
+      )}
+
+      {/* Confirmation Modal for Major & Destructive Actions */}
+      {confirmModal.isOpen && (
+        <div
+          className="admin-confirm-overlay"
+          onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        >
+          <div
+            className="admin-confirm-box"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="admin-confirm-header">
+              <div className={`admin-confirm-icon ${confirmModal.isDanger ? "danger" : ""}`}>
+                {confirmModal.isDanger ? "⚠️" : "ℹ️"}
+              </div>
+              <div>
+                <h3 className="admin-confirm-title">{confirmModal.title}</h3>
+              </div>
+            </div>
+
+            <div className="admin-confirm-body">
+              <p className="admin-confirm-message">{confirmModal.message}</p>
+            </div>
+
+            <div className="admin-confirm-footer">
+              <button
+                type="button"
+                className="admin-confirm-cancel-btn"
+                onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+              >
+                {confirmModal.cancelLabel || "Batal"}
+              </button>
+              <button
+                type="button"
+                className={`admin-confirm-action-btn ${confirmModal.isDanger ? "danger" : ""}`}
+                onClick={confirmModal.onConfirm}
+              >
+                {confirmModal.confirmLabel || "Konfirmasi"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

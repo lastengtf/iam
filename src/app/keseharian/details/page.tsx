@@ -7,10 +7,17 @@ import { useDailyData } from "@/data/contentStore";
 import MasterDetailLayout, { MasterDetailSidebarItem } from "@/components/MasterDetailLayout";
 
 const SENSE_ICONS: Record<SenseCategory, string> = {
+  Melihat: "👁️",
   Membaca: "📖",
   Mendengar: "🎧",
   Mengecap: "☕",
-  Melihat: "👁️",
+};
+
+const SENSE_LABELS_EN: Record<SenseCategory, string> = {
+  Melihat: "Watched",
+  Membaca: "Read",
+  Mendengar: "Listened",
+  Mengecap: "Tasted",
 };
 
 function KeseharianDetailInner() {
@@ -22,8 +29,8 @@ function KeseharianDetailInner() {
   const sidebarItems: MasterDetailSidebarItem[] = dailyLogs.map((item) => ({
     id: item.id,
     title: item.title,
-    subtitle: `${item.itemType || item.category} • ★ ${item.rating?.toFixed(1) || "5.0"}`,
-    badge: item.category,
+    subtitle: `${item.itemType || SENSE_LABELS_EN[item.category]} • ★ ${item.rating?.toFixed(1) || "5.0"}`,
+    badge: SENSE_LABELS_EN[item.category],
     icon: SENSE_ICONS[item.category],
     imageUrl: item.imageUrl,
     href: `/keseharian/details?id=${item.id}`,
@@ -56,7 +63,7 @@ function KeseharianDetailInner() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
               <span className={`sensory-badge-overlay ${selectedLog.category.toLowerCase()}`} style={{ position: "static", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
-                {SENSE_ICONS[selectedLog.category]} {selectedLog.category}
+                {SENSE_ICONS[selectedLog.category]} {SENSE_LABELS_EN[selectedLog.category]}
               </span>
               {selectedLog.itemType && (
                 <span className="sensory-type-badge-top" style={{ position: "static", display: "inline-flex" }}>

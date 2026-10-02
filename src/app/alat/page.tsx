@@ -173,6 +173,27 @@ export default function AlatPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover / Icon) */}
+      {viewMode === "gallery" && paginatedItems.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedItems.map((item) => (
+            <Link
+              href={`/alat/details?id=${item.id}`}
+              key={item.id}
+              className="card-gallery-item"
+              title={`Buka detail & ulasan ${item.name}`}
+            >
+              <div className="stack-gallery-cover">
+                <span>{item.icon || "⚙️"}</span>
+              </div>
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{item.name}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedItems.length > 0 && (
         <div className="card-grid-responsive">

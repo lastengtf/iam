@@ -189,6 +189,31 @@ export default function KaryaPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedItems.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedItems.map((item) => (
+            <Link
+              href={item.href}
+              key={item.id}
+              className="card-gallery-item"
+              title={`Buka detail ${item.title}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="card-gallery-img"
+                loading="lazy"
+              />
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{item.title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedItems.length > 0 && (
         <div className="card-grid-responsive">

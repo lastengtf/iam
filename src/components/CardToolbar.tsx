@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export type ViewMode = "grid" | "list" | "compact";
+export type ViewMode = "gallery" | "grid" | "list" | "compact";
 
 interface CardToolbarProps {
   searchQuery: string;
@@ -58,8 +58,24 @@ export default function CardToolbar({
         )}
       </div>
 
-      {/* View Switcher: Grid, List, Ringkas */}
-      <div className="view-switcher-group">
+      {/* View Switcher: Galeri, Grid, List, Ringkas */}
+      <div className="view-switcher-wrapper">
+        <span className="view-switcher-label">View:</span>
+        <div className="view-switcher-group">
+        <button
+          type="button"
+          className={`view-switcher-btn ${viewMode === "gallery" ? "active" : ""}`}
+          onClick={() => onViewModeChange("gallery")}
+          title="Tampilan Galeri (Hanya Cover)"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          <span className="view-btn-text">Galeri</span>
+        </button>
+
         <button
           type="button"
           className={`view-switcher-btn ${viewMode === "grid" ? "active" : ""}`}
@@ -107,5 +123,6 @@ export default function CardToolbar({
         </button>
       </div>
     </div>
-  );
+  </div>
+);
 }

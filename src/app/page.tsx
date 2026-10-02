@@ -76,6 +76,31 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+        {viewMode === "gallery" && paginatedUpdates.length > 0 && (
+          <div className="card-gallery-view">
+            {paginatedUpdates.map((item) => (
+              <Link
+                href={item.link}
+                key={item.id}
+                className="card-gallery-item"
+                title={`Buka detail ${item.title}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="card-gallery-img"
+                  loading="lazy"
+                />
+                <div className="card-gallery-overlay">
+                  <span className="card-gallery-title">{item.title}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
         {/* TAMPILAN 1: GRID VIEW (1-3 KOLOM) */}
         {viewMode === "grid" && paginatedUpdates.length > 0 && (
           <div className="card-grid-responsive">

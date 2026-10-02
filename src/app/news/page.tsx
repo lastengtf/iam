@@ -76,6 +76,31 @@ export default function NewsPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedNews.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedNews.map((news) => (
+            <Link
+              href={`/news/details?slug=${news.slug}`}
+              key={news.slug}
+              className="card-gallery-item"
+              title={`Buka detail ${news.title}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={news.imageUrl}
+                alt={news.title}
+                className="card-gallery-img"
+                loading="lazy"
+              />
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{news.title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedNews.length > 0 && (
         <div className="card-grid-responsive">

@@ -145,6 +145,37 @@ export default function KeseharianPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedLogs.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedLogs.map((item) => (
+            <Link
+              href={`/keseharian/details?id=${item.id}`}
+              key={item.id}
+              className="card-gallery-item"
+              title={`Baca detail catatan: ${item.title}`}
+            >
+              {item.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="card-gallery-img"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="stack-gallery-cover">
+                  <span>{SENSE_ICONS[item.category] || "📝"}</span>
+                </div>
+              )}
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{item.title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedLogs.length > 0 && (
         <div className="card-grid-responsive">

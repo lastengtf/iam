@@ -74,6 +74,31 @@ export default function ProjectsPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedProjects.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedProjects.map((project) => (
+            <Link
+              href={`/projects/details?slug=${project.slug}`}
+              key={project.slug}
+              className="card-gallery-item"
+              title={`Buka detail ${project.name}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={project.imageUrl}
+                alt={project.name}
+                className="card-gallery-img"
+                loading="lazy"
+              />
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{project.name}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedProjects.length > 0 && (
         <div className="card-grid-responsive">

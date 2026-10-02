@@ -74,6 +74,31 @@ export default function WorkPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedWork.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedWork.map((work) => (
+            <Link
+              href={`/work/details?id=${work.id}`}
+              key={work.id}
+              className="card-gallery-item"
+              title={`Lihat detail peran ${work.role}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={work.imageUrl}
+                alt={work.role}
+                className="card-gallery-img"
+                loading="lazy"
+              />
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{work.role}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedWork.length > 0 && (
         <div className="card-grid-responsive">

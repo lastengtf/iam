@@ -75,6 +75,31 @@ export default function PublicationsPage() {
         </div>
       )}
 
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {viewMode === "gallery" && paginatedPublications.length > 0 && (
+        <div className="card-gallery-view">
+          {paginatedPublications.map((pub) => (
+            <Link
+              href={`/publications/details?id=${pub.id}`}
+              key={pub.id}
+              className="card-gallery-item"
+              title={`Buka detail ${pub.title}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={pub.imageUrl}
+                alt={pub.title}
+                className="card-gallery-img"
+                loading="lazy"
+              />
+              <div className="card-gallery-overlay">
+                <span className="card-gallery-title">{pub.title}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* TAMPILAN 1: GRID VIEW */}
       {viewMode === "grid" && paginatedPublications.length > 0 && (
         <div className="card-grid-responsive">

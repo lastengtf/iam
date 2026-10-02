@@ -434,6 +434,20 @@ body {
   color: var(--mono-black);
 }
 
+.view-switcher-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.view-switcher-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
 .view-switcher-group {
   display: inline-flex;
   align-items: center;
@@ -500,6 +514,92 @@ body {
 .section-subtitle {
   font-size: 0.78rem;
   color: var(--text-dim);
+}
+
+/* ===================================================
+   TAMPILAN GALERI (MODE GALLERY - HANYA GAMBAR COVER)
+   =================================================== */
+.card-gallery-view {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.card-gallery-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: #f1f5f9;
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.card-gallery-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-hover);
+}
+
+.card-gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.card-gallery-item:hover .card-gallery-img {
+  transform: scale(1.04);
+}
+
+.card-gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0) 50%);
+  display: flex;
+  align-items: flex-end;
+  padding: 0.75rem 0.85rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.card-gallery-item:hover .card-gallery-overlay {
+  opacity: 1;
+}
+
+.card-gallery-title {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stack-gallery-cover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-size: 2.5rem;
+  transition: transform 0.3s ease;
+}
+
+.card-gallery-item:hover .stack-gallery-cover {
+  transform: scale(1.05);
 }
 
 /* Responsive Grid 1-3 Kolom */
@@ -1076,7 +1176,8 @@ body {
    RESPONSIVE BREAKPOINTS (1-3 KOLOM & MOBILE COMFORT)
    =================================================== */
 @media (max-width: 840px) {
-  .card-grid-responsive {
+  .card-grid-responsive,
+  .card-gallery-view {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.9rem;
   }
@@ -1086,6 +1187,11 @@ body {
   .card-grid-responsive {
     grid-template-columns: 1fr;
     gap: 0.85rem;
+  }
+  
+  .card-gallery-view {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
   }
   
   .content-wrapper {

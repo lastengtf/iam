@@ -941,6 +941,26 @@ export default function AdminPage() {
     setSortBy("default");
   };
 
+  const getModalHeading = () => {
+    const actionText = modalMode === "create" ? "Tambah" : "Sunting";
+    switch (targetType) {
+      case "work":
+        return { icon: "💼", title: `${actionText} Riwayat Pengalaman`, desc: "Karier profesional, peran, dan inisiatif kepemimpinan" };
+      case "projects":
+        return { icon: "🚀", title: `${actionText} Karya Digital`, desc: "Inisiatif proyek digital, platform web, dan perkakas mandiri" };
+      case "publications":
+        return { icon: "📑", title: `${actionText} Riset & Publikasi`, desc: "Makalah ilmiah, kajian komputasi, dan telaah arsitektur" };
+      case "alat":
+        return { icon: "🛠️", title: `${actionText} Alat & Stack`, desc: "Instrumen software produktivitas, hardware EDC, dan cloud" };
+      case "keseharian":
+        return { icon: "☕", title: `${actionText} Catatan Keseharian`, desc: "Dokumentasi tontonan (Watched), bacaan (Read), musik (Listened), dan seduhan (Tasted)" };
+      case "news":
+        return { icon: "📰", title: `${actionText} Warta Platform`, desc: "Pembaruan rilis platform, catatan fitur, dan kabar ekosistem" };
+      default:
+        return { icon: "✨", title: `${actionText} Konten`, desc: "Kelola data pada ekosistem platform TEN" };
+    }
+  };
+
   if (authStatus === "loading") {
     return (
       <div className="admin-loading-screen">
@@ -2404,644 +2424,998 @@ export default function AdminPage() {
       )}
 
       {/* ADAPTIVE MODAL (CREATE / EDIT) */}
-      {showModal && (
-        <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
-          <div
-            className="admin-modal-box admin-modal-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="admin-modal-header">
-              <h3 className="admin-modal-title">
-                {modalMode === "create" ? "Tambah Konten Baru" : "Sunting Item Konten"}
-              </h3>
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={() => setShowModal(false)}
-              >
-                ✕
-              </button>
-            </div>
+      {showModal && (() => {
+        const heading = getModalHeading();
+        return (
+          <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
+            <div
+              className="admin-modal-box admin-modal-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="admin-modal-drag-handle" />
 
-            <form onSubmit={handleSubmitModal} className="admin-modal-scroll-body">
-              {/* Type Selector (only on create) */}
-              {modalMode === "create" && (
-                <div className="admin-form-group">
-                  <label className="admin-label">Pilih Modul / Jenis Pilar</label>
-                  <select
-                    className="admin-select"
-                    value={targetType}
-                    onChange={(e) => setTargetType(e.target.value as ItemType)}
-                  >
-                    <option value="projects">Karya & Proyek Digital</option>
-                    <option value="work">Riwayat Pekerjaan & Pengalaman</option>
-                    <option value="publications">Riset & Publikasi Ilmiah</option>
-                    <option value="alat">Alat & Instrumen Kerja</option>
-                    <option value="keseharian">Catatan Keseharian & Indera</option>
-                    <option value="news">Kabar & Warta Ekosistem</option>
-                  </select>
+              <div className="admin-modal-header">
+                <div>
+                  <h3 className="admin-modal-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span>{heading.icon}</span>
+                    <span>{heading.title}</span>
+                  </h3>
+                  <p className="admin-field-help" style={{ margin: "0.2rem 0 0", fontSize: "0.75rem" }}>
+                    {heading.desc}
+                  </p>
                 </div>
-              )}
-
-              {/* COMMON & TYPE-SPECIFIC FIELDS */}
-
-              {/* 1. PROJECTS */}
-              {targetType === "projects" && (
-                <>
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Nama / Judul Karya</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Views Counter SaaS"
-                        value={formTitle}
-                        onChange={(e) => setFormTitle(e.target.value)}
-                        className="admin-input"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Kategori</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Tools & Utilitas"
-                        value={formCategory}
-                        onChange={(e) => setFormCategory(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Status Proyek</label>
-                      <select
-                        className="admin-select"
-                        value={formStatus}
-                        onChange={(e) => setFormStatus(e.target.value as "completed" | "in-progress" | "planned")}
-                      >
-                        <option value="completed">Selesai (Completed)</option>
-                        <option value="in-progress">Sedang Dibuat (In-Progress)</option>
-                        <option value="planned">Rencana (Planned)</option>
-                      </select>
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Slug / ID URL</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. views-counter"
-                        value={formSlug}
-                        onChange={(e) => setFormSlug(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Tech Stack (Pisahkan dengan koma)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Cloudflare, TypeScript, Next.js, Hono"
-                      value={formTech}
-                      onChange={(e) => setFormTech(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Metrik / Info Ringkas</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 10k+ Queries • Edge Ready"
-                      value={formMetrics}
-                      onChange={(e) => setFormMetrics(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Deskripsi Ringkas</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ringkasan inisiatif karya..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Rincian Arsitektur / Detail Teknis</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Penjelasan arsitektur, integrasi, dan keunggulan teknis..."
-                      value={formDetails}
-                      onChange={(e) => setFormDetails(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Tautan Eksternal / Demo</label>
-                      <input
-                        type="url"
-                        placeholder="https://..."
-                        value={formExternalHref}
-                        onChange={(e) => setFormExternalHref(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Ikon Emoji</label>
-                      <input
-                        type="text"
-                        placeholder="⚡"
-                        value={formIcon}
-                        onChange={(e) => setFormIcon(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* 2. WORK / PENGALAMAN */}
-              {targetType === "work" && (
-                <>
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Peran / Posisi</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Koordinator Transformasi Sistem"
-                        value={formTitle}
-                        onChange={(e) => setFormTitle(e.target.value)}
-                        className="admin-input"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Perusahaan / Lembaga</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Inisiatif Mandiri / Yayasan"
-                        value={formCompany}
-                        onChange={(e) => setFormCompany(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Periode</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 2024 - Sekarang"
-                        value={formPeriod}
-                        onChange={(e) => setFormPeriod(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Lokasi</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Jakarta, Indonesia"
-                        value={formLocation}
-                        onChange={(e) => setFormLocation(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Ringkasan Peran</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ringkasan tugas kepemimpinan dan tanggung jawab..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Rincian Tanggung Jawab (1 baris per poin)</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Merancang arsitektur sistem&#10;Mengkoordinasikan tim rekayasa&#10;Mengaudit kepatuhan data"
-                      value={formDetails}
-                      onChange={(e) => setFormDetails(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Keahlian / Skills (Pisahkan dengan koma)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Manajemen Proyek, Transformasi Digital, Cloud Architecture"
-                      value={formTech}
-                      onChange={(e) => setFormTech(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* 3. PUBLICATIONS / RISET */}
-              {targetType === "publications" && (
-                <>
-                  <div className="admin-form-group">
-                    <label className="admin-label">Judul Riset / Publikasi</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Telaah Rancang Bangun Edge Worker Terdistribusi"
-                      value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                      className="admin-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Penerbit / Jurnal / Forum</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. TEN Research Papers"
-                        value={formPublisher}
-                        onChange={(e) => setFormPublisher(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Tahun Terbit</label>
-                      <input
-                        type="text"
-                        placeholder="2026"
-                        value={formYear}
-                        onChange={(e) => setFormYear(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Ringkasan Riset</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ringkasan temuan penelitian..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Abstrak Penelitian</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Abstraksi lengkap dan metodologi..."
-                      value={formAbstract}
-                      onChange={(e) => setFormAbstract(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Tag / Kata Kunci (Pisahkan dengan koma)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Riset, Komputasi Awan, Edge Computing"
-                      value={formTags}
-                      onChange={(e) => setFormTags(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* 4. ALAT / STACK */}
-              {targetType === "alat" && (
-                <>
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Nama Instrumen / Alat</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Visual Studio Code / Neovim"
-                        value={formTitle}
-                        onChange={(e) => setFormTitle(e.target.value)}
-                        className="admin-input"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Kategori Alat</label>
-                      <select
-                        className="admin-select"
-                        value={formStackCategory}
-                        onChange={(e) => setFormStackCategory(e.target.value as "Hardware & EDC" | "Software & Otomasi" | "Infrastruktur & Cloud")}
-                      >
-                        <option value="Software & Otomasi">Software & Otomasi</option>
-                        <option value="Hardware & EDC">Hardware & EDC</option>
-                        <option value="Infrastruktur & Cloud">Infrastruktur & Cloud</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Status Penggunaan</label>
-                      <select
-                        className="admin-select"
-                        value={formStackStatus}
-                        onChange={(e) => setFormStackStatus(e.target.value as "active" | "evaluating" | "retired")}
-                      >
-                        <option value="active">Aktif Dipakai (Active)</option>
-                        <option value="evaluating">Sedang Dievaluasi (Evaluating)</option>
-                        <option value="retired">Pensiun / Arsip (Retired)</option>
-                      </select>
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Platform (Pisahkan koma)</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Web, macOS, Linux"
-                        value={formPlatforms}
-                        onChange={(e) => setFormPlatforms(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Deskripsi Alat</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Fungsi dan kegunaan alat ini..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Ulasan / Catatan Pengalaman</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Kesan dan manfaat penggunaan alat..."
-                      value={formReview}
-                      onChange={(e) => setFormReview(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* 5. KESEHARIAN */}
-              {targetType === "keseharian" && (
-                <>
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Judul Catatan</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Oppenheimer / Atomic Habits / Kopi V60"
-                        value={formTitle}
-                        onChange={(e) => setFormTitle(e.target.value)}
-                        className="admin-input"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Kategori Indera / Rasa</label>
-                      <select
-                        className="admin-select"
-                        value={formDailyCategory}
-                        onChange={(e) => setFormDailyCategory(e.target.value as SenseCategory)}
-                      >
-                        <option value="Melihat">👁️ Melihat (Watched: Film, Video, Dokumenter)</option>
-                        <option value="Membaca">📖 Membaca (Read: Buku, Esai, Artikel)</option>
-                        <option value="Mendengar">🎧 Mendengar (Listened: Album, Musik, Podcast)</option>
-                        <option value="Mengecap">☕ Mengecap (Tasted: Seduhan Kopi, Rasa)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Jenis / Format Media</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Film Bioskop, Video Podcast, Buku, Seduh Manual"
-                        value={formItemType}
-                        onChange={(e) => setFormItemType(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Kreator / Pembuat / Penulis</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Christopher Nolan, James Clear, Bill Evans"
-                        value={formCreator}
-                        onChange={(e) => setFormCreator(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Rating Pengalaman (Skala 1.0 - 5.0)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="1"
-                        max="5"
-                        placeholder="4.8"
-                        value={formRating}
-                        onChange={(e) => setFormRating(parseFloat(e.target.value) || 0)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Tanggal / Waktu</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. 2026-09-23 atau Hari Ini"
-                        value={formDate}
-                        onChange={(e) => setFormDate(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Subjudul / Topik</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Refleksi Sinematografi & Sains"
-                      value={formSubtitle}
-                      onChange={(e) => setFormSubtitle(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Ringkasan Catatan</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ringkasan pengalaman indera..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Catatan Pemikiran / Refleksi</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Gagasan dan catatan pemikiran lebih lanjut..."
-                      value={formThoughts}
-                      onChange={(e) => setFormThoughts(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Tag (Pisahkan koma)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Jurnal, Buku, Refleksi"
-                      value={formTags}
-                      onChange={(e) => setFormTags(e.target.value)}
-                      className="admin-input"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* 6. NEWS / WARTA */}
-              {targetType === "news" && (
-                <>
-                  <div className="admin-form-group">
-                    <label className="admin-label">Judul Warta / Berita</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Pemutakhiran Modul TEN v1.2"
-                      value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                      className="admin-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="admin-form-grid">
-                    <div className="admin-form-group">
-                      <label className="admin-label">Kategori Warta</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Warta Platform"
-                        value={formCategory}
-                        onChange={(e) => setFormCategory(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Penulis / Redaksi</label>
-                      <input
-                        type="text"
-                        placeholder="TEN Editorial"
-                        value={formAuthor}
-                        onChange={(e) => setFormAuthor(e.target.value)}
-                        className="admin-input"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Ringkasan Warta</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Ringkasan warta untuk kartu depan..."
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-
-                  <div className="admin-form-group">
-                    <label className="admin-label">Isi Lengkap Warta</label>
-                    <textarea
-                      rows={4}
-                      placeholder="Konten narasi lengkap warta..."
-                      value={formNewsContent}
-                      onChange={(e) => setFormNewsContent(e.target.value)}
-                      className="admin-textarea"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* IMAGE URL & LIVE PREVIEW (FOR ALL TYPES) */}
-              <div className="admin-form-group">
-                <label className="admin-label">URL Gambar Sampul / Media (Opsional)</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={formImageUrl}
-                  onChange={(e) => setFormImageUrl(e.target.value)}
-                  className="admin-input"
-                />
-                {formImageUrl && (
-                  <div className="admin-img-preview-box">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={formImageUrl}
-                      alt="Preview"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
-                      }}
-                    />
-                    <div className="admin-img-preview-info">
-                      <strong>Pratinjau Gambar Media:</strong>
-                      <div>Gambar akan otomatis dimuat dan disesuaikan secara proporsional di kartu konten.</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="admin-modal-actions">
                 <button
                   type="button"
-                  className="admin-btn-outline"
+                  className="admin-modal-close"
                   onClick={() => setShowModal(false)}
+                  title="Tutup Modal"
                 >
-                  Batal
-                </button>
-                <button type="submit" className="admin-btn-primary">
-                  {modalMode === "create" ? "Simpan & Publikasikan" : "Simpan Perubahan"}
+                  ✕
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSubmitModal} className="admin-modal-scroll-body">
+                {/* Type Switcher Pills (only on create) */}
+                {modalMode === "create" && (
+                  <div className="admin-type-pill-switcher">
+                    {[
+                      { id: "work" as const, label: "Pengalaman", icon: "💼" },
+                      { id: "projects" as const, label: "Karya", icon: "🚀" },
+                      { id: "publications" as const, label: "Riset", icon: "📑" },
+                      { id: "alat" as const, label: "Alat", icon: "🛠️" },
+                      { id: "keseharian" as const, label: "Keseharian", icon: "☕" },
+                      { id: "news" as const, label: "Warta", icon: "📰" },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        className={`admin-type-pill-btn ${targetType === tab.id ? "active" : ""}`}
+                        onClick={() => setTargetType(tab.id)}
+                      >
+                        <span>{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 1. PROJECTS (KARYA DIGITAL) */}
+                {targetType === "projects" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🚀 1. Identitas Karya & Status</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Nama / Judul Karya</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Views Counter SaaS"
+                            value={formTitle}
+                            onChange={(e) => setFormTitle(e.target.value)}
+                            className="admin-input"
+                            required
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Kategori Karya</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Tools & Utilitas"
+                            value={formCategory}
+                            onChange={(e) => setFormCategory(e.target.value)}
+                            className="admin-input"
+                          />
+                          <div className="admin-chips-row">
+                            {["Tools & Utilitas", "Arsitektur Sistem", "Platform Web", "Otomasi & Bot"].map((cat) => (
+                              <button
+                                key={cat}
+                                type="button"
+                                className={`admin-chip-btn ${formCategory === cat ? "active" : ""}`}
+                                onClick={() => setFormCategory(cat)}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Status Pengembangan</label>
+                          <select
+                            className="admin-select"
+                            value={formStatus}
+                            onChange={(e) => setFormStatus(e.target.value as "completed" | "in-progress" | "planned")}
+                          >
+                            <option value="completed">✓ Selesai (Completed)</option>
+                            <option value="in-progress">⏳ Sedang Dibuat (In-Progress)</option>
+                            <option value="planned">📅 Rencana (Planned)</option>
+                          </select>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Slug / ID URL</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. views-counter"
+                            value={formSlug}
+                            onChange={(e) => setFormSlug(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Ikon Emoji</label>
+                          <input
+                            type="text"
+                            placeholder="⚡"
+                            value={formIcon}
+                            onChange={(e) => setFormIcon(e.target.value)}
+                            className="admin-input"
+                            style={{ maxWidth: "90px" }}
+                          />
+                          <div className="admin-chips-row">
+                            {["⚡", "🚀", "🛡️", "🌐", "📦", "💻", "🔥", "✨"].map((emoji) => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                className={`admin-chip-btn ${formIcon === emoji ? "active" : ""}`}
+                                onClick={() => setFormIcon(emoji)}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Highlight Metrik / Info</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 10k+ Queries • Edge Ready"
+                            value={formMetrics}
+                            onChange={(e) => setFormMetrics(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">⚙️ 2. Teknologi & Rincian Teknis</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Teknologi Utama (Pisahkan koma)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. TypeScript, Next.js, Cloudflare"
+                          value={formTech}
+                          onChange={(e) => setFormTech(e.target.value)}
+                          className="admin-input"
+                        />
+                        <div className="admin-chips-row">
+                          {["Next.js", "TypeScript", "Cloudflare", "TailwindCSS", "Hono", "SQLite", "Workers"].map((tech) => (
+                            <button
+                              key={tech}
+                              type="button"
+                              className="admin-chip-btn"
+                              onClick={() => {
+                                const current = formTech ? formTech.split(",").map((s) => s.trim()) : [];
+                                if (!current.includes(tech)) {
+                                  setFormTech(current.concat(tech).join(", "));
+                                }
+                              }}
+                            >
+                              +{tech}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Deskripsi Ringkas</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan inisiatif karya..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Rincian Arsitektur / Fitur Teknis</label>
+                        <textarea
+                          rows={3}
+                          placeholder="Penjelasan arsitektur, integrasi, dan keunggulan teknis..."
+                          value={formDetails}
+                          onChange={(e) => setFormDetails(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🔗 3. Tautan Demo & Dokumentasi</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Tautan Web Publik / Demo</label>
+                          <input
+                            type="url"
+                            placeholder="https://..."
+                            value={formExternalHref}
+                            onChange={(e) => setFormExternalHref(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Tautan Internal / Repositori</label>
+                          <input
+                            type="text"
+                            placeholder="/karya/details atau https://github.com/..."
+                            value={formHref}
+                            onChange={(e) => setFormHref(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 2. WORK (RIWAYAT PENGALAMAN) */}
+                {targetType === "work" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🏢 1. Posisi & Lembaga</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Peran / Jabatan</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Inisiator & Koordinator Program"
+                            value={formTitle}
+                            onChange={(e) => setFormTitle(e.target.value)}
+                            className="admin-input"
+                            required
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Perusahaan / Organisasi</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. TEN Initiative"
+                            value={formCompany}
+                            onChange={(e) => setFormCompany(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Periode Waktu</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 2023 — Sekarang"
+                            value={formPeriod}
+                            onChange={(e) => setFormPeriod(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Lokasi</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Indonesia / Remote"
+                            value={formLocation}
+                            onChange={(e) => setFormLocation(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">📝 2. Ringkasan & Poin Tanggung Jawab</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Ringkasan Peran</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan peran kepemimpinan atau keahlian utama..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Rincian Tanggung Jawab (1 baris per poin)</label>
+                        <textarea
+                          rows={3}
+                          placeholder="Memimpin perencanaan program&#10;Mengoordinasikan tim lintas divisi&#10;Menyusun tata kelola kerja berkala"
+                          value={formDetails}
+                          onChange={(e) => setFormDetails(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Keahlian Kunci (Pisahkan koma)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Manajemen Inisiatif, Perencanaan Strategis, Kolaborasi Tim"
+                          value={formTech}
+                          onChange={(e) => setFormTech(e.target.value)}
+                          className="admin-input"
+                        />
+                        <div className="admin-chips-row">
+                          {["Manajemen Program", "Perencanaan Strategis", "Kolaborasi Tim", "Arsitektur Sistem", "Dokumentasi"].map((skill) => (
+                            <button
+                              key={skill}
+                              type="button"
+                              className="admin-chip-btn"
+                              onClick={() => {
+                                const current = formTech ? formTech.split(",").map((s) => s.trim()) : [];
+                                if (!current.includes(skill)) {
+                                  setFormTech(current.concat(skill).join(", "));
+                                }
+                              }}
+                            >
+                              +{skill}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🔗 3. Tautan Portofolio Lembaga</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Tautan Web Perusahaan / Referensi</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formHref}
+                          onChange={(e) => setFormHref(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 3. PUBLICATIONS (RISET & PUBLIKASI) */}
+                {targetType === "publications" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">📑 1. Dokumen Riset</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Judul Riset / Publikasi</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Telaah Rancang Bangun Edge Worker Terdistribusi"
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                          className="admin-input"
+                          required
+                        />
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Penerbit / Jurnal / Forum</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. TEN Research Papers"
+                            value={formPublisher}
+                            onChange={(e) => setFormPublisher(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Tahun Terbit</label>
+                          <input
+                            type="text"
+                            placeholder="2026"
+                            value={formYear}
+                            onChange={(e) => setFormYear(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🔬 2. Intisari & Abstrak</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Ringkasan Riset</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan temuan penting penelitian..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Abstrak Lengkap</label>
+                        <textarea
+                          rows={3}
+                          placeholder="Abstraksi lengkap dan metodologi..."
+                          value={formAbstract}
+                          onChange={(e) => setFormAbstract(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Kata Kunci / Tag (Pisahkan koma)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Riset, Komputasi Awan, Edge Computing"
+                          value={formTags}
+                          onChange={(e) => setFormTags(e.target.value)}
+                          className="admin-input"
+                        />
+                        <div className="admin-chips-row">
+                          {["Riset", "Edge Computing", "Arsitektur Terdistribusi", "OIDC", "Keamanan", "Kinerja"].map((tag) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              className="admin-chip-btn"
+                              onClick={() => {
+                                const current = formTags ? formTags.split(",").map((s) => s.trim()) : [];
+                                if (!current.includes(tag)) {
+                                  setFormTags(current.concat(tag).join(", "));
+                                }
+                              }}
+                            >
+                              +{tag}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🔗 3. Tautan Dokumen / DOI</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Tautan Dokumen / DOI / PDF</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formHref}
+                          onChange={(e) => setFormHref(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 4. ALAT (ALAT & STACK) */}
+                {targetType === "alat" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🛠️ 1. Identitas Alat & Kategori</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Nama Instrumen / Alat</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Visual Studio Code / Neovim"
+                            value={formTitle}
+                            onChange={(e) => setFormTitle(e.target.value)}
+                            className="admin-input"
+                            required
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Ikon Emoji</label>
+                          <input
+                            type="text"
+                            placeholder="🛠"
+                            value={formIcon}
+                            onChange={(e) => setFormIcon(e.target.value)}
+                            className="admin-input"
+                            style={{ maxWidth: "90px" }}
+                          />
+                          <div className="admin-chips-row">
+                            {["💻", "⚙️", "☁️", "📱", "🛠️", "⚡", "🔒", "Terminal"].map((ico) => (
+                              <button
+                                key={ico}
+                                type="button"
+                                className={`admin-chip-btn ${formIcon === ico ? "active" : ""}`}
+                                onClick={() => setFormIcon(ico)}
+                              >
+                                {ico}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Kategori Alat</label>
+                          <select
+                            className="admin-select"
+                            value={formStackCategory}
+                            onChange={(e) => setFormStackCategory(e.target.value as "Hardware & EDC" | "Software & Otomasi" | "Infrastruktur & Cloud")}
+                          >
+                            <option value="Software & Otomasi">Software & Otomasi</option>
+                            <option value="Hardware & EDC">Hardware & EDC</option>
+                            <option value="Infrastruktur & Cloud">Infrastruktur & Cloud</option>
+                          </select>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Status Penggunaan</label>
+                          <select
+                            className="admin-select"
+                            value={formStackStatus}
+                            onChange={(e) => setFormStackStatus(e.target.value as "active" | "evaluating" | "retired")}
+                          >
+                            <option value="active">✓ Aktif Dipakai (Active)</option>
+                            <option value="evaluating">⏳ Sedang Dievaluasi (Evaluating)</option>
+                            <option value="retired">📦 Pensiun / Arsip (Retired)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">💻 2. Komputasi & Apresiasi</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Platform Komputasi</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Web, macOS, Linux"
+                            value={formPlatforms}
+                            onChange={(e) => setFormPlatforms(e.target.value)}
+                            className="admin-input"
+                          />
+                          <div className="admin-chips-row">
+                            {["macOS", "Linux", "Windows", "Web", "iOS", "Android"].map((pl) => (
+                              <button
+                                key={pl}
+                                type="button"
+                                className="admin-chip-btn"
+                                onClick={() => {
+                                  const current = formPlatforms ? formPlatforms.split(",").map((s) => s.trim()) : [];
+                                  if (!current.includes(pl)) {
+                                    setFormPlatforms(current.concat(pl).join(", "));
+                                  }
+                                }}
+                              >
+                                +{pl}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Apresiasi (Likes ♥)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={formLikes}
+                            onChange={(e) => setFormLikes(parseInt(e.target.value) || 1)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Tautan Resmi / Unduh</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formHref}
+                          onChange={(e) => setFormHref(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">✍️ 3. Fungsi & Ulasan Pengalaman</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Fungsi Utama Alat</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Fungsi dan kegunaan alat ini..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Ulasan Pengalaman / Alasan Pemilihan</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Kesan dan manfaat penggunaan alat..."
+                          value={formReview}
+                          onChange={(e) => setFormReview(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 5. KESEHARIAN (CATATAN INDERA) */}
+                {targetType === "keseharian" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">☕ 1. Kategori Indera & Format Media</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Kategori Indera / Rasa</label>
+                        <div className="admin-chips-row" style={{ marginBottom: "0.5rem" }}>
+                          {[
+                            { id: "Melihat" as const, label: "👁️ Watched (Melihat)" },
+                            { id: "Membaca" as const, label: "📖 Read (Membaca)" },
+                            { id: "Mendengar" as const, label: "🎧 Listened (Mendengar)" },
+                            { id: "Mengecap" as const, label: "☕ Tasted (Mengecap)" },
+                          ].map((sense) => (
+                            <button
+                              key={sense.id}
+                              type="button"
+                              className={`admin-chip-btn ${formDailyCategory === sense.id ? "active" : ""}`}
+                              onClick={() => {
+                                setFormDailyCategory(sense.id);
+                                if (sense.id === "Melihat") setFormItemType("Film");
+                                else if (sense.id === "Membaca") setFormItemType("Buku");
+                                else if (sense.id === "Mendengar") setFormItemType("Album Musik");
+                                else if (sense.id === "Mengecap") setFormItemType("Seduh Manual V60");
+                              }}
+                            >
+                              {sense.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Jenis / Format Media</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Film Bioskop, Buku, Album Musik"
+                            value={formItemType}
+                            onChange={(e) => setFormItemType(e.target.value)}
+                            className="admin-input"
+                          />
+                          <div className="admin-chips-row">
+                            {(formDailyCategory === "Melihat"
+                              ? ["Film", "Video Podcast", "Dokumenter", "Seri TV", "Anime"]
+                              : formDailyCategory === "Membaca"
+                              ? ["Buku", "Esai", "Artikel", "Jurnal", "Newsletter"]
+                              : formDailyCategory === "Mendengar"
+                              ? ["Album Musik", "EP", "Podcast", "Suara Alam", "Audiobook"]
+                              : ["Seduh Manual V60", "Espresso", "Cold Brew", "Kuliner", "Rasa Tradisional"]
+                            ).map((fmt) => (
+                              <button
+                                key={fmt}
+                                type="button"
+                                className={`admin-chip-btn ${formItemType === fmt ? "active" : ""}`}
+                                onClick={() => setFormItemType(fmt)}
+                              >
+                                {fmt}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Kreator / Pembuat / Sutradara</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Christopher Nolan, James Clear"
+                            value={formCreator}
+                            onChange={(e) => setFormCreator(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Judul Karya / Objek Catatan</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Oppenheimer / Atomic Habits / Kopi V60 Flores"
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                          className="admin-input"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">⭐ 2. Rating & Penilaian Personal</div>
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">
+                            Rating Pengalaman ({formRating.toFixed(1)} / 5.0 ★)
+                          </label>
+                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="1"
+                              max="5"
+                              placeholder="4.8"
+                              value={formRating}
+                              onChange={(e) => setFormRating(parseFloat(e.target.value) || 0)}
+                              className="admin-input"
+                              style={{ maxWidth: "100px" }}
+                            />
+                            <span className="admin-table-rating" style={{ fontSize: "0.85rem", padding: "0.3rem 0.6rem" }}>
+                              ★ {formRating.toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="admin-chips-row">
+                            {[3.5, 4.0, 4.5, 4.8, 5.0].map((score) => (
+                              <button
+                                key={score}
+                                type="button"
+                                className={`admin-chip-btn ${formRating === score ? "active" : ""}`}
+                                onClick={() => setFormRating(score)}
+                              >
+                                ★ {score.toFixed(1)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Tanggal / Waktu Penikmatan</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Hari Ini atau 2026-09-23"
+                            value={formDate}
+                            onChange={(e) => setFormDate(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Subjudul / Sudut Pandang Catatan</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Refleksi Sinematografi & Sains"
+                          value={formSubtitle}
+                          onChange={(e) => setFormSubtitle(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">💭 3. Refleksi & Pemikiran</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Ringkasan Pengamatan & Kesan Utama</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan pengalaman indera..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Catatan Pemikiran & Refleksi Mendalam</label>
+                        <textarea
+                          rows={3}
+                          placeholder="Gagasan, renungan, dan refleksi pemikiran..."
+                          value={formThoughts}
+                          onChange={(e) => setFormThoughts(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Tag / Kata Kunci (Pisahkan koma)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Film, Nolan, Refleksi, Sains"
+                          value={formTags}
+                          onChange={(e) => setFormTags(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">🔗 4. Tautan Referensi Sumber</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Tautan Referensi Eksternal (IMDb, Goodreads, Spotify, dsb.)</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={formHref}
+                          onChange={(e) => setFormHref(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* 6. NEWS (WARTA PLATFORM) */}
+                {targetType === "news" && (
+                  <>
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">📰 1. Identitas Warta</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Judul Warta / Berita</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Pemutakhiran Modul TEN v1.2"
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                          className="admin-input"
+                          required
+                        />
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Kategori Warta</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Warta Platform"
+                            value={formCategory}
+                            onChange={(e) => setFormCategory(e.target.value)}
+                            className="admin-input"
+                          />
+                          <div className="admin-chips-row">
+                            {["Warta Platform", "Catatan Rilis", "Pengumuman", "Dokumentasi"].map((cat) => (
+                              <button
+                                key={cat}
+                                type="button"
+                                className={`admin-chip-btn ${formCategory === cat ? "active" : ""}`}
+                                onClick={() => setFormCategory(cat)}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Penulis / Redaksi</label>
+                          <input
+                            type="text"
+                            placeholder="TEN Editorial"
+                            value={formAuthor}
+                            onChange={(e) => setFormAuthor(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="admin-form-grid">
+                        <div className="admin-form-group">
+                          <label className="admin-label">Slug / ID URL</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. update-v1-2"
+                            value={formSlug}
+                            onChange={(e) => setFormSlug(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                        <div className="admin-form-group">
+                          <label className="admin-label">Tanggal Rilis</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 2026-10-02"
+                            value={formDate}
+                            onChange={(e) => setFormDate(e.target.value)}
+                            className="admin-input"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="admin-form-section">
+                      <div className="admin-form-section-title">✍️ 2. Isi & Narasi Warta</div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">Ringkasan Warta (Cuplikan Depan)</label>
+                        <textarea
+                          rows={2}
+                          placeholder="Ringkasan warta untuk kartu depan..."
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+
+                      <div className="admin-form-group">
+                        <label className="admin-label">Isi Lengkap Warta</label>
+                        <textarea
+                          rows={4}
+                          placeholder="Konten narasi lengkap warta..."
+                          value={formNewsContent}
+                          onChange={(e) => setFormNewsContent(e.target.value)}
+                          className="admin-textarea"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* MEDIA & IMAGE COVER SECTION */}
+                <div className="admin-form-section">
+                  <div className="admin-form-section-title">🖼️ Media & Sampul Gambar</div>
+                  <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                    <label className="admin-label">
+                      URL Gambar Sampul / Poster
+                      {targetType === "keseharian" && " (Disarankan foto berorientasi potret 3:4 untuk poster)"}
+                      {targetType === "projects" && " (Disarankan format lanskap 16:9)"}
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/..."
+                      value={formImageUrl}
+                      onChange={(e) => setFormImageUrl(e.target.value)}
+                      className="admin-input"
+                    />
+                    {formImageUrl && (
+                      <div className="admin-img-preview-box">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={formImageUrl}
+                          alt="Preview"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
+                          }}
+                        />
+                        <div className="admin-img-preview-info">
+                          <strong>Pratinjau Gambar Media:</strong>
+                          <div>Gambar akan otomatis dimuat dan disesuaikan secara proporsional pada platform.</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sticky Action Buttons */}
+                <div className="admin-modal-actions">
+                  <button
+                    type="button"
+                    className="admin-btn-outline"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Batal
+                  </button>
+                  <button type="submit" className="admin-btn-primary">
+                    {modalMode === "create" ? "Simpan & Publikasikan" : "Simpan Perubahan"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Floating Action Button on Mobile */}
       {activeTab === "content" && (
         <button
           type="button"
           className="admin-mobile-fab"
-          onClick={() => handleOpenCreateModal(contentCategory === "all" ? "projects" : contentCategory)}
+          onClick={() => {
+            if (majorCategory === "pengalaman") handleOpenCreateModal("work");
+            else if (majorCategory === "riset-karya") handleOpenCreateModal(risetKaryaSubFilter === "publications" ? "publications" : "projects");
+            else if (majorCategory === "alat") handleOpenCreateModal("alat");
+            else if (majorCategory === "keseharian") handleOpenCreateModal("keseharian");
+            else if (majorCategory === "warta") handleOpenCreateModal("news");
+            else handleOpenCreateModal("projects");
+          }}
           title="Tambah Konten Baru"
           aria-label="Tambah Konten Baru"
         >

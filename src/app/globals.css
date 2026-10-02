@@ -2603,6 +2603,110 @@ body {
   flex-shrink: 0;
 }
 
+.admin-modal-drag-handle {
+  display: none;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-subtle);
+  margin: 0.5rem auto 0.25rem;
+}
+
+.admin-form-section {
+  background: var(--bg-soft);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-form-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.admin-chips-row {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.admin-chip-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.admin-chip-btn:hover {
+  background: var(--bg-soft);
+  border-color: var(--mono-gray-mid);
+  color: var(--text-main);
+}
+
+.admin-chip-btn.active {
+  background: var(--mono-black);
+  color: #ffffff;
+  border-color: var(--mono-black);
+}
+
+.admin-type-pill-switcher {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.35rem;
+  background: var(--bg-soft);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.admin-type-pill-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-type-pill-btn.active {
+  background: #ffffff;
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes slideUpMobile {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Mobile Adjustments for Admin (Native Android-Style App Experience) */
 @media (max-width: 768px) {
   .admin-portal-container {
@@ -2781,6 +2885,85 @@ body {
 
   .admin-search-input-wrap {
     width: 100%;
+  }
+
+  /* Mobile Bottom Sheet Modal */
+  .admin-modal-drag-handle {
+    display: block;
+  }
+
+  .admin-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-modal-box.admin-modal-lg {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    width: 100%;
+    max-height: 92vh;
+    padding: 0;
+    animation: slideUpMobile 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .admin-modal-header {
+    padding: 0.75rem 1.15rem;
+    margin-bottom: 0;
+  }
+
+  .admin-modal-scroll-body {
+    padding: 1rem 1.15rem;
+  }
+
+  .admin-modal-actions {
+    padding: 0.75rem 1.15rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    margin-top: 0;
+    background: #ffffff;
+    border-top: 1px solid var(--border-subtle);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  /* Mobile Table to Card Transformation */
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table tr {
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+    padding: 0.85rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .admin-table td {
+    padding: 0.25rem 0;
+    border-bottom: none;
+  }
+
+  .admin-table-actions {
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border-subtle);
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .admin-btn-sm {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.74rem;
   }
 }
 

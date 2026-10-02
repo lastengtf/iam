@@ -175,6 +175,7 @@ export default function KeseharianPage() {
                     alt={item.title}
                     className="sensory-gallery-poster-img"
                     loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="sensory-gallery-placeholder">
@@ -233,6 +234,7 @@ export default function KeseharianPage() {
                     alt={item.title}
                     className="card-thumb-img"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="sensory-badges-row">
                     <span
@@ -323,6 +325,7 @@ export default function KeseharianPage() {
                     src={item.imageUrl}
                     alt={item.title}
                     loading="lazy"
+                    decoding="async"
                   />
                   <span
                     className={`sensory-badge-overlay ${item.category.toLowerCase()}`}

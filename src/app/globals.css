@@ -461,8 +461,8 @@ body {
 .view-switcher-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.28rem 0.6rem;
+  justify-content: center;
+  padding: 0.35rem 0.5rem;
   font-size: 0.72rem;
   border-radius: var(--radius-full);
   border: none;
@@ -1385,8 +1385,13 @@ body {
     max-width: 100%;
   }
 
+  .view-switcher-wrapper {
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
   .view-switcher-group {
-    align-self: flex-start;
+    align-self: flex-end;
   }
 
   .card-item-list-link {
@@ -2666,6 +2671,8 @@ body {
   margin-bottom: 1.15rem;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
 }
 
 .karya-tab-nav::-webkit-scrollbar {
@@ -3100,6 +3107,11 @@ body {
   box-shadow: var(--shadow-card);
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: 190px;
+  contain: layout paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .sensory-gallery-card:hover {
@@ -3114,6 +3126,8 @@ body {
   aspect-ratio: 2 / 3;
   overflow: hidden;
   background: #0f172a;
+  contain: paint;
+  transform: translateZ(0);
 }
 
 .sensory-gallery-poster-img {
@@ -3138,7 +3152,7 @@ body {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 }
 
-/* Rating terlihat langsung tanpa perlu hover */
+/* Rating terlihat langsung tanpa perlu hover (Opaque slate untuk performa scroll 120fps) */
 .sensory-gallery-rating-badge {
   position: absolute;
   bottom: 0.45rem;
@@ -3146,16 +3160,15 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(6px);
+  background: #0f172af0;
   color: #f8fafc;
   padding: 0.16rem 0.42rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   font-size: 0.72rem;
   font-weight: 800;
   font-family: var(--font-mono);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
   z-index: 2;
   pointer-events: none;
 }
@@ -3165,17 +3178,16 @@ body {
   position: absolute;
   top: 0.45rem;
   left: 0.45rem;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(6px);
+  background: #0f172af0;
   color: #f8fafc;
   padding: 0.14rem 0.42rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
   z-index: 2;
   pointer-events: none;
 }
@@ -3283,14 +3295,19 @@ body {
 }
 
 .sensory-type-badge-top {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(4px);
+  background: #0f172af0;
   color: #ffffff;
   font-size: 0.68rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sensory-card-item {
+  content-visibility: auto;
+  contain-intrinsic-size: 260px;
+  transform: translateZ(0);
 }
 
 .sensory-badges-row {

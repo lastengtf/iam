@@ -93,7 +93,45 @@ export interface UpdateFeedItem {
   imageUrl: string;
 }
 
-export const PROFILE_DATA = {
+export interface BioFocusItem {
+  id: string;
+  title: string;
+  desc: string;
+  badge?: string;
+  icon?: string;
+}
+
+export interface BioPrincipleItem {
+  id: string;
+  title: string;
+  desc: string;
+  icon?: string;
+}
+
+export interface ProfileDataType {
+  name: string;
+  fullName: string;
+  tagline: string;
+  bio: string;
+  avatarUrl: string;
+  status: string;
+  location: string;
+  aboutIntro: string;
+  aboutParagraphs: string[];
+  currentFocus: BioFocusItem[];
+  principles: BioPrincipleItem[];
+  stats: { label: string; value: string }[];
+  contact: {
+    email: string;
+    website: string;
+    ssoPortal: string;
+    docsUrl: string;
+    location: string;
+  };
+  socialLinks: { label: string; url: string; icon: string }[];
+}
+
+export const PROFILE_DATA: ProfileDataType = {
   name: "TEN",
   fullName: "Teguh Eko N.",
   tagline: "Eksplorasi Karya, Inisiatif Mandiri, Catatan & Dokumentasi",
@@ -101,8 +139,56 @@ export const PROFILE_DATA = {
   avatarUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=260&auto=format&fit=crop&q=80",
   status: "Terbuka untuk Kolaborasi & Diskusi",
   location: "Indonesia",
+  aboutIntro: "Selamat datang di ruang personal saya. Saya adalah inisiator karya, perekayasa alur sistem, dan pencatat perjalanan yang menaruh minat mendalam pada desain minimalis, teknologi terdistribusi, serta kemandirian berkarya.",
+  aboutParagraphs: [
+    "Situs ini berfungsi sebagai pusat pengarsipan digital mandiri (self-hosted digital archive) — merangkum apa yang saya kerjakan, riset yang saya susun, perangkat yang saya gunakan sehari-hari, serta apa yang saya nikmati (tontonan, bacaan, dengaran, dan seduhan rasa).",
+    "Saya meyakini bahwa teknologi seharusnya membebaskan dan memperjernih pikiran, bukan membebani dengan distraksi. Oleh karena itu, seluruh infrastruktur di ruang ini dibangun dengan prinsip minimalis, modular, efisiensi edge global, dan estetika yang tenang.",
+  ],
+  currentFocus: [
+    {
+      id: "focus-1",
+      title: "Rekayasa Sistem Edge & Serverless",
+      desc: "Mengeksplorasi arsitektur cloud terdistribusi dengan Cloudflare Workers, Next.js static, dan sistem autentikasi mandiri terpusat.",
+      badge: "Teknologi",
+      icon: "⚡",
+    },
+    {
+      id: "focus-2",
+      title: "Dokumentasi Terbuka & Riset Mandiri",
+      desc: "Menyusun metodologi kerja berkelanjutan, panduan teknis modular, dan tulisan telaah yang dapat diakses publik.",
+      badge: "Riset",
+      icon: "📚",
+    },
+    {
+      id: "focus-3",
+      title: "Kurasi Pengalaman & Gaya Hidup Hening",
+      desc: "Mendokumentasikan refleksi harian seputar sinema berbobot, literatur human-centered, musik ambient, dan ritual seduh manual.",
+      badge: "Harian",
+      icon: "☕",
+    },
+  ],
+  principles: [
+    {
+      id: "pr-1",
+      title: "Minimalisme & Kejelasan",
+      desc: "Menghilangkan ornamen berlebih agar esensi informasi, ide, dan fungsionalitas berbicara dengan lugas.",
+      icon: "🎯",
+    },
+    {
+      id: "pr-2",
+      title: "Kemandirian & Keterbukaan",
+      desc: "Membangun sistem yang dapat dikelola secara otonom serta berbagi pengetahuan secara transparan.",
+      icon: "🔓",
+    },
+    {
+      id: "pr-3",
+      title: "Refleksi & Ketelitian",
+      desc: "Setiap karya, baris kode, dan tulisan dikerjakan dengan pertimbangan mendalam demi kebermanfaatan jangka panjang.",
+      icon: "🌱",
+    },
+  ],
   stats: [
-    { label: "visits", value: "1.2k+" },
+    { label: "visits", value: "124" },
     { label: "projects", value: "4" },
     { label: "writings", value: "3" },
     { label: "experiences", value: "3" },

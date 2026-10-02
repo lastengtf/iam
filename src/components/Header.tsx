@@ -1,12 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useProfileData } from "@/data/contentStore";
+import {
+  useProfileData,
+  useProjectsData,
+  usePublicationsData,
+  useWorkData,
+  useNewsData,
+} from "@/data/contentStore";
+import { useVisitorLogs, recordVisit } from "@/data/visitStore";
 
 const NAV_ITEMS = [
-  { label: "Beranda", shortLabel: "Beranda", href: "/" },
+  { label: "Bio", shortLabel: "Bio", href: "/" },
   { label: "Pengalaman", shortLabel: "Pengalaman", href: "/pengalaman" },
   { label: "Riset & Karya", shortLabel: "Karya", href: "/karya" },
   { label: "Alat", shortLabel: "Alat", href: "/alat" },
@@ -16,6 +23,12 @@ const NAV_ITEMS = [
 export default function Header() {
   const pathname = usePathname();
   const { profile } = useProfileData();
+  const { projects } = useProjectsData();
+  const { publications } = usePublicationsData();
+  const { work } = useWorkData();
+  const { news } = useNewsData();
+  const { totalVisits } = useVisitorLogs();
+
   const cleanPath = pathname.replace(/\/$/, "");
   const isDetailPage =
     cleanPath.includes("/details") ||
@@ -28,9 +41,29 @@ export default function Header() {
     cleanPath === "/login" ||
     cleanPath.startsWith("/login/");
 
+  // Record real visits for non-admin/login pages
+  useEffect(() => {
+    if (!pathname.startsWith("/admin") && !pathname.startsWith("/login")) {
+      recordVisit(pathname);
+    }
+  }, [pathname]);
+
   if (isDetailPage) {
     return null;
   }
+
+  // Format real-time metrics
+  const formattedVisits =
+    totalVisits >= 1000
+      ? `${(totalVisits / 1000).toFixed(1)}k+`
+      : String(totalVisits);
+
+  const realStats = [
+    { label: "visits", value: formattedVisits },
+    { label: "projects", value: String(projects.length) },
+    { label: "writings", value: String(publications.length + news.length) },
+    { label: "experiences", value: String(work.length) },
+  ];
 
   return (
     <header className="profile-header-wrap">
@@ -122,9 +155,9 @@ export default function Header() {
         </a>
       </div>
 
-      {/* Statistik Minimalis di Atas Navigasi */}
+      {/* Statistik Minimalis di Atas Navigasi - Otomatis Dari Data Real */}
       <div className="stats-bar">
-        {profile.stats.map((stat: { label: string; value: string }, idx: number) => (
+        {realStats.map((stat, idx) => (
           <React.Fragment key={stat.label}>
             {idx > 0 && <span className="stat-sep">•</span>}
             <div className="stat-pill">

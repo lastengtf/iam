@@ -72,22 +72,22 @@ export default function KeseharianPage() {
     <div style={{ paddingBottom: "2.5rem" }}>
       <div className="section-header">
         <div>
-          <h2 className="section-title">Catatan Keseharian & Indera</h2>
+          <h2 className="section-title">Keseharian: Watched, Read, Listened, & Tasted</h2>
           <div className="section-subtitle">
-            Daftar kurasi tontonan, bacaan, dengaran, dan seduhan harian
+            Apa yang ditonton, dibaca, didengar, dan dikecap beserta rating &amp; reviewku
           </div>
         </div>
       </div>
 
-      {/* Filter Kategori: Bahasa Inggris Sepenuhnya dengan Icon Saja */}
+      {/* Filter Kategori: Watched, Read, Listened, Tasted */}
       <div className="karya-tab-nav">
         <button
           type="button"
           className={`karya-tab-btn ${selectedSense === "all" ? "active" : ""}`}
           onClick={() => handleSenseChange("all")}
         >
-          <span className="tab-label-full">All ({dailyLogs.length})</span>
-          <span className="tab-label-short">All</span>
+          <span className="tab-label-full">Semua ({dailyLogs.length})</span>
+          <span className="tab-label-short">Semua</span>
         </button>
         <button
           type="button"
@@ -127,14 +127,14 @@ export default function KeseharianPage() {
         onViewModeChange={setViewMode}
         placeholder={
           selectedSense === "Melihat"
-            ? "Search watched films, series, podcasts..."
+            ? "Cari apa yang ditonton..."
             : selectedSense === "Membaca"
-            ? "Search books, papers, authors..."
+            ? "Cari apa yang dibaca..."
             : selectedSense === "Mendengar"
-            ? "Search albums, music, audio podcasts..."
+            ? "Cari apa yang didengar..."
             : selectedSense === "Mengecap"
-            ? "Search coffee V60, artisan tea, origins..."
-            : "Search watched, read, listened, tasted..."
+            ? "Cari apa yang dikecap / seduhan..."
+            : "Cari watched, read, listened, tasted..."
         }
         totalFiltered={filteredLogs.length}
       />
@@ -165,7 +165,7 @@ export default function KeseharianPage() {
               href={`/keseharian/details?id=${item.id}`}
               key={item.id}
               className="sensory-gallery-card"
-              title={`View: ${item.title}`}
+              title={`Buka detail & reviewku: ${item.title}`}
             >
               <div className="sensory-gallery-poster-wrap">
                 {item.imageUrl ? (
@@ -191,7 +191,7 @@ export default function KeseharianPage() {
                   </span>
                 </div>
 
-                {/* Overlay hover seperti kategori lainnya (tipe, judul & kreator muncul saat di-hover) */}
+                {/* Overlay hover */}
                 <div className="card-gallery-overlay sensory-hover-overlay">
                   <div className="sensory-hover-content">
                     {item.itemType && (
@@ -220,7 +220,7 @@ export default function KeseharianPage() {
               key={item.id}
               className="sensory-card-item"
               style={{ textDecoration: "none", color: "inherit" }}
-              title={`Baca detail catatan: ${item.title}`}
+              title={`Baca reviewku: ${item.title}`}
             >
               {item.imageUrl && (
                 <div className="card-thumb-wrap">
@@ -275,20 +275,11 @@ export default function KeseharianPage() {
                 {item.subtitle && (
                   <div className="sensory-subtitle-text">{item.subtitle}</div>
                 )}
-                <p className="card-desc-text">{item.summary}</p>
 
-                {/* Catatan Rasa / Intisari Refleksi */}
+                {/* Reviewku (Ulasan Personal Sederhana) */}
                 <div className="sensory-thought-box">
-                  <span className="sensory-thought-label">
-                    {item.category === "Melihat"
-                      ? "Watched Reflection:"
-                      : item.category === "Membaca"
-                      ? "Reading Notes:"
-                      : item.category === "Mendengar"
-                      ? "Listening Resonance:"
-                      : "Tasting Notes:"}
-                  </span>
-                  <p className="sensory-thought-text">&ldquo;{item.thoughts}&rdquo;</p>
+                  <span className="sensory-thought-label">Reviewku:</span>
+                  <p className="sensory-thought-text">&ldquo;{item.thoughts || item.summary}&rdquo;</p>
                 </div>
 
                 <div className="tag-pills">
@@ -360,9 +351,9 @@ export default function KeseharianPage() {
                 {item.subtitle && (
                   <div className="sensory-subtitle-text">{item.subtitle}</div>
                 )}
-                <p className="card-desc-text">{item.summary}</p>
-                <div className="sensory-thought-text-list">
-                  <strong>Reflection:</strong> &ldquo;{item.thoughts}&rdquo;
+                <div className="sensory-thought-box" style={{ marginTop: "0.5rem" }}>
+                  <span className="sensory-thought-label">Reviewku:</span>
+                  <p className="sensory-thought-text">&ldquo;{item.thoughts || item.summary}&rdquo;</p>
                 </div>
                 <div className="tag-pills">
                   {item.tags.map((tag) => (

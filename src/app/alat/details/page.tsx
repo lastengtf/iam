@@ -107,14 +107,14 @@ function AlatDetailInner() {
           </button>
         </div>
 
-        {/* Ulasan Utama */}
+        {/* Ulasan Utama (Reviewku) */}
         <div style={{ marginTop: "1rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "1.25rem" }}>
-          <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1rem", fontWeight: 700 }}>
-            Ulasan Pengalaman Personal
+          <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1.05rem", fontWeight: 700 }}>
+            Reviewku &amp; Pengalaman Nyata
           </h3>
-          <div className="stack-review-box" style={{ padding: "1rem 1.25rem", margin: "0.75rem 0 1.5rem" }}>
-            <span className="stack-review-tag" style={{ fontSize: "0.72rem" }}>Catatan Kejujuran Pemakaian:</span>
-            <p className="stack-review-text" style={{ fontSize: "0.95rem", lineHeight: 1.6 }}>
+          <div className="stack-review-box" style={{ padding: "1.1rem 1.35rem", margin: "0.75rem 0 1.5rem" }}>
+            <span className="stack-review-tag" style={{ fontSize: "0.75rem", textTransform: "uppercase" }}>Reviewku:</span>
+            <p className="stack-review-text" style={{ fontSize: "0.98rem", lineHeight: 1.65 }}>
               &ldquo;{selectedItem.review}&rdquo;
             </p>
           </div>

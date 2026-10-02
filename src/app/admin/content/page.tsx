@@ -1441,9 +1441,9 @@ function ContentManagerInner() {
                   </div>
 
                   <div className="admin-form-section">
-                    <div className="admin-form-section-title">3. Catatan Ulasan & Tautan</div>
+                    <div className="admin-form-section-title">3. Reviewku &amp; Tautan</div>
                     <div className="admin-form-group">
-                      <label className="admin-label">Alasan Menggunakan Alat Ini</label>
+                      <label className="admin-label">Reviewku (Ulasan Pemakaian Nyata) *</label>
                       <textarea
                         rows={2}
                         placeholder="Kesan dan alasan mengapa alat ini efektif..."
@@ -1573,7 +1573,7 @@ function ContentManagerInner() {
                   </div>
 
                   <div className="admin-form-section">
-                    <div className="admin-form-section-title">3. Ringkasan & Refleksi Rasa</div>
+                    <div className="admin-form-section-title">3. Sinopsis &amp; Reviewku</div>
                     <div className="admin-form-group">
                       <label className="admin-label">Sinopsis / Pengantar Singkat</label>
                       <textarea
@@ -1585,10 +1585,10 @@ function ContentManagerInner() {
                       />
                     </div>
                     <div className="admin-form-group">
-                      <label className="admin-label">Catatan Refleksi Personal / Ulasan Rasa</label>
+                      <label className="admin-label">Reviewku (Ulasan &amp; Catatan Personal) *</label>
                       <textarea
                         rows={3}
-                        placeholder="Bagikan kesan, alasan mengapa karya/seduhan ini berkesan bagi Anda..."
+                        placeholder="Bagikan ulasan personal, kesan mendalam, atau rating alasan karya/seduhan ini..."
                         value={formThoughts}
                         onChange={(e) => setFormThoughts(e.target.value)}
                         className="admin-textarea"

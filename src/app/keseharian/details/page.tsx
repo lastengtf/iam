@@ -130,19 +130,13 @@ function KeseharianDetailInner() {
             {selectedLog.summary}
           </p>
 
-          <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1rem", fontWeight: 700 }}>
-            {selectedLog.category === "Melihat"
-              ? "Refleksi & Catatan Menonton"
-              : selectedLog.category === "Membaca"
-              ? "Refleksi Pemikiran & Relevansi"
-              : selectedLog.category === "Mendengar"
-              ? "Refleksi Audio & Resonansi Fokus"
-              : "Catatan Rasa & Pengalaman Seduh"}
+          <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1.05rem", fontWeight: 700 }}>
+            Reviewku &amp; Catatan Personal
           </h3>
-          <div className="sensory-thought-box" style={{ padding: "1.1rem 1.35rem", margin: "0.75rem 0 1.5rem" }}>
-            <span className="sensory-thought-label" style={{ fontSize: "0.72rem" }}>Intisari Personal:</span>
-            <p className="sensory-thought-text" style={{ fontSize: "0.95rem", lineHeight: 1.65 }}>
-              &ldquo;{selectedLog.thoughts}&rdquo;
+          <div className="sensory-thought-box" style={{ padding: "1.15rem 1.35rem", margin: "0.75rem 0 1.5rem" }}>
+            <span className="sensory-thought-label" style={{ fontSize: "0.75rem", textTransform: "uppercase" }}>Reviewku:</span>
+            <p className="sensory-thought-text" style={{ fontSize: "0.98rem", lineHeight: 1.65 }}>
+              &ldquo;{selectedLog.thoughts || selectedLog.summary}&rdquo;
             </p>
           </div>
 

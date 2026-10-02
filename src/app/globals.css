@@ -5324,3 +5324,434 @@ body.in-master-detail .footer-contact {
     font-size: 0.7rem;
   }
 }
+
+/* ============================================================
+   ESTETIKA HALAMAN BIO (BERANDA BARU)
+   ============================================================ */
+.bio-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bio-hero-header {
+  margin-bottom: 1.5rem;
+}
+
+.bio-intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  background: var(--bg-hover, #f1f5f9);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.85rem;
+}
+
+.bio-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.bio-hero-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.75rem;
+  line-height: 1.28;
+}
+
+.bio-hero-lead {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--text-main, #334155);
+  font-weight: 450;
+  border-left: 3px solid var(--border-subtle, #cbd5e1);
+  padding-left: 1rem;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.bio-narrative-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.bio-narrative-p {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--text-dim, #475569);
+  margin: 0;
+}
+
+/* Grid Fokus Saat Ini */
+.bio-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bio-focus-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 10px);
+  padding: 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.bio-focus-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--mono-gray-light, #94a3b8);
+  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.05);
+}
+
+.bio-focus-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.bio-focus-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.bio-focus-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg-hover, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 9999px;
+  color: var(--mono-gray-mid, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.bio-focus-title {
+  font-size: 0.96rem;
+  font-weight: 650;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.45rem;
+  line-height: 1.35;
+}
+
+.bio-focus-desc {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--text-dim, #64748b);
+  margin: 0;
+}
+
+/* Grid Prinsip & Nilai */
+.bio-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bio-principle-card {
+  display: flex;
+  gap: 0.85rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 10px);
+  padding: 1.15rem;
+  align-items: flex-start;
+}
+
+.bio-principle-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.bio-principle-title {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.35rem;
+}
+
+.bio-principle-desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-dim, #64748b);
+  margin: 0;
+}
+
+/* Nav Hub Cards (Jelajahi Pilar Lainnya) */
+.bio-nav-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.bio-hub-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 10px);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.bio-hub-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--mono-black, #0f172a);
+  background: var(--bg-hover, #f8fafc);
+}
+
+.bio-hub-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.bio-hub-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bio-hub-title {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.15rem;
+}
+
+.bio-hub-desc {
+  font-size: 0.77rem;
+  color: var(--text-dim, #64748b);
+  line-height: 1.35;
+}
+
+.bio-hub-arrow {
+  font-size: 1rem;
+  color: var(--mono-gray-light, #94a3b8);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.bio-hub-card:hover .bio-hub-arrow {
+  color: var(--mono-black, #0f172a);
+  transform: translateX(3px);
+}
+
+/* Kolaborasi Card */
+.bio-collab-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.7) 100%);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.bio-collab-left {
+  flex: 1;
+  min-width: 260px;
+}
+
+.bio-collab-status-badge {
+  display: inline-block;
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #065f46;
+  background: #d1fae5;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  margin-bottom: 0.65rem;
+}
+
+.bio-collab-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.4rem;
+}
+
+.bio-collab-desc {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text-main, #475569);
+  margin: 0;
+}
+
+.bio-collab-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+/* ============================================================
+   ESTETIKA HALAMAN ADMIN: LOG KUNJUNGAN
+   ============================================================ */
+.admin-visits-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-visits-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.admin-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 0.75rem 1rem;
+}
+
+.admin-filter-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.84rem;
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: 6px;
+  background: var(--bg-hover, #f8fafc);
+  color: var(--mono-black, #0f172a);
+}
+
+.admin-filter-select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.84rem;
+  border: 1px solid var(--border-subtle, #cbd5e1);
+  border-radius: 6px;
+  background: var(--bg-card, #ffffff);
+  color: var(--mono-black, #0f172a);
+}
+
+.admin-visits-table-wrap {
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  overflow-x: auto;
+}
+
+.admin-visits-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  text-align: left;
+}
+
+.admin-visits-table th {
+  background: var(--bg-hover, #f8fafc);
+  padding: 0.75rem 1rem;
+  font-weight: 650;
+  color: var(--mono-gray-mid, #475569);
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-visits-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+  color: var(--mono-black, #0f172a);
+  vertical-align: middle;
+}
+
+.admin-visits-table tr:hover td {
+  background: rgba(248, 250, 252, 0.7);
+}
+
+.admin-badge-device {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.admin-badge-browser {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.admin-path-pill {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.78rem;
+  background: var(--bg-hover, #f1f5f9);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: var(--mono-black, #0f172a);
+}
+
+.admin-bar-progress-wrap {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.35rem;
+}
+
+.admin-bar-progress-fill {
+  height: 100%;
+  background: #0f172a;
+  border-radius: 9999px;
+}
+
+@media (max-width: 768px) {
+  .bio-focus-grid {
+    grid-template-columns: 1fr;
+  }
+  .bio-principles-grid {
+    grid-template-columns: 1fr;
+  }
+  .bio-nav-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-visits-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bio-collab-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+

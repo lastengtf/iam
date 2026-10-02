@@ -98,9 +98,9 @@ export default function AlatPage() {
     <div style={{ paddingBottom: "2.5rem" }}>
       <div className="section-header">
         <div>
-          <h2 className="section-title">Alat & Instrumen Kerja</h2>
+          <h2 className="section-title">Alat &amp; Reviewku</h2>
           <div className="section-subtitle">
-            Perangkat, piranti lunak, dan instrumen komputasi
+            Katalog perangkat kerja dan ulasan pemakaian nyata (Reviewku)
           </div>
         </div>
       </div>
@@ -227,9 +227,9 @@ export default function AlatPage() {
 
                 <p className="stack-desc-text">{item.description}</p>
 
-                {/* Ulasan Personal (Micro-Review) */}
+                {/* Reviewku (Ulasan Personal Pemakaian Nyata) */}
                 <div className="stack-review-box">
-                  <span className="stack-review-tag">Ulasan Personal:</span>
+                  <span className="stack-review-tag">Reviewku:</span>
                   <p className="stack-review-text">&ldquo;{item.review}&rdquo;</p>
                 </div>
 
@@ -247,7 +247,7 @@ export default function AlatPage() {
                       className="stack-ext-link"
                       style={{ color: "var(--mono-black)", fontWeight: 700 }}
                     >
-                      Buka Ulasan ↗
+                      Buka Reviewku ↗
                     </Link>
                     {item.href && (
                       <a
@@ -285,7 +285,7 @@ export default function AlatPage() {
                     <h3 className="stack-title-text">{item.name}</h3>
                     <p className="stack-desc-text">{item.description}</p>
                     <div className="stack-review-text-list">
-                      <strong>Ulasan:</strong> &ldquo;{item.review}&rdquo;
+                      <strong>Reviewku:</strong> &ldquo;{item.review}&rdquo;
                     </div>
                   </div>
                 </div>

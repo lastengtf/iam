@@ -396,20 +396,29 @@ function ContentManagerInner() {
       }
     } else if (targetType === "keseharian") {
       const existing = dailyLogs.find((d) => d.id === editingId);
+      const defaultImg =
+        formSense === "Melihat"
+          ? "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80"
+          : formSense === "Membaca"
+          ? "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80"
+          : formSense === "Mendengar"
+          ? "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80"
+          : "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop&q=80";
+
       const payload: DailyLogItem = {
         ...existing,
         id: modalMode === "create" ? `daily-${Date.now()}` : (editingId as string),
-        title: formTitle,
+        title: formTitle.trim(),
         category: formSense,
-        itemType: formItemFormat || (formSense === "Melihat" ? "Film" : formSense === "Membaca" ? "Buku" : formSense === "Mendengar" ? "Musik" : "Kopi"),
+        itemType: formItemFormat || (formSense === "Melihat" ? "Film" : formSense === "Membaca" ? "Buku" : formSense === "Mendengar" ? "Album Musik" : "Seduh Manual"),
         creator: formCreator.trim() || undefined,
-        rating: Number(formRating) || 4.8,
-        date: formDate || "Hari Ini",
-        summary: formSummary || "Catatan pengamatan dan refleksi rasa.",
-        thoughts: formThoughts || formSummary || "Membangun konsistensi dan eksplorasi berkesinambungan.",
+        rating: Number(formRating) || 5.0,
+        date: formDate.trim() || "Hari Ini",
+        summary: formSummary.trim() || formThoughts.trim() || "Catatan pengamatan dan refleksi rasa.",
+        thoughts: formThoughts.trim() || formSummary.trim() || "Ulasan catatan personal.",
         tags: ["Keseharian", formSense],
-        imageUrl: formImageUrl || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
-        link: formHref || undefined,
+        imageUrl: formImageUrl.trim() || defaultImg,
+        link: formHref.trim() || undefined,
       };
 
       if (modalMode === "create") {
@@ -1086,10 +1095,16 @@ function ContentManagerInner() {
             <div className="admin-modal-header">
               <div>
                 <h3 className="admin-modal-title">
-                  {modalMode === "create" ? "Tambah Konten Baru" : `Sunting Konten: ${formTitle || "Item"}`}
+                  {modalMode === "create"
+                    ? targetType === "keseharian"
+                      ? "Tambah Catatan Keseharian"
+                      : "Tambah Konten Baru"
+                    : `Sunting Konten: ${formTitle || "Item"}`}
                 </h3>
                 <p className="admin-modal-desc">
-                  Isi informasi penting dengan alur bertahap yang teratur.
+                  {targetType === "keseharian"
+                    ? "Alur sederhana: 1. Isi review, rating & tanggal. 2. Isi objek yang direview & detailnya."
+                    : "Isi informasi penting dengan alur bertahap yang teratur."}
                 </p>
               </div>
               <button
@@ -1478,62 +1493,32 @@ function ContentManagerInner() {
                 </>
               )}
 
-              {/* E. FORM KESEHARIAN (SENSORY) */}
+              {/* E. FORM KESEHARIAN (Sederhana: 1. Review, Rating & Tanggal; 2. Objek yang Direview & Detailnya) */}
               {targetType === "keseharian" && (
                 <>
-                  <div className="admin-form-section">
-                    <div className="admin-form-section-title">2. Kategori Indera & Judul</div>
+                  {/* BAGIAN 1: REVIEW, RATING & TANGGAL */}
+                  <div className="admin-form-section" style={{ borderLeft: "3px solid var(--mono-black)" }}>
+                    <div className="admin-form-section-title">
+                      <span>✍️ 1. Review, Rating &amp; Tanggal</span>
+                    </div>
+
+                    {/* Review / Ulasan Personal */}
                     <div className="admin-form-group">
-                      <label className="admin-label">Pilih Jenis Indera *</label>
-                      <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
-                        {[
-                          { val: "Melihat" as const, label: "👁️ Watched", defaultFormat: "Film" },
-                          { val: "Membaca" as const, label: "📖 Read", defaultFormat: "Buku" },
-                          { val: "Mendengar" as const, label: "🎧 Listened", defaultFormat: "Album Musik" },
-                          { val: "Mengecap" as const, label: "☕ Tasted", defaultFormat: "Seduh Manual" },
-                        ].map((s) => (
-                          <button
-                            key={s.val}
-                            type="button"
-                            className={`admin-category-btn ${formSense === s.val ? "active" : ""}`}
-                            onClick={() => {
-                              setFormSense(s.val);
-                              setFormItemFormat(s.defaultFormat);
-                            }}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
+                      <label className="admin-label">Review / Ulasan Personal *</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Tuliskan ulasan personal, kesan mendalam, refleksi, atau alasan penilaian Anda..."
+                        value={formThoughts}
+                        onChange={(e) => setFormThoughts(e.target.value)}
+                        className="admin-textarea"
+                        required
+                      />
                     </div>
 
                     <div className="admin-form-grid">
+                      {/* Rating */}
                       <div className="admin-form-group">
-                        <label className="admin-label">Judul (Film, Buku, Album, atau Kopi) *</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Dune: Part Two"
-                          value={formTitle}
-                          onChange={(e) => setFormTitle(e.target.value)}
-                          className="admin-input"
-                          required
-                        />
-                      </div>
-                      <div className="admin-form-group">
-                        <label className="admin-label">Kreator / Penulis / Sutradara / Roastery</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Denis Villeneuve"
-                          value={formCreator}
-                          onChange={(e) => setFormCreator(e.target.value)}
-                          className="admin-input"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="admin-form-grid">
-                      <div className="admin-form-group">
-                        <label className="admin-label">Rating Personal TEN (Skala 1.0 - 5.0)</label>
+                        <label className="admin-label">Rating Personal (1.0 - 5.0)</label>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                           <input
                             type="number"
@@ -1543,15 +1528,17 @@ function ContentManagerInner() {
                             value={formRating}
                             onChange={(e) => setFormRating(parseFloat(e.target.value))}
                             className="admin-input"
-                            style={{ width: "90px" }}
+                            style={{ width: "85px", fontWeight: "700" }}
+                            required
                           />
-                          <div style={{ display: "flex", gap: "0.25rem" }}>
+                          <div style={{ display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
                             {[5.0, 4.8, 4.5, 4.0].map((star) => (
                               <button
                                 key={star}
                                 type="button"
-                                className="admin-btn-sm admin-btn-outline"
+                                className={`admin-btn-sm ${formRating === star ? "admin-btn-primary" : "admin-btn-outline"}`}
                                 onClick={() => setFormRating(star)}
+                                style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem" }}
                               >
                                 ★ {star}
                               </button>
@@ -1559,79 +1546,287 @@ function ContentManagerInner() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Tanggal */}
                       <div className="admin-form-group">
-                        <label className="admin-label">Tanggal Catatan</label>
-                        <input
-                          type="text"
-                          placeholder="Hari Ini"
-                          value={formDate}
-                          onChange={(e) => setFormDate(e.target.value)}
-                          className="admin-input"
-                        />
+                        <label className="admin-label">Tanggal Review / Catatan</label>
+                        <div style={{ display: "flex", gap: "0.4rem" }}>
+                          <input
+                            type="text"
+                            placeholder="e.g. Hari Ini atau 3 Okt 2026"
+                            value={formDate}
+                            onChange={(e) => setFormDate(e.target.value)}
+                            className="admin-input"
+                            required
+                          />
+                          <button
+                            type="button"
+                            className="admin-btn-sm admin-btn-outline"
+                            onClick={() => {
+                              const today = new Date();
+                              const d = today.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+                              setFormDate(d);
+                            }}
+                            title="Gunakan tanggal hari ini"
+                            style={{ whiteSpace: "nowrap", padding: "0 0.6rem" }}
+                          >
+                            Hari Ini
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="admin-form-section">
-                    <div className="admin-form-section-title">3. Sinopsis &amp; Reviewku</div>
+                  {/* BAGIAN 2: OBJEK YANG DIREVIEW & DETAILNYA */}
+                  <div className="admin-form-section" style={{ borderLeft: "3px solid #6366f1" }}>
+                    <div className="admin-form-section-title">
+                      <span>🎬 2. Objek yang Direview &amp; Detailnya</span>
+                    </div>
+
+                    {/* Pilihan: Watched / Read / Listened / Tasted */}
                     <div className="admin-form-group">
-                      <label className="admin-label">Sinopsis / Pengantar Singkat</label>
+                      <label className="admin-label">Apa yang Direview? (Pilih Aktivitas Indera) *</label>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.4rem", marginBottom: "0.5rem" }}>
+                        {[
+                          { val: "Melihat" as const, label: "👁️ Watched", desc: "Film, Serial, Video", defaultFormat: "Film" },
+                          { val: "Membaca" as const, label: "📖 Read", desc: "Buku, Artikel, Esai", defaultFormat: "Buku" },
+                          { val: "Mendengar" as const, label: "🎧 Listened", desc: "Album Musik, Podcast", defaultFormat: "Album Musik" },
+                          { val: "Mengecap" as const, label: "☕ Tasted", desc: "Kopi, Kuliner, Seduhan", defaultFormat: "Seduh Manual" },
+                        ].map((s) => (
+                          <button
+                            key={s.val}
+                            type="button"
+                            className={`admin-category-btn ${formSense === s.val ? "active" : ""}`}
+                            onClick={() => {
+                              setFormSense(s.val);
+                              setFormItemFormat(s.defaultFormat);
+                            }}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "flex-start",
+                              padding: "0.55rem 0.75rem",
+                              textAlign: "left",
+                              borderRadius: "6px"
+                            }}
+                          >
+                            <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{s.label}</span>
+                            <span style={{ fontSize: "0.68rem", opacity: 0.8 }}>{s.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Quick Format Pills */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
+                        <span style={{ fontSize: "0.72rem", color: "var(--text-dim)", fontWeight: 600 }}>Format:</span>
+                        {(formSense === "Melihat"
+                          ? ["Film", "Serial", "Dokumenter", "Video"]
+                          : formSense === "Membaca"
+                          ? ["Buku", "Esai", "Artikel", "Makalah"]
+                          : formSense === "Mendengar"
+                          ? ["Album Musik", "Lagu", "Podcast", "Live Session"]
+                          : ["Seduh Manual", "Espresso", "Kuliner", "Teh"]
+                        ).map((fmt) => (
+                          <button
+                            key={fmt}
+                            type="button"
+                            className={`admin-chip-btn ${formItemFormat === fmt ? "active" : ""}`}
+                            onClick={() => setFormItemFormat(fmt)}
+                          >
+                            {fmt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Judul & Kreator */}
+                    <div className="admin-form-grid">
+                      <div className="admin-form-group">
+                        <label className="admin-label">
+                          Judul {formSense === "Melihat" ? "Film / Tayangan" : formSense === "Membaca" ? "Buku / Bacaan" : formSense === "Mendengar" ? "Album / Musik" : "Kopi / Menu"} *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={
+                            formSense === "Melihat"
+                              ? "e.g. Dune: Part Two"
+                              : formSense === "Membaca"
+                              ? "e.g. Atomic Habits"
+                              : formSense === "Mendengar"
+                              ? "e.g. Random Access Memories"
+                              : "e.g. Ethiopia Guji Washed"
+                          }
+                          value={formTitle}
+                          onChange={(e) => setFormTitle(e.target.value)}
+                          className="admin-input"
+                          required
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-label">
+                          {formSense === "Melihat" ? "Sutradara / Studio" : formSense === "Membaca" ? "Penulis / Penerbit" : formSense === "Mendengar" ? "Musisi / Host" : "Roastery / Asal"} (Opsional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={
+                            formSense === "Melihat"
+                              ? "e.g. Denis Villeneuve"
+                              : formSense === "Membaca"
+                              ? "e.g. James Clear"
+                              : formSense === "Mendengar"
+                              ? "e.g. Daft Punk"
+                              : "e.g. Giyanti Coffee Roastery"
+                          }
+                          value={formCreator}
+                          onChange={(e) => setFormCreator(e.target.value)}
+                          className="admin-input"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Deskripsi */}
+                    <div className="admin-form-group">
+                      <label className="admin-label">Deskripsi / Sinopsis *</label>
                       <textarea
                         rows={2}
-                        placeholder="Sinopsis singkat karya atau profil seduhan..."
+                        placeholder="Sinopsis singkat karya atau deskripsi profil objek yang direview..."
                         value={formSummary}
                         onChange={(e) => setFormSummary(e.target.value)}
                         className="admin-textarea"
+                        required
                       />
                     </div>
-                    <div className="admin-form-group">
-                      <label className="admin-label">Reviewku (Ulasan &amp; Catatan Personal) *</label>
-                      <textarea
-                        rows={3}
-                        placeholder="Bagikan ulasan personal, kesan mendalam, atau rating alasan karya/seduhan ini..."
-                        value={formThoughts}
-                        onChange={(e) => setFormThoughts(e.target.value)}
-                        className="admin-textarea"
+
+                    {/* Gambar Sampul / Poster */}
+                    <div className="admin-form-group" style={{ marginBottom: "0.5rem" }}>
+                      <label className="admin-label">Gambar Sampul / Poster (URL)</label>
+                      <div style={{ display: "flex", gap: "0.4rem" }}>
+                        <input
+                          type="url"
+                          placeholder="https://images.unsplash.com/... atau tautan poster"
+                          value={formImageUrl}
+                          onChange={(e) => setFormImageUrl(e.target.value)}
+                          className="admin-input"
+                        />
+                        {formImageUrl && (
+                          <button
+                            type="button"
+                            className="admin-btn-sm admin-btn-outline"
+                            onClick={() => setFormImageUrl("")}
+                            title="Hapus tautan gambar"
+                            style={{ padding: "0 0.6rem" }}
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Quick Poster Templates / Presets jika kosong */}
+                      {!formImageUrl && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", flexWrap: "wrap", marginTop: "0.4rem" }}>
+                          <span style={{ fontSize: "0.7rem", color: "var(--text-dim)" }}>Contoh cepat:</span>
+                          {[
+                            {
+                              label: "Poster Film",
+                              url: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80",
+                            },
+                            {
+                              label: "Cover Buku",
+                              url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
+                            },
+                            {
+                              label: "Cover Musik",
+                              url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
+                            },
+                            {
+                              label: "Seduh Kopi",
+                              url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&auto=format&fit=crop&q=80",
+                            },
+                          ].map((preset) => (
+                            <button
+                              key={preset.label}
+                              type="button"
+                              className="admin-chip-btn"
+                              style={{ fontSize: "0.68rem", padding: "0.15rem 0.5rem" }}
+                              onClick={() => setFormImageUrl(preset.url)}
+                            >
+                              + {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Preview Sampul Poster */}
+                      {formImageUrl && (
+                        <div className="admin-img-preview-box" style={{ marginTop: "0.5rem" }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={formImageUrl}
+                            alt="Poster Preview"
+                            style={{ width: "54px", height: "76px", objectFit: "cover", borderRadius: "4px" }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
+                            }}
+                          />
+                          <div className="admin-img-preview-info">
+                            <strong>Pratinjau Sampul / Poster:</strong>
+                            <div>Proporsi potret ideal untuk kartu dan galeri keseharian.</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tautan Luar (Opsional) */}
+                    <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                      <label className="admin-label">Tautan Eksternal / Sumber (Opsional)</label>
+                      <input
+                        type="url"
+                        placeholder="https://... (e.g. IMDb, Goodreads, Spotify, situs resmi)"
+                        value={formHref}
+                        onChange={(e) => setFormHref(e.target.value)}
+                        className="admin-input"
                       />
                     </div>
                   </div>
                 </>
               )}
 
-              {/* MEDIA & SAMPUL GAMBAR */}
-              <div className="admin-form-section">
-                <div className="admin-form-section-title">Media & Sampul Gambar (Opsional)</div>
-                <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                  <label className="admin-label">
-                    URL Gambar Sampul / Poster
-                    {targetType === "keseharian" && " (Disarankan format potret 2:3 atau 3:4)"}
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={formImageUrl}
-                    onChange={(e) => setFormImageUrl(e.target.value)}
-                    className="admin-input"
-                  />
-                  {formImageUrl && (
-                    <div className="admin-img-preview-box">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={formImageUrl}
-                        alt="Preview"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
-                        }}
-                      />
-                      <div className="admin-img-preview-info">
-                        <strong>Pratinjau Sampul:</strong>
-                        <div>Gambar akan otomatis disesuaikan secara proporsional.</div>
+              {/* MEDIA & SAMPUL GAMBAR (Khusus Pengalaman, Karya, Riset, Alat) */}
+              {targetType !== "keseharian" && (
+                <div className="admin-form-section">
+                  <div className="admin-form-section-title">Media & Sampul Gambar (Opsional)</div>
+                  <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                    <label className="admin-label">
+                      URL Gambar Sampul
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://images.unsplash.com/..."
+                      value={formImageUrl}
+                      onChange={(e) => setFormImageUrl(e.target.value)}
+                      className="admin-input"
+                    />
+                    {formImageUrl && (
+                      <div className="admin-img-preview-box">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={formImageUrl}
+                          alt="Preview"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
+                          }}
+                        />
+                        <div className="admin-img-preview-info">
+                          <strong>Pratinjau Sampul:</strong>
+                          <div>Gambar akan otomatis disesuaikan secara proporsional.</div>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Modal Sticky Actions */}
               <div className="admin-modal-actions">

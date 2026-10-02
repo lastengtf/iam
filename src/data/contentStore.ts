@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useSyncExternalStore, useCallback, useState, useEffect } from "react";
 import {
   PROFILE_DATA,
   WORK_ITEMS,
@@ -96,6 +96,165 @@ export function setStoredData<T>(key: string, data: T) {
   } catch (err) {
     console.error(`Failed to save to localStorage (${key}):`, err);
   }
+}
+
+let isHydrating = false;
+
+/**
+ * Hydrates all content store keys from Cloudflare D1 database (sync_store table).
+ * - If D1 has data, updates local storage and memory cache, refreshing all UI components.
+ * - If D1 is empty, but this device has local data, automatically seeds D1 so other devices sync.
+ */
+export async function hydrateFromD1(): Promise<{ success: boolean; updated: boolean; count: number }> {
+  if (typeof window === "undefined" || isHydrating) {
+    return { success: false, updated: false, count: 0 };
+  }
+
+  isHydrating = true;
+  try {
+    const res = await fetch("/api/d1/sync", { cache: "no-store" });
+    if (!res.ok) {
+      return { success: false, updated: false, count: 0 };
+    }
+
+    const resData = (await res.json()) as {
+      success: boolean;
+      items?: Record<string, unknown>;
+      count?: number;
+    };
+
+    if (!resData || !resData.success) {
+      return { success: false, updated: false, count: 0 };
+    }
+
+    const items = resData.items || {};
+    const d1KeyCount = Object.keys(items).length;
+
+    // If Cloudflare D1 has data, sync down into localStorage
+    if (d1KeyCount > 0) {
+      let hasChanges = false;
+      let updatedCount = 0;
+
+      for (const [key, value] of Object.entries(items)) {
+        if (value !== undefined && value !== null) {
+          const raw = JSON.stringify(value);
+          const current = localStorage.getItem(key);
+          if (current !== raw) {
+            localStorage.setItem(key, raw);
+            memoryCache[key] = { raw, parsed: value };
+            hasChanges = true;
+            updatedCount++;
+          }
+        }
+      }
+
+      if (hasChanges) {
+        notifyContentUpdated();
+      }
+
+      return { success: true, updated: hasChanges, count: updatedCount };
+    }
+
+    // If D1 is empty on initial run, automatically seed it with local data if present
+    const localBatch: Record<string, unknown> = {};
+    for (const key of Object.values(STORAGE_KEYS)) {
+      const localRaw = localStorage.getItem(key);
+      if (localRaw) {
+        try {
+          localBatch[key] = JSON.parse(localRaw);
+        } catch {
+          localBatch[key] = localRaw;
+        }
+      }
+    }
+
+    if (Object.keys(localBatch).length > 0) {
+      await fetch("/api/d1/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batch: localBatch }),
+      }).catch(() => {});
+    }
+
+    return { success: true, updated: false, count: 0 };
+  } catch {
+    return { success: false, updated: false, count: 0 };
+  } finally {
+    isHydrating = false;
+  }
+}
+
+/**
+ * Force pushes all current local storage content into Cloudflare D1 database.
+ */
+export async function pushAllLocalToD1(): Promise<{ success: boolean; count: number; error?: string }> {
+  if (typeof window === "undefined") return { success: false, count: 0 };
+  try {
+    const batch: Record<string, unknown> = {};
+    for (const key of Object.values(STORAGE_KEYS)) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        try {
+          batch[key] = JSON.parse(raw);
+        } catch {
+          batch[key] = raw;
+        }
+      }
+    }
+
+    if (Object.keys(batch).length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const res = await fetch("/api/d1/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batch }),
+    });
+
+    const json = (await res.json()) as { success: boolean; count?: number; error?: string };
+    return {
+      success: !!json.success,
+      count: json.count || Object.keys(batch).length,
+      error: json.error,
+    };
+  } catch (err) {
+    return { success: false, count: 0, error: String(err) };
+  }
+}
+
+// Automatically trigger hydration on startup and when switching back to tab
+if (typeof window !== "undefined") {
+  setTimeout(() => {
+    hydrateFromD1();
+  }, 100);
+
+  window.addEventListener("focus", () => {
+    hydrateFromD1();
+  });
+}
+
+/**
+ * React Hook for UI components to trigger manual D1 sync and observe status.
+ */
+export function useD1Sync() {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
+
+  const sync = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      await pushAllLocalToD1();
+      const res = await hydrateFromD1();
+      const now = new Date();
+      setLastSync(`${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
+      return res;
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  return { isSyncing, lastSync, sync };
 }
 
 // Reset all storage keys to initial profileData constants

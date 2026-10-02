@@ -415,7 +415,32 @@ export default {
 
         if (request.method === "POST") {
           try {
-            const body = (await request.json()) as { key: string; data: unknown };
+            const body = (await request.json()) as {
+              key?: string;
+              data?: unknown;
+              batch?: Record<string, unknown>;
+            };
+
+            // Support batch saving multiple keys at once
+            if (body.batch && typeof body.batch === "object") {
+              const statements: D1PreparedStatement[] = [];
+              for (const [k, v] of Object.entries(body.batch)) {
+                if (k && v !== undefined && v !== null) {
+                  const dataStr = typeof v === "string" ? v : JSON.stringify(v);
+                  statements.push(
+                    db.prepare(
+                      `INSERT INTO sync_store (key, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+                       ON CONFLICT(key) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP`
+                    ).bind(k, dataStr)
+                  );
+                }
+              }
+              if (statements.length > 0) {
+                await db.batch(statements);
+              }
+              return new Response(JSON.stringify({ success: true, count: statements.length }), { headers: corsHeaders });
+            }
+
             if (!body.key) {
               return new Response(JSON.stringify({ success: false, message: "Missing key" }), {
                 status: 400,
@@ -457,11 +482,23 @@ export default {
             );
           }
 
-          const allRows = await db.prepare("SELECT key, updated_at FROM sync_store").all();
+          // Return all synced keys and parsed items for full client hydration
+          const allRows = await db.prepare("SELECT key, data, updated_at FROM sync_store").all<{ key: string; data: string; updated_at: string }>();
+          const items: Record<string, unknown> = {};
+          for (const row of allRows.results || []) {
+            try {
+              items[row.key] = JSON.parse(row.data);
+            } catch {
+              items[row.key] = row.data;
+            }
+          }
+
           return new Response(
             JSON.stringify({
               success: true,
-              keys: allRows.results || [],
+              items,
+              keys: (allRows.results || []).map((r) => ({ key: r.key, updated_at: r.updated_at })),
+              count: (allRows.results || []).length,
             }),
             { headers: corsHeaders }
           );

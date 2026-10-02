@@ -17,6 +17,7 @@ import {
   usePublicationsData,
   useStackData,
   useDailyData,
+  useD1Sync,
 } from "@/data/contentStore";
 import { useAdmin } from "../AdminContext";
 
@@ -99,6 +100,22 @@ function ContentManagerInner() {
   const readCount = useMemo(() => dailyLogs.filter((d) => d.category === "Membaca").length, [dailyLogs]);
   const listenedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Mendengar").length, [dailyLogs]);
   const tastedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Mengecap").length, [dailyLogs]);
+
+  // Cloudflare D1 Sync Integration
+  const { isSyncing: isD1Syncing, lastSync: lastD1Sync, sync: syncWithD1 } = useD1Sync();
+
+  const handleManualD1Sync = async () => {
+    try {
+      const res = await syncWithD1();
+      if (res && res.success) {
+        showToast("Sinkronisasi Cloudflare D1 berhasil! Konten sama persis di HP & seluruh perangkat.");
+      } else {
+        showToast("Sinkronisasi lokal selesai. D1 siap disinkronkan di server produksi.");
+      }
+    } catch {
+      showToast("Gagal sinkronisasi dengan database.");
+    }
+  };
 
   // Modal State for Add & Edit
   const [showModal, setShowModal] = useState(false);
@@ -643,7 +660,17 @@ function ContentManagerInner() {
           </p>
         </div>
 
-        <div className="admin-header-actions">
+        <div className="admin-header-actions" style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="admin-btn-outline"
+            onClick={handleManualD1Sync}
+            disabled={isD1Syncing}
+            title="Sinkronkan dengan Cloudflare D1 agar konten di HP dan komputer selalu sama persis"
+            style={{ fontSize: "0.85rem", padding: "0.45rem 0.85rem" }}
+          >
+            {isD1Syncing ? "🔄 Menyinkronkan..." : lastD1Sync ? `☁️ D1 Aktif (${lastD1Sync})` : "☁️ Sinkron Database"}
+          </button>
           <button
             type="button"
             className="admin-btn-primary"

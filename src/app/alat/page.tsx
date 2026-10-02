@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useStackData } from "@/data/contentStore";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 6;
@@ -11,7 +11,7 @@ const ITEMS_PER_PAGE = 6;
 export default function AlatPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
   const [likesMap, setLikesMap] = useState<Record<string, number>>({});
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
@@ -100,7 +100,7 @@ export default function AlatPage() {
         <div>
           <h2 className="section-title">Alat & Instrumen Kerja</h2>
           <div className="section-subtitle">
-            Katalog perangkat keras, editor kode, dan infrastruktur komputasi harian beserta catatan ulasan personal
+            Perangkat, piranti lunak, dan instrumen komputasi
           </div>
         </div>
       </div>

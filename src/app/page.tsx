@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useUpdatesFeed } from "@/data/contentStore";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 3;
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
   const updatesFeed = useUpdatesFeed();
 
@@ -43,7 +43,7 @@ export default function HomePage() {
           <div>
             <h2 className="section-title">Catatan & Updates Terkini</h2>
             <div className="section-subtitle">
-              Aktivitas berkala, eksplorasi karya, dan warta kegiatan
+              Aktivitas dan pembaruan berkala
             </div>
           </div>
         </div>

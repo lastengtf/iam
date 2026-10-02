@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useNewsData } from "@/data/contentStore";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 3;
 
 export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
   const { news: newsList } = useNewsData();
 
@@ -43,7 +43,7 @@ export default function NewsPage() {
         <div>
           <h2 className="section-title">Kabar & Warta Kegiatan</h2>
           <div className="section-subtitle">
-            Kabar berkala, warta kegiatan, dan catatan perkembangan
+            Kabar dan catatan perkembangan terbaru
           </div>
         </div>
       </div>

@@ -4,6 +4,42 @@ import React from "react";
 
 export type ViewMode = "gallery" | "grid" | "list" | "compact";
 
+const VIEW_STORAGE_KEY = "ten_view_mode_pref";
+
+export function usePersistedViewMode(defaultMode: ViewMode = "gallery") {
+  const [viewMode, setViewModeState] = React.useState<ViewMode>(defaultMode);
+
+  React.useEffect(() => {
+    const updateFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(VIEW_STORAGE_KEY) as ViewMode | null;
+        if (saved && ["gallery", "grid", "list", "compact"].includes(saved)) {
+          setViewModeState(saved);
+        }
+      } catch {}
+    };
+
+    updateFromStorage();
+
+    window.addEventListener("storage", updateFromStorage);
+    window.addEventListener("ten_view_mode_change", updateFromStorage);
+    return () => {
+      window.removeEventListener("storage", updateFromStorage);
+      window.removeEventListener("ten_view_mode_change", updateFromStorage);
+    };
+  }, []);
+
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, mode);
+      window.dispatchEvent(new Event("ten_view_mode_change"));
+    } catch {}
+  };
+
+  return [viewMode, setViewMode] as const;
+}
+
 interface CardToolbarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;

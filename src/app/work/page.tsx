@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { WORK_ITEMS } from "@/data/profileData";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 3;
 
 export default function WorkPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
 
   const handleSearchChange = (q: string) => {
@@ -41,7 +41,7 @@ export default function WorkPage() {
         <div>
           <h2 className="section-title">Riwayat Pengalaman</h2>
           <div className="section-subtitle">
-            Perjalanan peran profesional, kolaborasi inisiatif, dan pengalaman kerja
+            Rekam jejak peran dan pengalaman kerja
           </div>
         </div>
       </div>

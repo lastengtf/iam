@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { PROJECT_ITEMS } from "@/data/profileData";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 3;
 
 export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
 
   const handleSearchChange = (q: string) => {
@@ -41,7 +41,7 @@ export default function ProjectsPage() {
         <div>
           <h2 className="section-title">Karya & Proyek Inisiatif</h2>
           <div className="section-subtitle">
-            Koleksi karya mandiri, sarana produktivitas, dan proyek eksplorasi
+            Koleksi karya mandiri dan sarana digital
           </div>
         </div>
       </div>

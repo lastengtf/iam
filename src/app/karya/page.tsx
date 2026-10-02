@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useProjectsData, usePublicationsData } from "@/data/contentStore";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 type TabType = "all" | "projects" | "research";
@@ -27,7 +27,7 @@ const ITEMS_PER_PAGE = 4;
 export default function KaryaPage() {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
 
   const { projects } = useProjectsData();
@@ -117,7 +117,7 @@ export default function KaryaPage() {
         <div>
           <h2 className="section-title">Riset & Karya Kreasi</h2>
           <div className="section-subtitle">
-            Koleksi aplikasi rekayasa, sarana produktivitas, serta telaah karya ilmiah periset
+            Koleksi proyek, sarana digital, dan riset ilmiah
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { SenseCategory } from "@/data/profileData";
 import { useDailyData } from "@/data/contentStore";
-import CardToolbar, { ViewMode } from "@/components/CardToolbar";
+import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 4;
@@ -19,7 +19,7 @@ const SENSE_ICONS: Record<SenseCategory, string> = {
 export default function KeseharianPage() {
   const [selectedSense, setSelectedSense] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [viewMode, setViewMode] = usePersistedViewMode("gallery");
   const [currentPage, setCurrentPage] = useState(1);
   const { dailyLogs } = useDailyData();
 
@@ -61,7 +61,7 @@ export default function KeseharianPage() {
         <div>
           <h2 className="section-title">Catatan Keseharian & Indera</h2>
           <div className="section-subtitle">
-            Ruang refleksi personal: apa yang dibaca, didengarkan, dicicipi, dan dilihat dalam keseharian
+            Refleksi personal dan tangkapan indera harian
           </div>
         </div>
       </div>

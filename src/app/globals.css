@@ -1707,6 +1707,17 @@ body {
 .admin-portal-container {
   padding-bottom: 3.5rem;
   animation: fadeInDown 0.2s ease-out;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.admin-main-viewport,
+.admin-tab-body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .admin-topbar {
@@ -2082,12 +2093,17 @@ body {
   margin-bottom: 1rem;
   flex-wrap: wrap;
   gap: 0.75rem;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-category-pills {
   display: flex;
   gap: 0.35rem;
   overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-category-btn {
@@ -2312,10 +2328,14 @@ body {
 .admin-table-title {
   font-weight: 600;
   color: var(--text-main);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-table-sub {
   color: var(--text-muted);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .admin-table-meta {
@@ -2636,6 +2656,23 @@ body {
   border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   margin-bottom: 0.85rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-sense-grid-toggle {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 540px) {
+  .admin-sense-grid-toggle {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
 }
 
 .admin-form-section-title {
@@ -3004,6 +3041,9 @@ body {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     margin-bottom: 0.85rem;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .admin-category-pills {
@@ -3011,9 +3051,13 @@ body {
     overflow-x: auto;
     white-space: nowrap;
     gap: 0.35rem;
-    padding-bottom: 0.25rem;
+    padding-bottom: 0.35rem;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .admin-category-pills::-webkit-scrollbar {
@@ -3176,6 +3220,8 @@ body {
     width: 100%;
     max-height: 92vh;
     padding: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
     animation: slideUpMobile 0.25s cubic-bezier(0.2, 0, 1);
   }
 
@@ -3186,6 +3232,8 @@ body {
 
   .admin-modal-scroll-body {
     padding: 1rem 1.15rem;
+    overflow-x: hidden;
+    box-sizing: border-box;
   }
 
   .admin-modal-actions {

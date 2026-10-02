@@ -1064,27 +1064,27 @@ function ContentManagerInner() {
               ) : (
                 filteredDaily.map((d) => (
                   <tr key={d.id}>
-                    <td>
-                      <div className="admin-table-title" style={{ fontSize: "0.82rem" }}>
+                    <td style={{ minWidth: "140px", maxWidth: "260px" }}>
+                      <div className="admin-table-title" style={{ fontSize: "0.82rem", wordBreak: "break-word" }}>
                         {d.title}
                       </div>
                       {d.creator && (
-                        <div className="admin-table-sub" style={{ fontSize: "0.72rem" }}>
+                        <div className="admin-table-sub" style={{ fontSize: "0.72rem", wordBreak: "break-word" }}>
                           {d.creator}
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td style={{ whiteSpace: "nowrap" }}>
                       <span className="admin-table-badge">
                         {d.category === "Melihat" ? "👁️ Watched" : d.category === "Membaca" ? "📖 Read" : d.category === "Mendengar" ? "🎧 Listened" : "☕ Tasted"}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ whiteSpace: "nowrap" }}>
                       <span className="admin-table-rating">
                         ★ {d.rating?.toFixed(1) || "5.0"}
                       </span>
                     </td>
-                    <td style={{ textAlign: "right" }}>
+                    <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                       <div className="admin-table-actions">
                         <Link
                           href={`/keseharian/details?id=${d.id}`}
@@ -1563,11 +1563,11 @@ function ContentManagerInner() {
                       />
                     </div>
 
-                    <div className="admin-form-grid" style={{ alignItems: "center" }}>
+                    <div className="admin-form-grid">
                       {/* Rating */}
                       <div className="admin-form-group" style={{ marginBottom: 0 }}>
                         <label className="admin-label">Rating</label>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                           <div style={{ display: "flex", gap: "0.15rem" }}>
                             {[1, 2, 3, 4, 5].map((star) => (
                               <button
@@ -1613,7 +1613,7 @@ function ContentManagerInner() {
                           onChange={(e) => setFormDate(e.target.value)}
                           className="admin-input"
                           required
-                          style={{ cursor: "pointer", padding: "0.45rem 0.65rem" }}
+                          style={{ cursor: "pointer", padding: "0.45rem 0.65rem", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
                         />
                       </div>
                     </div>
@@ -1628,7 +1628,7 @@ function ContentManagerInner() {
                     {/* Segmented Button: Watched, Read, Listened, Tasted */}
                     <div className="admin-form-group">
                       <label className="admin-label">Apa yang Direview? *</label>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.35rem" }}>
+                      <div className="admin-sense-grid-toggle">
                         {[
                           { val: "Melihat" as const, label: "👁️ Watched", defaultFormat: "Film" },
                           { val: "Membaca" as const, label: "📖 Read", defaultFormat: "Buku" },
@@ -1644,12 +1644,14 @@ function ContentManagerInner() {
                               setFormItemFormat(s.defaultFormat);
                             }}
                             style={{
-                              padding: "0.5rem 0.25rem",
+                              padding: "0.55rem 0.4rem",
                               textAlign: "center",
                               justifyContent: "center",
                               fontSize: "0.82rem",
                               fontWeight: 600,
-                              borderRadius: "6px"
+                              borderRadius: "6px",
+                              width: "100%",
+                              boxSizing: "border-box"
                             }}
                           >
                             {s.label}

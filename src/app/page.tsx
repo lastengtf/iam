@@ -8,174 +8,141 @@ export default function BioHomePage() {
   const { profile } = useProfileData();
 
   return (
-    <div className="bio-page-container" style={{ paddingBottom: "3rem" }}>
-      {/* 1. Pengantar Personal (About Intro & Lead) */}
-      <section className="section-box" style={{ marginBottom: "1.75rem" }}>
-        <div className="bio-hero-header">
-          <div className="bio-intro-badge">
-            <span className="bio-pulse-dot"></span>
-            <span>Profil & Bio Personal</span>
-          </div>
-          <h2 className="bio-hero-title">
-            Membangun Ruang Mandiri, Merawat Arsip Terbuka
-          </h2>
-          <p className="bio-hero-lead">
-            {profile.aboutIntro || profile.bio}
+    <div className="bio-ringkas-container">
+      {/* 1. Profil Ringkas & Intro Personal */}
+      <section className="section-box" style={{ padding: "1.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+          <span className="bio-pulse-dot"></span>
+          <span style={{ fontSize: "0.78rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--mono-gray-mid)" }}>
+            Bio Personal
+          </span>
+          <span style={{ color: "var(--border-subtle)" }}>•</span>
+          <span style={{ fontSize: "0.78rem", color: "#10b981", fontWeight: 600 }}>
+            {profile.status || "Terbuka untuk Kolaborasi"}
+          </span>
+        </div>
+
+        <h2 style={{ fontSize: "1.45rem", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--mono-black)", marginBottom: "0.65rem", lineHeight: 1.3 }}>
+          {profile.tagline || "Eksplorasi Karya, Inisiatif Mandiri, & Dokumentasi Terbuka"}
+        </h2>
+
+        <p style={{ fontSize: "0.96rem", lineHeight: 1.65, color: "var(--text-main)", marginBottom: "1rem" }}>
+          {profile.aboutIntro || profile.bio}
+        </p>
+
+        {/* Paragraf Ringkas Inti */}
+        {profile.aboutParagraphs && profile.aboutParagraphs[0] && (
+          <p style={{ fontSize: "0.88rem", lineHeight: 1.6, color: "var(--text-dim)", margin: 0 }}>
+            {profile.aboutParagraphs[0]}
           </p>
-        </div>
+        )}
 
-        {/* Paragraf Narasi Lengkap */}
-        <div className="bio-narrative-flow">
-          {(profile.aboutParagraphs && profile.aboutParagraphs.length > 0
-            ? profile.aboutParagraphs
-            : [
-                "Ruang personal ini didedikasikan untuk mengarsipkan perjalanan, eksplorasi karya, riset mandiri, serta catatan pemikiran berkelanjutan secara terbuka.",
-                "Seluruh sistem dirancang dengan prinsip kesederhanaan, keterbacaan, dan efisiensi arsitektur edge terdistribusi.",
-              ]
-          ).map((para, idx) => (
-            <p key={idx} className="bio-narrative-p">
-              {para}
-            </p>
-          ))}
-        </div>
-      </section>
-
-      {/* 2. Fokus & Inisiatif Saat Ini */}
-      {profile.currentFocus && profile.currentFocus.length > 0 && (
-        <section className="section-box" style={{ marginBottom: "1.75rem" }}>
-          <div className="section-header">
-            <div>
-              <h2 className="section-title">Fokus & Inisiatif Saat Ini</h2>
-              <div className="section-subtitle">
-                Bidang eksplorasi dan prioritas kerja yang sedang ditekuni
-              </div>
-            </div>
-          </div>
-
-          <div className="bio-focus-grid">
-            {profile.currentFocus.map((item) => (
-              <div key={item.id} className="bio-focus-card">
-                <div className="bio-focus-card-top">
-                  <span className="bio-focus-icon">{item.icon || "⚡"}</span>
-                  {item.badge && (
-                    <span className="bio-focus-badge">{item.badge}</span>
-                  )}
-                </div>
-                <h3 className="bio-focus-title">{item.title}</h3>
-                <p className="bio-focus-desc">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 3. Prinsip & Nilai Kerja */}
-      {profile.principles && profile.principles.length > 0 && (
-        <section className="section-box" style={{ marginBottom: "1.75rem" }}>
-          <div className="section-header">
-            <div>
-              <h2 className="section-title">Prinsip & Nilai Kerja</h2>
-              <div className="section-subtitle">
-                Panduan fundamental dalam merancang sistem dan menyelesaikan inisiatif
-              </div>
-            </div>
-          </div>
-
-          <div className="bio-principles-grid">
-            {profile.principles.map((pr) => (
-              <div key={pr.id} className="bio-principle-card">
-                <span className="bio-principle-icon">{pr.icon || "✦"}</span>
-                <div>
-                  <h4 className="bio-principle-title">{pr.title}</h4>
-                  <p className="bio-principle-desc">{pr.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 4. Ruang Eksplorasi (Jelajahi Pilar Lainnya) */}
-      <section className="section-box" style={{ marginBottom: "1.75rem" }}>
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Jelajahi Ruang Dokumentasi</h2>
-            <div className="section-subtitle">
-              Pilar arsip karya, instrumen alat, dan catatan harian
-            </div>
-          </div>
-        </div>
-
-        <div className="bio-nav-cards-grid">
-          <Link href="/pengalaman" className="bio-hub-card">
-            <span className="bio-hub-icon">💼</span>
-            <div className="bio-hub-text">
-              <span className="bio-hub-title">Pengalaman Kerja</span>
-              <span className="bio-hub-desc">Riwayat peran, kontribusi program, dan koordinasi tim</span>
-            </div>
-            <span className="bio-hub-arrow">→</span>
-          </Link>
-
-          <Link href="/karya" className="bio-hub-card">
-            <span className="bio-hub-icon">🚀</span>
-            <div className="bio-hub-text">
-              <span className="bio-hub-title">Riset & Karya</span>
-              <span className="bio-hub-desc">Koleksi aplikasi web, repositori, dan publikasi ilmiah</span>
-            </div>
-            <span className="bio-hub-arrow">→</span>
-          </Link>
-
-          <Link href="/alat" className="bio-hub-card">
-            <span className="bio-hub-icon">🛠️</span>
-            <div className="bio-hub-text">
-              <span className="bio-hub-title">Alat & Reviewku</span>
-              <span className="bio-hub-desc">Hardware, software editor, cloud, dan ulasan personal</span>
-            </div>
-            <span className="bio-hub-arrow">→</span>
-          </Link>
-
-          <Link href="/keseharian" className="bio-hub-card">
-            <span className="bio-hub-icon">☕</span>
-            <div className="bio-hub-text">
-              <span className="bio-hub-title">Keseharian & Refleksi</span>
-              <span className="bio-hub-desc">Watched, Read, Listened, Tasted, Rating, dan Reviewku</span>
-            </div>
-            <span className="bio-hub-arrow">→</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* 5. Kolaborasi & Kontak Langsung */}
-      <section className="section-box">
-        <div className="bio-collab-card">
-          <div className="bio-collab-left">
-            <span className="bio-collab-status-badge">
-              🟢 {profile.status || "Terbuka untuk Kolaborasi"}
+        {/* Fokus Ringkas (Chips / Badges) */}
+        {profile.currentFocus && profile.currentFocus.length > 0 && (
+          <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid var(--border-subtle)", display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "center" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--mono-gray-mid)", marginRight: "0.25rem" }}>
+              Fokus Utama:
             </span>
-            <h3 className="bio-collab-title">Mari Terhubung & Berdiskusi</h3>
-            <p className="bio-collab-desc">
-              Tertarik membahas inisiatif mandiri, arsitektur sistem modular, atau sekadar bertukar wawasan? Korespondensi selalu disambut hangat.
-            </p>
+            {profile.currentFocus.map((f) => (
+              <span
+                key={f.id}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.35rem",
+                  padding: "0.25rem 0.65rem",
+                  background: "var(--bg-hover)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "9999px",
+                  fontSize: "0.78rem",
+                  color: "var(--mono-black)",
+                  fontWeight: 500,
+                }}
+              >
+                <span>{f.icon || "⚡"}</span>
+                <span>{f.title}</span>
+              </span>
+            ))}
           </div>
-          <div className="bio-collab-actions">
-            <a
-              href={`mailto:${profile.contact.email}`}
-              className="action-btn-detail"
-              style={{ textDecoration: "none" }}
-            >
-              ✉️ Kirim Email ({profile.contact.email})
-            </a>
-            {profile.contact.docsUrl && (
+        )}
+      </section>
+
+      {/* 2. Jelajahi 4 Pilar Utama (Ringkas & Langsung) */}
+      <div className="bio-ringkas-nav-grid">
+        <Link href="/pengalaman" className="bio-ringkas-card">
+          <div className="bio-ringkas-card-icon">💼</div>
+          <div className="bio-ringkas-card-text">
+            <span className="bio-ringkas-card-title">Pengalaman</span>
+            <span className="bio-ringkas-card-sub">Rekam jejak & peran kerja</span>
+          </div>
+          <span className="bio-ringkas-arrow">↗</span>
+        </Link>
+
+        <Link href="/karya" className="bio-ringkas-card">
+          <div className="bio-ringkas-card-icon">🚀</div>
+          <div className="bio-ringkas-card-text">
+            <span className="bio-ringkas-card-title">Riset & Karya</span>
+            <span className="bio-ringkas-card-sub">Aplikasi web & tulisan ilmiah</span>
+          </div>
+          <span className="bio-ringkas-arrow">↗</span>
+        </Link>
+
+        <Link href="/alat" className="bio-ringkas-card">
+          <div className="bio-ringkas-card-icon">🛠️</div>
+          <div className="bio-ringkas-card-text">
+            <span className="bio-ringkas-card-title">Alat & Reviewku</span>
+            <span className="bio-ringkas-card-sub">Hardware, software, & ulasan</span>
+          </div>
+          <span className="bio-ringkas-arrow">↗</span>
+        </Link>
+
+        <Link href="/keseharian" className="bio-ringkas-card">
+          <div className="bio-ringkas-card-icon">☕</div>
+          <div className="bio-ringkas-card-text">
+            <span className="bio-ringkas-card-title">Keseharian</span>
+            <span className="bio-ringkas-card-sub">Watched, Read, Listened, Tasted</span>
+          </div>
+          <span className="bio-ringkas-arrow">↗</span>
+        </Link>
+      </div>
+
+      {/* 3. Kontak Cepat */}
+      <section className="section-box" style={{ padding: "1.1rem 1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <span style={{ fontSize: "1.1rem" }}>✉️</span>
+            <div>
+              <span style={{ fontSize: "0.84rem", fontWeight: 600, color: "var(--mono-black)" }}>
+                Korespondensi & Diskusi:
+              </span>{" "}
+              <a
+                href={`mailto:${profile.contact?.email}`}
+                style={{ fontSize: "0.84rem", color: "var(--mono-black)", fontWeight: 700, textDecoration: "underline" }}
+              >
+                {profile.contact?.email}
+              </a>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {profile.contact?.docsUrl && (
               <a
                 href={profile.contact.docsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="action-btn-share"
-                style={{ textDecoration: "none" }}
+                className="admin-btn-outline"
+                style={{ textDecoration: "none", padding: "0.35rem 0.75rem", fontSize: "0.78rem" }}
               >
-                📖 Baca Dokumentasi Panduan ↗
+                Panduan Docs ↗
               </a>
             )}
+            <a
+              href={`mailto:${profile.contact?.email}`}
+              className="admin-btn-primary"
+              style={{ textDecoration: "none", padding: "0.35rem 0.85rem", fontSize: "0.78rem" }}
+            >
+              Kirim Pesan
+            </a>
           </div>
         </div>
       </section>

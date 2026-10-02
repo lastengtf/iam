@@ -5755,3 +5755,472 @@ body.in-master-detail .footer-contact {
   }
 }
 
+/* ============================================================
+   ESTETIKA BIO RINGKAS (BERANDA MINIMALIS)
+   ============================================================ */
+.bio-ringkas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding-bottom: 2.5rem;
+}
+
+.bio-ringkas-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+.bio-ringkas-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 10px);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bio-ringkas-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--mono-black, #0f172a);
+  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.05);
+}
+
+.bio-ringkas-card-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.bio-ringkas-card-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bio-ringkas-card-title {
+  font-size: 0.92rem;
+  font-weight: 650;
+  color: var(--mono-black, #0f172a);
+}
+
+.bio-ringkas-card-sub {
+  font-size: 0.76rem;
+  color: var(--text-dim, #64748b);
+}
+
+.bio-ringkas-arrow {
+  font-size: 0.9rem;
+  color: var(--mono-gray-light, #94a3b8);
+  transition: transform 0.2s ease;
+}
+
+.bio-ringkas-card:hover .bio-ringkas-arrow {
+  transform: translate(2px, -2px);
+  color: var(--mono-black, #0f172a);
+}
+
+@media (max-width: 640px) {
+  .bio-ringkas-nav-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   NETFLIX-STYLE CINEMATIC DETAIL LAYOUT (KESEHARIAN & ALAT)
+   ============================================================ */
+.netflix-detail-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-bottom: 3rem;
+}
+
+/* Netflix Billboard / Hero */
+.netflix-billboard {
+  position: relative;
+  background: #141414;
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  color: #ffffff;
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.45);
+}
+
+.netflix-billboard-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center top;
+  opacity: 0.4;
+  filter: blur(1px);
+}
+
+.netflix-billboard-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    0deg,
+    #141414 0%,
+    rgba(20, 20, 20, 0.85) 45%,
+    rgba(20, 20, 20, 0.4) 100%
+  );
+}
+
+.netflix-billboard-content {
+  position: relative;
+  z-index: 2;
+  padding: 2.5rem 2rem 2rem 2rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-end;
+}
+
+.netflix-poster-box {
+  width: 170px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
+  aspect-ratio: 2/3;
+  background: #222;
+}
+
+.netflix-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.netflix-info-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.netflix-brand-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e50914;
+}
+
+.netflix-brand-logo-n {
+  font-family: var(--font-mono, sans-serif);
+  font-size: 1rem;
+  font-weight: 900;
+  color: #e50914;
+}
+
+.netflix-title-text {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.netflix-meta-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  margin-top: 0.15rem;
+}
+
+.netflix-match-score {
+  color: #46d369;
+  font-weight: 700;
+}
+
+.netflix-rating-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.netflix-year-tag {
+  color: #a3a3a3;
+}
+
+.netflix-badge-pill {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.netflix-quality-badge {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #e5e5e5;
+}
+
+/* Netflix Action Buttons */
+.netflix-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.netflix-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  color: #000000;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.65rem 1.45rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.netflix-play-btn:hover {
+  background: #e6e6e6;
+  transform: scale(1.02);
+}
+
+.netflix-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(109, 109, 110, 0.7);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.65rem 1.15rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease;
+}
+
+.netflix-secondary-btn:hover {
+  background: rgba(109, 109, 110, 0.45);
+}
+
+/* Featured Spotlight: Reviewku */
+.netflix-review-spotlight {
+  background: linear-gradient(145deg, #1e1e1e 0%, #171717 100%);
+  border-left: 4px solid #e50914;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+}
+
+.netflix-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.netflix-review-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e50914;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.netflix-review-quote {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: #f1f5f9;
+  font-weight: 450;
+  margin: 0 0 0.85rem 0;
+  font-style: italic;
+}
+
+.netflix-review-author {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Netflix Content & Metadata Grid */
+.netflix-content-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 2rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.75rem;
+}
+
+.netflix-synopsis-p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-main, #334155);
+  margin-bottom: 1.25rem;
+}
+
+.netflix-metadata-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border-left: 1px solid var(--border-subtle, #e2e8f0);
+  padding-left: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.netflix-meta-item-label {
+  color: var(--text-dim, #64748b);
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.netflix-meta-item-val {
+  color: var(--mono-black, #0f172a);
+  font-weight: 600;
+}
+
+/* Netflix "Lainnya yang Serupa" Carousel / Grid */
+.netflix-more-like-this-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.netflix-more-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.netflix-more-card {
+  position: relative;
+  background: #181818;
+  border-radius: 6px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #ffffff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  aspect-ratio: 2/3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.netflix-more-card:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+
+.netflix-more-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.netflix-more-card:hover .netflix-more-poster {
+  transform: scale(1.06);
+}
+
+.netflix-more-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+}
+
+.netflix-more-info {
+  position: relative;
+  z-index: 2;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.netflix-more-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.netflix-more-score {
+  font-size: 0.72rem;
+  color: #46d369;
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .netflix-billboard-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 1.25rem 1.5rem 1.25rem;
+  }
+  .netflix-poster-box {
+    width: 140px;
+  }
+  .netflix-actions-row {
+    justify-content: center;
+  }
+  .netflix-meta-strip {
+    justify-content: center;
+  }
+  .netflix-content-grid {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+  .netflix-metadata-box {
+    border-left: none;
+    border-top: 1px solid var(--border-subtle, #e2e8f0);
+    padding-left: 0;
+    padding-top: 1rem;
+  }
+  .netflix-more-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+

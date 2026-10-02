@@ -258,22 +258,18 @@ export default function MasterDetailLayout({
 
             <span className="md-breadcrumb-sep">/</span>
 
-            {/* Bagian Kategori dengan Hover Dropdown untuk berpindah cepat */}
-            <div
-              ref={catMenuRef}
-              className="md-breadcrumb-cat-wrap"
-              onMouseEnter={() => setIsCatMenuOpen(true)}
-              onMouseLeave={() => setIsCatMenuOpen(false)}
-            >
-              <Link
-                href={categoryDetailHref}
-                className="md-breadcrumb-link md-breadcrumb-cat-trigger"
-                title={`Ke Detail ${resolvedCategory} (Arahkan kursor atau klik untuk pilih kategori lain)`}
-                onClick={() => setIsCatMenuOpen(false)}
+            {/* Bagian Kategori: Klik untuk membuka opsi pindah kategori */}
+            <div ref={catMenuRef} className="md-breadcrumb-cat-wrap">
+              <button
+                type="button"
+                className={`md-breadcrumb-cat-trigger ${isCatMenuOpen ? "active" : ""}`}
+                title={`Kategori: ${resolvedCategory} (Klik untuk pilih atau pindah kategori)`}
+                onClick={() => setIsCatMenuOpen((prev) => !prev)}
+                aria-expanded={isCatMenuOpen}
               >
                 <span>{resolvedCategory}</span>
-                <span className="md-breadcrumb-chevron">▾</span>
-              </Link>
+                <span className={`md-breadcrumb-chevron ${isCatMenuOpen ? "open" : ""}`}>▾</span>
+              </button>
 
               {isCatMenuOpen && (
                 <div className="md-category-dropdown" role="menu">
@@ -298,6 +294,19 @@ export default function MasterDetailLayout({
                       </Link>
                     );
                   })}
+
+                  {/* Opsi Langsung ke Halaman Katalog /:kategori/ */}
+                  <div className="md-cat-dropdown-footer">
+                    <Link
+                      href={backHref}
+                      className="md-cat-catalog-link"
+                      onClick={() => setIsCatMenuOpen(false)}
+                      title={`Buka halaman utama ${resolvedCategory}`}
+                    >
+                      <span>Katalog {resolvedCategory} (/:kategori/)</span>
+                      <span>↗</span>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

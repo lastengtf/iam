@@ -27,7 +27,7 @@ export default function LoginPage() {
     signIn("ten-accounts");
   };
 
-  const handleManualSubmit = (e: React.FormEvent) => {
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
 
@@ -42,12 +42,34 @@ export default function LoginPage() {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      // Allow any valid input for direct administration
-      const adminName = username.includes("@") ? username.split("@")[0] : username;
-      const adminEmail = username.includes("@") ? username : `${username.toLowerCase()}@ten.my.id`;
-      loginLocalAdmin(adminName, adminEmail, "admin");
-    }, 600);
+
+    try {
+      const res = await fetch("/api/auth/login-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (res.status === 404) {
+        // Fallback untuk mode development lokal tanpa Cloudflare Worker
+        const adminName = username.includes("@") ? username.split("@")[0] : username;
+        const adminEmail = username.includes("@") ? username : `${username.toLowerCase()}@ten.my.id`;
+        loginLocalAdmin(adminName, adminEmail, "admin");
+        return;
+      }
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Simpan sesi lokal di browser dan arahkan ke admin
+        loginLocalAdmin(data.user.name, data.user.email, data.user.role || "admin");
+      } else {
+        setErrorMsg(data.message || "Nama pengguna atau kata sandi tidak cocok dengan konfigurasi Cloudflare.");
+      }
+    } catch {
+      setErrorMsg("Terjadi gangguan koneksi saat memvalidasi kredensial administrator.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -172,6 +194,10 @@ export default function LoginPage() {
                 >
                   {isLoading ? "Memproses Autentikasi..." : "Otorisasi & Buka Admin"}
                 </button>
+
+                <div style={{ fontSize: "0.72rem", color: "var(--text-dim)", marginTop: "0.6rem", textAlign: "center", lineHeight: 1.4 }}>
+                  Kredensial diverifikasi via variabel Cloudflare (<code>ADMIN_USERNAME</code> & <code>ADMIN_PASSWORD</code>)
+                </div>
               </form>
             )}
           </>

@@ -28,6 +28,10 @@ interface Env {
   TEN_CLIENT_ID?: string;
   TEN_CLIENT_SECRET?: string;
   AUTH_SECRET?: string;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD?: string;
+  ADMIN_NAME?: string;
+  ADMIN_EMAIL?: string;
 }
 
 interface UserProfile {
@@ -118,6 +122,83 @@ export default {
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
         return new Response(`Authentication error: ${errorMsg}`, { status: 500 });
+      }
+    }
+
+    // 2.5. Manual Admin Login: Validasi kredensial administrator dari Cloudflare Environment Variables
+    if (url.pathname === "/api/auth/login-admin" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as { username?: string; password?: string };
+        const inputUser = (body.username || "").trim().toLowerCase();
+        const inputPass = body.password || "";
+
+        // Kredensial dari Cloudflare Environment Variables (Secret / Env)
+        const cfUser = (env.ADMIN_USERNAME || env.ADMIN_EMAIL || "admin").trim().toLowerCase();
+        const cfPass = env.ADMIN_PASSWORD || "admin123";
+
+        // Periksa apakah username cocok (bisa username lengkap, format email, atau user prefix)
+        const isUserMatch =
+          inputUser === cfUser ||
+          (cfUser.includes("@") && inputUser === cfUser.split("@")[0]) ||
+          (!cfUser.includes("@") && inputUser === `${cfUser}@ten.my.id`);
+
+        // Periksa apakah password cocok
+        const isPassMatch = inputPass === cfPass;
+
+        if (!isUserMatch || !isPassMatch) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              message: "Nama pengguna atau kata sandi administrator tidak cocok.",
+            }),
+            {
+              status: 401,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+
+        // Kredensial terverifikasi -> buat sesi admin
+        const adminName = env.ADMIN_NAME || (cfUser.includes("@") ? cfUser.split("@")[0] : cfUser);
+        const adminEmail = cfUser.includes("@") ? cfUser : `${cfUser}@ten.my.id`;
+
+        const sessionPayload = {
+          user: {
+            id: "admin-cf",
+            name: adminName,
+            email: adminEmail,
+            role: "admin",
+          },
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        };
+
+        const cookieValue = btoa(encodeURIComponent(JSON.stringify(sessionPayload)));
+        const isHttps = url.protocol === "https:";
+        const headers = new Headers();
+        headers.set("Content-Type", "application/json");
+        headers.set(
+          "Set-Cookie",
+          `ten_session=${cookieValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${isHttps ? "; Secure" : ""}`
+        );
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            user: sessionPayload.user,
+          }),
+          { status: 200, headers }
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            message: "Format data login tidak valid.",
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
       }
     }
 

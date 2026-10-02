@@ -3050,6 +3050,267 @@ body {
 }
 
 /* ==========================================================================
+   SENSORY WATCHED / MEDIA GALLERY STYLES (Melihat, Membaca, Mendengar, Mengecap)
+   ========================================================================== */
+.sensory-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.15rem;
+}
+
+@media (max-width: 1024px) {
+  .sensory-gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .sensory-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.sensory-gallery-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  box-shadow: var(--shadow-card);
+}
+
+.sensory-gallery-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-hover);
+}
+
+.sensory-gallery-poster-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.sensory-gallery-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.sensory-gallery-card:hover .sensory-gallery-poster-img {
+  transform: scale(1.05);
+}
+
+.sensory-gallery-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.sensory-poster-badges {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sensory-type-pill {
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  color: #f8fafc;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sensory-sense-pill {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sensory-gallery-caption {
+  padding: 0.75rem 0.85rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sensory-gallery-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.3;
+  margin: 0 0 0.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sensory-gallery-creator {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sensory-small-rating {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.sensory-star {
+  color: #eab308;
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.sensory-rating-val {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.sensory-rating-scale {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* Sensory Rating Pill (Digunakan pada Grid, List, Compact) */
+.sensory-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  color: var(--text-main);
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.sensory-type-badge-top {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sensory-badges-row {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  z-index: 2;
+}
+
+.sensory-creator-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+/* Sensory Detail Rating Box */
+.sensory-detail-rating-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.sensory-detail-rating-score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.sensory-star-lg {
+  color: #eab308;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.rating-num-lg {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.rating-scale-lg {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.sensory-detail-rating-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* ==========================================================================
    MASTER-DETAIL TWO-PANEL WITH RESIZABLE SIDEBAR
    ========================================================================== */
 

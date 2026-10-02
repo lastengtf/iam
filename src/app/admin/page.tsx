@@ -558,7 +558,9 @@ export default function AdminPage() {
       const tagsArray = formTags.split(",").map((s) => s.trim()).filter(Boolean);
       const defaultImg = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80";
 
+      const existingItem = dailyLogs.find((d) => d.id === editingId);
       const itemPayload: DailyLogItem = {
+        ...existingItem,
         id: modalMode === "create" ? `daily-${Date.now()}` : (editingId as string),
         title: formTitle,
         subtitle: formSubtitle || "Refleksi Keseharian",
@@ -569,6 +571,18 @@ export default function AdminPage() {
         tags: tagsArray.length > 0 ? tagsArray : ["Keseharian", "Jurnal"],
         imageUrl: formImageUrl || defaultImg,
         link: formHref || undefined,
+        rating: existingItem?.rating ?? 4.8,
+        itemType:
+          existingItem?.itemType ||
+          (formDailyCategory === "Melihat"
+            ? "Film"
+            : formDailyCategory === "Membaca"
+            ? "Buku"
+            : formDailyCategory === "Mendengar"
+            ? "Album Musik"
+            : "Seduh Manual"),
+        creator: existingItem?.creator,
+        year: existingItem?.year || new Date().getFullYear().toString(),
       };
 
       if (modalMode === "create") {

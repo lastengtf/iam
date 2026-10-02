@@ -22,7 +22,7 @@ function KeseharianDetailInner() {
   const sidebarItems: MasterDetailSidebarItem[] = dailyLogs.map((item) => ({
     id: item.id,
     title: item.title,
-    subtitle: item.date,
+    subtitle: `${item.itemType || item.category} • ★ ${item.rating?.toFixed(1) || "5.0"}`,
     badge: item.category,
     icon: SENSE_ICONS[item.category],
     imageUrl: item.imageUrl,
@@ -42,48 +42,96 @@ function KeseharianDetailInner() {
     >
       <article className="content-card-detail" style={{ border: "none", boxShadow: "none", padding: 0 }}>
         {selectedLog.imageUrl && (
-          <div style={{ width: "100%", height: "260px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)" }}>
+          <div style={{ width: "100%", maxHeight: "380px", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "1.5rem", border: "1px solid var(--border-subtle)", background: "#0f172a" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedLog.imageUrl}
               alt={selectedLog.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ width: "100%", height: "100%", maxHeight: "380px", objectFit: "cover", display: "block" }}
             />
           </div>
         )}
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
           <div>
-            <span className={`sensory-badge-overlay ${selectedLog.category.toLowerCase()}`} style={{ position: "static", display: "inline-block", marginBottom: "0.5rem" }}>
-              {SENSE_ICONS[selectedLog.category]} {selectedLog.category}
-            </span>
-            <h1 style={{ fontSize: "1.65rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.2rem", lineHeight: 1.3 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
+              <span className={`sensory-badge-overlay ${selectedLog.category.toLowerCase()}`} style={{ position: "static", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
+                {SENSE_ICONS[selectedLog.category]} {selectedLog.category}
+              </span>
+              {selectedLog.itemType && (
+                <span className="sensory-type-badge-top" style={{ position: "static", display: "inline-flex" }}>
+                  {selectedLog.itemType}
+                </span>
+              )}
+            </div>
+
+            <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-main)", marginBottom: "0.35rem", lineHeight: 1.25 }}>
               {selectedLog.title}
             </h1>
+
+            {selectedLog.creator && (
+              <div style={{ fontSize: "0.95rem", color: "var(--text-secondary)", fontWeight: 600, marginBottom: "0.35rem" }}>
+                <span style={{ color: "var(--text-muted)" }}>
+                  {selectedLog.category === "Melihat"
+                    ? "Karya / Sutradara:"
+                    : selectedLog.category === "Membaca"
+                    ? "Penulis:"
+                    : selectedLog.category === "Mendengar"
+                    ? "Musisi / Host:"
+                    : "Asal / Roastery:"}{" "}
+                </span>
+                <span style={{ color: "var(--text-main)" }}>{selectedLog.creator}</span>
+                {selectedLog.year ? ` • Tahun ${selectedLog.year}` : ""}
+              </div>
+            )}
+
             {selectedLog.subtitle && (
-              <div style={{ fontSize: "0.95rem", color: "var(--mono-gray-mid)", fontWeight: 600, marginBottom: "0.3rem" }}>
+              <div style={{ fontSize: "0.92rem", color: "var(--mono-gray-mid)", fontStyle: "italic", marginBottom: "0.45rem" }}>
                 {selectedLog.subtitle}
               </div>
             )}
-            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+
+            <div style={{ fontSize: "0.82rem", color: "var(--text-dim)", fontFamily: "var(--font-mono)" }}>
               Tanggal Catatan: {selectedLog.date}
             </div>
+          </div>
+
+          {/* Rating Pill Besar di Halaman Detail */}
+          <div className="sensory-detail-rating-box">
+            <div className="sensory-detail-rating-score">
+              <span className="sensory-star-lg">★</span>
+              <span className="rating-num-lg">{selectedLog.rating?.toFixed(1) || "5.0"}</span>
+              <span className="rating-scale-lg">/5.0</span>
+            </div>
+            <div className="sensory-detail-rating-label">Rating Personal TEN</div>
           </div>
         </div>
 
         <div style={{ marginTop: "1.5rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "1.25rem" }}>
           <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1rem", fontWeight: 700 }}>
-            Ringkasan Konteks
+            {selectedLog.category === "Melihat"
+              ? "Sinopsis & Premis Tontonan"
+              : selectedLog.category === "Membaca"
+              ? "Sinopsis & Pokok Bahasan"
+              : selectedLog.category === "Mendengar"
+              ? "Latar Belakang Karya"
+              : "Profil Biji & Metode Seduh"}
           </h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.92rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>
             {selectedLog.summary}
           </p>
 
           <h3 style={{ color: "var(--text-main)", marginBottom: "0.5rem", fontSize: "1rem", fontWeight: 700 }}>
-            Refleksi & Catatan Rasa Personal
+            {selectedLog.category === "Melihat"
+              ? "Refleksi & Catatan Menonton"
+              : selectedLog.category === "Membaca"
+              ? "Refleksi Pemikiran & Relevansi"
+              : selectedLog.category === "Mendengar"
+              ? "Refleksi Audio & Resonansi Fokus"
+              : "Catatan Rasa & Pengalaman Seduh"}
           </h3>
-          <div className="sensory-thought-box" style={{ padding: "1rem 1.25rem", margin: "0.75rem 0 1.5rem" }}>
-            <span className="sensory-thought-label" style={{ fontSize: "0.72rem" }}>Poin Intisari:</span>
+          <div className="sensory-thought-box" style={{ padding: "1.1rem 1.35rem", margin: "0.75rem 0 1.5rem" }}>
+            <span className="sensory-thought-label" style={{ fontSize: "0.72rem" }}>Intisari Personal:</span>
             <p className="sensory-thought-text" style={{ fontSize: "0.95rem", lineHeight: 1.65 }}>
               &ldquo;{selectedLog.thoughts}&rdquo;
             </p>

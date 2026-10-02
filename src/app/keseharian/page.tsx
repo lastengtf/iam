@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { SenseCategory } from "@/data/profileData";
 import { useDailyData } from "@/data/contentStore";
-import CardToolbar, { ViewMode, usePersistedViewMode } from "@/components/CardToolbar";
+import CardToolbar, { usePersistedViewMode } from "@/components/CardToolbar";
 import Pagination from "@/components/Pagination";
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 8;
 
 const SENSE_ICONS: Record<SenseCategory, string> = {
   Membaca: "📖",
@@ -43,6 +43,9 @@ export default function KeseharianPage() {
     return (
       item.title.toLowerCase().includes(q) ||
       (item.subtitle && item.subtitle.toLowerCase().includes(q)) ||
+      (item.creator && item.creator.toLowerCase().includes(q)) ||
+      (item.itemType && item.itemType.toLowerCase().includes(q)) ||
+      (item.year && item.year.toLowerCase().includes(q)) ||
       item.summary.toLowerCase().includes(q) ||
       item.thoughts.toLowerCase().includes(q) ||
       item.tags.some((t) => t.toLowerCase().includes(q))
@@ -61,49 +64,49 @@ export default function KeseharianPage() {
         <div>
           <h2 className="section-title">Catatan Keseharian & Indera</h2>
           <div className="section-subtitle">
-            Refleksi personal dan tangkapan indera harian
+            Daftar kurasi tontonan, bacaan, dengaran, dan seduhan harian
           </div>
         </div>
       </div>
 
-      {/* Filter Indera: Semua, Membaca, Mendengar, Mengecap, Melihat */}
+      {/* Filter Indera: Semua, Melihat, Membaca, Mendengar, Mengecap */}
       <div className="karya-tab-nav">
         <button
           type="button"
           className={`karya-tab-btn ${selectedSense === "all" ? "active" : ""}`}
           onClick={() => handleSenseChange("all")}
         >
-          <span className="tab-label-full">Semua Catatan</span>
+          <span className="tab-label-full">Semua Kurasi</span>
           <span className="tab-label-short">Semua</span>
           <span>({dailyLogs.length})</span>
-        </button>
-        <button
-          type="button"
-          className={`karya-tab-btn ${selectedSense === "Membaca" ? "active" : ""}`}
-          onClick={() => handleSenseChange("Membaca")}
-        >
-          📖 Membaca
-        </button>
-        <button
-          type="button"
-          className={`karya-tab-btn ${selectedSense === "Mendengar" ? "active" : ""}`}
-          onClick={() => handleSenseChange("Mendengar")}
-        >
-          🎧 Mendengar
-        </button>
-        <button
-          type="button"
-          className={`karya-tab-btn ${selectedSense === "Mengecap" ? "active" : ""}`}
-          onClick={() => handleSenseChange("Mengecap")}
-        >
-          ☕ Mengecap
         </button>
         <button
           type="button"
           className={`karya-tab-btn ${selectedSense === "Melihat" ? "active" : ""}`}
           onClick={() => handleSenseChange("Melihat")}
         >
-          👁️ Melihat
+          👁️ Melihat (Watched)
+        </button>
+        <button
+          type="button"
+          className={`karya-tab-btn ${selectedSense === "Membaca" ? "active" : ""}`}
+          onClick={() => handleSenseChange("Membaca")}
+        >
+          📖 Membaca (Read)
+        </button>
+        <button
+          type="button"
+          className={`karya-tab-btn ${selectedSense === "Mendengar" ? "active" : ""}`}
+          onClick={() => handleSenseChange("Mendengar")}
+        >
+          🎧 Mendengar (Listened)
+        </button>
+        <button
+          type="button"
+          className={`karya-tab-btn ${selectedSense === "Mengecap" ? "active" : ""}`}
+          onClick={() => handleSenseChange("Mengecap")}
+        >
+          ☕ Mengecap (Tasted)
         </button>
       </div>
 
@@ -114,15 +117,15 @@ export default function KeseharianPage() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         placeholder={
-          selectedSense === "Membaca"
-            ? "Cari buku, telaah, catatan pemikiran..."
+          selectedSense === "Melihat"
+            ? "Cari film, serial, video podcast, dokumenter..."
+            : selectedSense === "Membaca"
+            ? "Cari buku, jurnal, penulis..."
             : selectedSense === "Mendengar"
-            ? "Cari musik, podcast, audio..."
+            ? "Cari album, musik, podcast, artis..."
             : selectedSense === "Mengecap"
-            ? "Cari kopi, kuliner, rasa..."
-            : selectedSense === "Melihat"
-            ? "Cari dokumenter, visual, foto..."
-            : "Cari catatan keseharian..."
+            ? "Cari kopi V60, artisan tea, origin..."
+            : "Cari tontonan, bacaan, dengaran, rasa..."
         }
         totalFiltered={filteredLogs.length}
       />
@@ -133,7 +136,7 @@ export default function KeseharianPage() {
           <div className="empty-search-icon">🔍</div>
           <div className="empty-search-title">Tidak ada hasil ditemukan</div>
           <div className="empty-search-desc">
-            Tidak ada catatan keseharian yang cocok dengan &quot;{searchQuery}&quot;
+            Tidak ada catatan yang cocok dengan kata kunci &quot;{searchQuery}&quot;
           </div>
           <button
             type="button"
@@ -145,31 +148,58 @@ export default function KeseharianPage() {
         </div>
       )}
 
-      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Hanya Cover) */}
+      {/* TAMPILAN 0: GALERI / GALLERY VIEW (Watched / Media Cover Card + Rating Kecil) */}
       {viewMode === "gallery" && paginatedLogs.length > 0 && (
-        <div className="card-gallery-view">
+        <div className="sensory-gallery-grid">
           {paginatedLogs.map((item) => (
             <Link
               href={`/keseharian/details?id=${item.id}`}
               key={item.id}
-              className="card-gallery-item"
-              title={`Baca detail catatan: ${item.title}`}
+              className="sensory-gallery-card"
+              title={`Lihat ulasan: ${item.title}`}
             >
-              {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="card-gallery-img"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="stack-gallery-cover">
-                  <span>{SENSE_ICONS[item.category] || "📝"}</span>
+              <div className="sensory-gallery-poster-wrap">
+                {item.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="sensory-gallery-poster-img"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="sensory-gallery-placeholder">
+                    <span>{SENSE_ICONS[item.category] || "📝"}</span>
+                  </div>
+                )}
+                <div className="sensory-poster-badges">
+                  <span className="sensory-type-pill">
+                    {item.itemType || item.category}
+                  </span>
+                  <span
+                    className={`sensory-sense-pill ${item.category.toLowerCase()}`}
+                    title={item.category}
+                  >
+                    {SENSE_ICONS[item.category]}
+                  </span>
                 </div>
-              )}
-              <div className="card-gallery-overlay">
-                <span className="card-gallery-title">{item.title}</span>
+              </div>
+
+              {/* Di bawah Cover: Judul, Kreator & Rating Kecil */}
+              <div className="sensory-gallery-caption">
+                <h4 className="sensory-gallery-title">{item.title}</h4>
+                {item.creator && (
+                  <div className="sensory-gallery-creator">
+                    {item.creator} {item.year ? `• ${item.year}` : ""}
+                  </div>
+                )}
+                <div className="sensory-small-rating">
+                  <span className="sensory-star">★</span>
+                  <span className="sensory-rating-val">
+                    {item.rating?.toFixed(1) || "5.0"}
+                  </span>
+                  <span className="sensory-rating-scale">/5</span>
+                </div>
               </div>
             </Link>
           ))}
@@ -196,25 +226,62 @@ export default function KeseharianPage() {
                     className="card-thumb-img"
                     loading="lazy"
                   />
-                  <span className={`sensory-badge-overlay ${item.category.toLowerCase()}`}>
-                    {SENSE_ICONS[item.category]} {item.category}
-                  </span>
+                  <div className="sensory-badges-row">
+                    <span
+                      className={`sensory-badge-overlay ${item.category.toLowerCase()}`}
+                    >
+                      {SENSE_ICONS[item.category]} {item.category}
+                    </span>
+                    {item.itemType && (
+                      <span className="sensory-type-badge-top">
+                        {item.itemType}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 
               <div className="card-body-content">
-                <div className="card-meta-line">
+                <div
+                  className="card-meta-line"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <span>{item.date}</span>
+                  <div className="sensory-rating-pill">
+                    <span className="sensory-star">★</span>
+                    <span className="sensory-rating-val">
+                      {item.rating?.toFixed(1) || "5.0"}
+                    </span>
+                    <span className="sensory-rating-scale">/5</span>
+                  </div>
                 </div>
+
                 <h3 className="card-title-text">{item.title}</h3>
+                {item.creator && (
+                  <div className="sensory-creator-text">
+                    {item.creator} {item.year ? `(${item.year})` : ""}
+                  </div>
+                )}
                 {item.subtitle && (
                   <div className="sensory-subtitle-text">{item.subtitle}</div>
                 )}
                 <p className="card-desc-text">{item.summary}</p>
 
-                {/* Catatan Rasa / Intisari Pemikiran */}
+                {/* Catatan Rasa / Intisari Refleksi */}
                 <div className="sensory-thought-box">
-                  <span className="sensory-thought-label">Refleksi & Catatan Rasa:</span>
+                  <span className="sensory-thought-label">
+                    {item.category === "Melihat"
+                      ? "Refleksi Tontonan:"
+                      : item.category === "Membaca"
+                      ? "Intisari Bacaan:"
+                      : item.category === "Mendengar"
+                      ? "Kesan Dengaran:"
+                      : "Catatan Rasa Seduhan:"}
+                  </span>
                   <p className="sensory-thought-text">&ldquo;{item.thoughts}&rdquo;</p>
                 </div>
 
@@ -249,17 +316,40 @@ export default function KeseharianPage() {
                     alt={item.title}
                     loading="lazy"
                   />
-                  <span className={`sensory-badge-overlay ${item.category.toLowerCase()}`}>
+                  <span
+                    className={`sensory-badge-overlay ${item.category.toLowerCase()}`}
+                  >
                     {SENSE_ICONS[item.category]} {item.category}
                   </span>
                 </div>
               )}
 
               <div className="card-list-body">
-                <div className="card-meta-line">
-                  <span>{item.date} • {item.category}</span>
+                <div
+                  className="card-meta-line"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>
+                    {item.date} • {item.itemType || item.category}
+                  </span>
+                  <div className="sensory-rating-pill">
+                    <span className="sensory-star">★</span>
+                    <span className="sensory-rating-val">
+                      {item.rating?.toFixed(1) || "5.0"}
+                    </span>
+                    <span className="sensory-rating-scale">/5</span>
+                  </div>
                 </div>
                 <h3 className="card-title-text">{item.title}</h3>
+                {item.creator && (
+                  <div className="sensory-creator-text">
+                    {item.creator} {item.year ? `(${item.year})` : ""}
+                  </div>
+                )}
                 {item.subtitle && (
                   <div className="sensory-subtitle-text">{item.subtitle}</div>
                 )}
@@ -294,9 +384,26 @@ export default function KeseharianPage() {
                 <span className="compact-title">
                   {SENSE_ICONS[item.category]} {item.title}
                 </span>
-                <span className="compact-badge">{item.category}</span>
+                <span className="compact-badge">
+                  {item.itemType || item.category}
+                </span>
+                {item.creator && (
+                  <span
+                    className="compact-creator"
+                    style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}
+                  >
+                    • {item.creator}
+                  </span>
+                )}
               </div>
               <div className="compact-right">
+                <div
+                  className="sensory-rating-pill"
+                  style={{ padding: "0.15rem 0.45rem", fontSize: "0.76rem" }}
+                >
+                  <span className="sensory-star">★</span>
+                  <span>{item.rating?.toFixed(1) || "5.0"}</span>
+                </div>
                 <span className="compact-meta">{item.date}</span>
                 <span className="compact-arrow">↗</span>
               </div>

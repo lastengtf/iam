@@ -24,7 +24,7 @@ export const STORAGE_KEYS = {
   WORK: "ten_admin_work",
   PUBLICATIONS: "ten_admin_pub",
   STACK: "ten_admin_stack",
-  DAILY: "ten_admin_daily",
+  DAILY: "ten_admin_daily_v2",
   NEWS: "ten_admin_news",
   PROFILE: "ten_admin_profile",
 } as const;

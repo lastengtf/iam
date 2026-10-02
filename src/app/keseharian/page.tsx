@@ -183,7 +183,7 @@ export default function KeseharianPage() {
                   </div>
                 )}
 
-                {/* Rating terlihat langsung tanpa hover */}
+                {/* Rating minimalis terlihat langsung di pojok cover */}
                 <div className="sensory-gallery-rating-badge">
                   <span className="sensory-star">★</span>
                   <span className="rating-val">
@@ -191,16 +191,12 @@ export default function KeseharianPage() {
                   </span>
                 </div>
 
-                {/* Type Badge pojok atas terlihat langsung */}
-                {item.itemType && (
-                  <div className="sensory-gallery-type-badge">
-                    {item.itemType}
-                  </div>
-                )}
-
-                {/* Overlay hover seperti kategori lainnya (judul & info muncul saat di-hover) */}
+                {/* Overlay hover seperti kategori lainnya (tipe, judul & kreator muncul saat di-hover) */}
                 <div className="card-gallery-overlay sensory-hover-overlay">
                   <div className="sensory-hover-content">
+                    {item.itemType && (
+                      <span className="sensory-hover-type">{item.itemType}</span>
+                    )}
                     <span className="card-gallery-title">{item.title}</span>
                     {item.creator && (
                       <span className="sensory-hover-creator">

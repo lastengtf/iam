@@ -26,6 +26,7 @@ import {
 
 type AdminTab = "overview" | "content" | "profile" | "sso" | "backup";
 type ContentCategory = "all" | "projects" | "work" | "publications" | "alat" | "keseharian" | "news";
+type MajorCategory = "pengalaman" | "riset-karya" | "alat" | "keseharian" | "warta";
 type ItemType = "projects" | "work" | "publications" | "alat" | "keseharian" | "news";
 
 interface UnifiedRow {
@@ -55,9 +56,13 @@ export default function AdminPage() {
 
   // Tab & Filter States
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [majorCategory, setMajorCategory] = useState<MajorCategory>("pengalaman");
+  const [risetKaryaSubFilter, setRisetKaryaSubFilter] = useState<"all" | "projects" | "publications">("all");
+  const [alatSubFilter, setAlatSubFilter] = useState<string>("all");
+  const [keseharianSubFilter, setKeseharianSubFilter] = useState<string>("all");
   const [contentCategory, setContentCategory] = useState<ContentCategory>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"default" | "title-asc" | "title-desc">("default");
+  const [sortBy, setSortBy] = useState<"default" | "title-asc" | "title-desc" | "rating-desc" | "likes-desc">("default");
   const [searchQuery, setSearchQuery] = useState("");
   const [notification, setNotification] = useState<{ message: string; type: "success" | "info" } | null>(null);
 
@@ -114,6 +119,9 @@ export default function AdminPage() {
   const [formSubtitle, setFormSubtitle] = useState("");
   const [formDate, setFormDate] = useState("Hari Ini");
   const [formThoughts, setFormThoughts] = useState("");
+  const [formRating, setFormRating] = useState<number>(4.8);
+  const [formItemType, setFormItemType] = useState<string>("Film");
+  const [formCreator, setFormCreator] = useState<string>("");
   const [formAuthor, setFormAuthor] = useState("TEN Editorial");
   const [formNewsContent, setFormNewsContent] = useState("");
 
@@ -226,7 +234,181 @@ export default function AdminPage() {
     ];
   }, [projects, work, publications, stack, dailyLogs, news]);
 
-  // Filtered & Sorted Rows
+  // Specific Memoized Lists for Each Major Category
+  const filteredWork = useMemo(() => {
+    let result = work.filter((w) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        w.role.toLowerCase().includes(q) ||
+        w.company.toLowerCase().includes(q) ||
+        w.location.toLowerCase().includes(q) ||
+        w.summary.toLowerCase().includes(q) ||
+        w.skills.some((s) => s.toLowerCase().includes(q));
+      return matchSearch;
+    });
+
+    if (sortBy === "title-asc") {
+      result = [...result].sort((a, b) => a.role.localeCompare(b.role));
+    } else if (sortBy === "title-desc") {
+      result = [...result].sort((a, b) => b.role.localeCompare(a.role));
+    }
+    return result;
+  }, [work, searchQuery, sortBy]);
+
+  const risetKaryaItems = useMemo(() => {
+    const list: {
+      id: string;
+      itemType: "projects" | "publications";
+      typeLabel: "Karya" | "Publikasi";
+      title: string;
+      category: string;
+      metric: string;
+      status: "active" | "progress" | "planned";
+      statusText: string;
+      imageUrl: string;
+      previewUrl: string;
+      rawItem: ProjectItem | PublicationItem;
+    }[] = [];
+
+    if (risetKaryaSubFilter === "all" || risetKaryaSubFilter === "projects") {
+      projects.forEach((p) => {
+        let status: "active" | "progress" | "planned" = "active";
+        let statusText = "Selesai";
+        if (p.status === "in-progress") {
+          status = "progress";
+          statusText = "Sedang Dibuat";
+        } else if (p.status === "planned") {
+          status = "planned";
+          statusText = "Rencana";
+        }
+        list.push({
+          id: p.slug,
+          itemType: "projects",
+          typeLabel: "Karya",
+          title: p.name,
+          category: p.category,
+          metric: p.metrics || "Digital Product",
+          status,
+          statusText,
+          imageUrl: p.imageUrl,
+          previewUrl: `/karya/details?id=proj-${p.slug}`,
+          rawItem: p,
+        });
+      });
+    }
+
+    if (risetKaryaSubFilter === "all" || risetKaryaSubFilter === "publications") {
+      publications.forEach((pub) => {
+        list.push({
+          id: pub.id,
+          itemType: "publications",
+          typeLabel: "Publikasi",
+          title: pub.title,
+          category: pub.publisher,
+          metric: `Tahun ${pub.year}`,
+          status: "active",
+          statusText: "Diterbitkan",
+          imageUrl: pub.imageUrl,
+          previewUrl: `/karya/details?id=pub-${pub.id}`,
+          rawItem: pub,
+        });
+      });
+    }
+
+    return list;
+  }, [projects, publications, risetKaryaSubFilter]);
+
+  const filteredRisetKarya = useMemo(() => {
+    let result = risetKaryaItems.filter((item) => {
+      const matchStatus = statusFilter === "all" || item.status === statusFilter;
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        item.title.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        item.metric.toLowerCase().includes(q);
+      return matchStatus && matchSearch;
+    });
+
+    if (sortBy === "title-asc") {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "title-desc") {
+      result = [...result].sort((a, b) => b.title.localeCompare(a.title));
+    }
+    return result;
+  }, [risetKaryaItems, statusFilter, searchQuery, sortBy]);
+
+  const filteredStack = useMemo(() => {
+    let result = stack.filter((s) => {
+      const matchCategory = alatSubFilter === "all" || s.category === alatSubFilter;
+      const matchStatus = statusFilter === "all" || s.status === statusFilter;
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.platforms.some((pl) => pl.toLowerCase().includes(q));
+      return matchCategory && matchStatus && matchSearch;
+    });
+
+    if (sortBy === "title-asc") {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "title-desc") {
+      result = [...result].sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortBy === "likes-desc") {
+      result = [...result].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    }
+    return result;
+  }, [stack, alatSubFilter, statusFilter, searchQuery, sortBy]);
+
+  const filteredDaily = useMemo(() => {
+    let result = dailyLogs.filter((d) => {
+      const matchCategory = keseharianSubFilter === "all" || d.category === keseharianSubFilter;
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        d.title.toLowerCase().includes(q) ||
+        (d.subtitle && d.subtitle.toLowerCase().includes(q)) ||
+        d.summary.toLowerCase().includes(q) ||
+        (d.creator && d.creator.toLowerCase().includes(q)) ||
+        (d.itemType && d.itemType.toLowerCase().includes(q)) ||
+        d.tags.some((t) => t.toLowerCase().includes(q));
+      return matchCategory && matchSearch;
+    });
+
+    if (sortBy === "title-asc") {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "title-desc") {
+      result = [...result].sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortBy === "rating-desc") {
+      result = [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    }
+    return result;
+  }, [dailyLogs, keseharianSubFilter, searchQuery, sortBy]);
+
+  const filteredNews = useMemo(() => {
+    let result = news.filter((n) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        n.title.toLowerCase().includes(q) ||
+        n.category.toLowerCase().includes(q) ||
+        n.author.toLowerCase().includes(q) ||
+        n.summary.toLowerCase().includes(q);
+      return matchSearch;
+    });
+
+    if (sortBy === "title-asc") {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "title-desc") {
+      result = [...result].sort((a, b) => b.title.localeCompare(a.title));
+    }
+    return result;
+  }, [news, searchQuery, sortBy]);
+
+  // General Filtered & Sorted Rows (fallback for unified search)
   const filteredContents = useMemo(() => {
     let result = allRows.filter((item) => {
       const matchCategory = contentCategory === "all" || item.type === contentCategory;
@@ -284,6 +466,9 @@ export default function AdminPage() {
     setFormSubtitle("Refleksi Keseharian");
     setFormDate("Hari Ini");
     setFormThoughts("Membangun konsistensi dan eksplorasi berkesinambungan.");
+    setFormRating(4.8);
+    setFormItemType(type === "keseharian" ? "Film" : "");
+    setFormCreator("");
     setFormAuthor("TEN Editorial");
     setFormNewsContent("Kabar berkala pemutakhiran ekosistem TEN.");
 
@@ -353,6 +538,9 @@ export default function AdminPage() {
       setFormTags(d.tags.join(", "));
       setFormImageUrl(d.imageUrl || "");
       setFormHref(d.link || "");
+      setFormRating(d.rating ?? 4.8);
+      setFormItemType(d.itemType || "");
+      setFormCreator(d.creator || "");
     } else if (row.type === "news") {
       const n = row.rawItem as NewsItem;
       setFormTitle(n.title);
@@ -571,8 +759,9 @@ export default function AdminPage() {
         tags: tagsArray.length > 0 ? tagsArray : ["Keseharian", "Jurnal"],
         imageUrl: formImageUrl || defaultImg,
         link: formHref || undefined,
-        rating: existingItem?.rating ?? 4.8,
+        rating: Number(formRating) || 4.8,
         itemType:
+          formItemType.trim() ||
           existingItem?.itemType ||
           (formDailyCategory === "Melihat"
             ? "Film"
@@ -581,8 +770,8 @@ export default function AdminPage() {
             : formDailyCategory === "Mendengar"
             ? "Album Musik"
             : "Seduh Manual"),
-        creator: existingItem?.creator,
-        year: existingItem?.year || new Date().getFullYear().toString(),
+        creator: formCreator.trim() || existingItem?.creator,
+        year: formYear || existingItem?.year || new Date().getFullYear().toString(),
       };
 
       if (modalMode === "create") {
@@ -692,6 +881,65 @@ export default function AdminPage() {
     { id: "keseharian", label: "Keseharian", count: dailyLogs.length },
     { id: "news", label: "Warta", count: news.length },
   ];
+
+  const MAJOR_CATEGORIES = [
+    {
+      id: "pengalaman" as const,
+      label: "Pengalaman",
+      icon: "💼",
+      count: work.length,
+      description: "Karier, rekayasa & inisiatif",
+      unit: "riwayat",
+    },
+    {
+      id: "riset-karya" as const,
+      label: "Riset & Karya",
+      icon: "🚀",
+      count: projects.length + publications.length,
+      description: "Proyek digital & riset ilmiah",
+      unit: "item",
+    },
+    {
+      id: "alat" as const,
+      label: "Alat",
+      icon: "🛠️",
+      count: stack.length,
+      description: "Software, hardware & cloud",
+      unit: "alat",
+    },
+    {
+      id: "keseharian" as const,
+      label: "Keseharian",
+      icon: "☕",
+      count: dailyLogs.length,
+      description: "Watched, read, listened & tasted",
+      unit: "catatan",
+    },
+    {
+      id: "warta" as const,
+      label: "Warta",
+      icon: "📰",
+      count: news.length,
+      description: "Kabar rilis & catatan editorial",
+      unit: "artikel",
+    },
+  ];
+
+  const watchedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Melihat").length, [dailyLogs]);
+  const readCount = useMemo(() => dailyLogs.filter((d) => d.category === "Membaca").length, [dailyLogs]);
+  const listenedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Mendengar").length, [dailyLogs]);
+  const tastedCount = useMemo(() => dailyLogs.filter((d) => d.category === "Mengecap").length, [dailyLogs]);
+
+  const softwareCount = useMemo(() => stack.filter((s) => s.category === "Software & Otomasi").length, [stack]);
+  const hardwareCount = useMemo(() => stack.filter((s) => s.category === "Hardware & EDC").length, [stack]);
+  const infraCount = useMemo(() => stack.filter((s) => s.category === "Infrastruktur & Cloud").length, [stack]);
+
+  const handleSelectMajorCategory = (cat: MajorCategory) => {
+    setMajorCategory(cat);
+    setSearchQuery("");
+    setStatusFilter("all");
+    setSortBy("default");
+  };
 
   if (authStatus === "loading") {
     return (
@@ -903,7 +1151,8 @@ export default function AdminPage() {
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
-                    setContentCategory("projects");
+                    setMajorCategory("riset-karya");
+                    setRisetKaryaSubFilter("projects");
                     handleOpenCreateModal("projects");
                   }}
                 >
@@ -914,7 +1163,7 @@ export default function AdminPage() {
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
-                    setContentCategory("work");
+                    setMajorCategory("pengalaman");
                     handleOpenCreateModal("work");
                   }}
                 >
@@ -925,7 +1174,8 @@ export default function AdminPage() {
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
-                    setContentCategory("publications");
+                    setMajorCategory("riset-karya");
+                    setRisetKaryaSubFilter("publications");
                     handleOpenCreateModal("publications");
                   }}
                 >
@@ -936,7 +1186,8 @@ export default function AdminPage() {
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
-                    setContentCategory("alat");
+                    setMajorCategory("alat");
+                    setAlatSubFilter("all");
                     handleOpenCreateModal("alat");
                   }}
                 >
@@ -947,7 +1198,8 @@ export default function AdminPage() {
                   className="admin-btn-outline"
                   onClick={() => {
                     setActiveTab("content");
-                    setContentCategory("keseharian");
+                    setMajorCategory("keseharian");
+                    setKeseharianSubFilter("all");
                     handleOpenCreateModal("keseharian");
                   }}
                 >
@@ -973,68 +1225,312 @@ export default function AdminPage() {
       {/* TAB 2: CONTENT MANAGEMENT */}
       {activeTab === "content" && (
         <div className="admin-tab-body">
-          <div className="admin-section-bar">
-            <div>
-              <h2 className="admin-section-title">Kelola Konten & Inisiatif</h2>
-              <p className="admin-section-subtitle">
-                Sunting, duplikasi, tambah, atau hapus konten di 5 pilar dan warta platform TEN.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="admin-btn-primary"
-              onClick={() => handleOpenCreateModal(contentCategory === "all" ? "projects" : contentCategory)}
-            >
-              + Tambah Konten Baru
-            </button>
-          </div>
-
-          {/* Filter Bar */}
-          <div className="admin-filter-bar">
-            <div className="admin-category-pills">
-              {CATEGORY_TABS.map((cat) => (
+          {/* Major Category Cards Navigator */}
+          <div className="admin-major-tabs">
+            {MAJOR_CATEGORIES.map((cat) => {
+              const isActive = majorCategory === cat.id;
+              return (
                 <button
                   key={cat.id}
                   type="button"
-                  className={`admin-category-btn ${contentCategory === cat.id ? "active" : ""}`}
-                  onClick={() => setContentCategory(cat.id)}
+                  className={`admin-major-card ${isActive ? "active" : ""}`}
+                  onClick={() => handleSelectMajorCategory(cat.id)}
                 >
-                  {cat.label} ({cat.count})
+                  <div className="admin-major-icon">{cat.icon}</div>
+                  <div className="admin-major-info">
+                    <div className="admin-major-title-row">
+                      <span className="admin-major-title">{cat.label}</span>
+                      <span className="admin-major-count">{cat.count}</span>
+                    </div>
+                    <span className="admin-major-desc">{cat.description}</span>
+                  </div>
                 </button>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* Section Bar */}
+          <div className="admin-section-bar">
+            <div>
+              {majorCategory === "pengalaman" && (
+                <>
+                  <h2 className="admin-section-title">Kelola Riwayat Pengalaman & Inisiatif</h2>
+                  <p className="admin-section-subtitle">
+                    Karier profesional, inisiatif kepemimpinan, dan perjalanan rekayasa sistem.
+                  </p>
+                </>
+              )}
+              {majorCategory === "riset-karya" && (
+                <>
+                  <h2 className="admin-section-title">Kelola Riset & Karya Digital</h2>
+                  <p className="admin-section-subtitle">
+                    Kompilasi proyek digital, solusi open source, serta dokumen riset ilmiah.
+                  </p>
+                </>
+              )}
+              {majorCategory === "alat" && (
+                <>
+                  <h2 className="admin-section-title">Kelola Alat & Instrumen Komputasi</h2>
+                  <p className="admin-section-subtitle">
+                    Katalog instrumen software produktivitas, hardware EDC, dan infrastruktur cloud.
+                  </p>
+                </>
+              )}
+              {majorCategory === "keseharian" && (
+                <>
+                  <h2 className="admin-section-title">Kelola Pengalaman Keseharian</h2>
+                  <p className="admin-section-subtitle">
+                    Dokumentasi tontonan (Watched), bacaan (Read), pendengaran (Listened), dan seduhan (Tasted).
+                  </p>
+                </>
+              )}
+              {majorCategory === "warta" && (
+                <>
+                  <h2 className="admin-section-title">Kelola Warta & Pembaruan Platform</h2>
+                  <p className="admin-section-subtitle">
+                    Kabar pemutakhiran, rilisan fitur, dan pengumuman ekosistem TEN.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="admin-header-actions">
+              {majorCategory === "pengalaman" && (
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={() => handleOpenCreateModal("work")}
+                >
+                  + Tambah Pengalaman Baru
+                </button>
+              )}
+
+              {majorCategory === "riset-karya" && (
+                <>
+                  <button
+                    type="button"
+                    className="admin-btn-primary"
+                    onClick={() => handleOpenCreateModal("projects")}
+                  >
+                    + Tambah Karya / Proyek
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn-outline"
+                    onClick={() => handleOpenCreateModal("publications")}
+                  >
+                    + Tambah Riset / Publikasi
+                  </button>
+                </>
+              )}
+
+              {majorCategory === "alat" && (
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={() => handleOpenCreateModal("alat")}
+                >
+                  + Tambah Alat / Stack
+                </button>
+              )}
+
+              {majorCategory === "keseharian" && (
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={() => handleOpenCreateModal("keseharian")}
+                >
+                  + Tambah Catatan Keseharian
+                </button>
+              )}
+
+              {majorCategory === "warta" && (
+                <button
+                  type="button"
+                  className="admin-btn-primary"
+                  onClick={() => handleOpenCreateModal("news")}
+                >
+                  + Tambah Warta Baru
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Filter Bar with Sub-categories */}
+          <div className="admin-filter-bar">
+            {/* Sub-Filters per category */}
+            <div className="admin-category-pills">
+              {majorCategory === "pengalaman" && (
+                <button type="button" className="admin-category-btn active">
+                  Semua Riwayat ({work.length})
+                </button>
+              )}
+
+              {majorCategory === "riset-karya" && (
+                <>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${risetKaryaSubFilter === "all" ? "active" : ""}`}
+                    onClick={() => setRisetKaryaSubFilter("all")}
+                  >
+                    Semua ({projects.length + publications.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${risetKaryaSubFilter === "projects" ? "active" : ""}`}
+                    onClick={() => setRisetKaryaSubFilter("projects")}
+                  >
+                    Karya / Proyek ({projects.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${risetKaryaSubFilter === "publications" ? "active" : ""}`}
+                    onClick={() => setRisetKaryaSubFilter("publications")}
+                  >
+                    Riset & Publikasi ({publications.length})
+                  </button>
+                </>
+              )}
+
+              {majorCategory === "alat" && (
+                <>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${alatSubFilter === "all" ? "active" : ""}`}
+                    onClick={() => setAlatSubFilter("all")}
+                  >
+                    Semua Alat ({stack.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${alatSubFilter === "Software & Otomasi" ? "active" : ""}`}
+                    onClick={() => setAlatSubFilter("Software & Otomasi")}
+                  >
+                    Software & Otomasi ({softwareCount})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${alatSubFilter === "Hardware & EDC" ? "active" : ""}`}
+                    onClick={() => setAlatSubFilter("Hardware & EDC")}
+                  >
+                    Hardware & EDC ({hardwareCount})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${alatSubFilter === "Infrastruktur & Cloud" ? "active" : ""}`}
+                    onClick={() => setAlatSubFilter("Infrastruktur & Cloud")}
+                  >
+                    Infrastruktur & Cloud ({infraCount})
+                  </button>
+                </>
+              )}
+
+              {majorCategory === "keseharian" && (
+                <>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${keseharianSubFilter === "all" ? "active" : ""}`}
+                    onClick={() => setKeseharianSubFilter("all")}
+                  >
+                    Semua ({dailyLogs.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${keseharianSubFilter === "Melihat" ? "active" : ""}`}
+                    onClick={() => setKeseharianSubFilter("Melihat")}
+                  >
+                    👁️ Watched ({watchedCount})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${keseharianSubFilter === "Membaca" ? "active" : ""}`}
+                    onClick={() => setKeseharianSubFilter("Membaca")}
+                  >
+                    📖 Read ({readCount})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${keseharianSubFilter === "Mendengar" ? "active" : ""}`}
+                    onClick={() => setKeseharianSubFilter("Mendengar")}
+                  >
+                    🎧 Listened ({listenedCount})
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-category-btn ${keseharianSubFilter === "Mengecap" ? "active" : ""}`}
+                    onClick={() => setKeseharianSubFilter("Mengecap")}
+                  >
+                    ☕ Tasted ({tastedCount})
+                  </button>
+                </>
+              )}
+
+              {majorCategory === "warta" && (
+                <button type="button" className="admin-category-btn active">
+                  Semua Warta ({news.length})
+                </button>
+              )}
             </div>
 
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-              {/* Status Filter */}
-              <select
-                className="admin-select"
-                style={{ width: "auto", fontSize: "0.75rem", padding: "0.3rem 0.5rem" }}
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">Semua Status</option>
-                <option value="active">Selesai / Aktif</option>
-                <option value="progress">Sedang Dibuat / Evaluasi</option>
-                <option value="planned">Rencana</option>
-              </select>
+              {/* Status Filter for categories that support it */}
+              {(majorCategory === "riset-karya" || majorCategory === "alat") && (
+                <select
+                  className="admin-select"
+                  style={{ width: "auto", fontSize: "0.75rem", padding: "0.3rem 0.5rem" }}
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">Semua Status</option>
+                  {majorCategory === "riset-karya" ? (
+                    <>
+                      <option value="active">Selesai / Aktif</option>
+                      <option value="progress">Sedang Dibuat</option>
+                      <option value="planned">Rencana</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="active">Aktif Dipakai</option>
+                      <option value="evaluating">Sedang Dievaluasi</option>
+                      <option value="retired">Pensiun / Arsip</option>
+                    </>
+                  )}
+                </select>
+              )}
 
               {/* Sorting Filter */}
               <select
                 className="admin-select"
                 style={{ width: "auto", fontSize: "0.75rem", padding: "0.3rem 0.5rem" }}
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "default" | "title-asc" | "title-desc")}
+                onChange={(e) => setSortBy(e.target.value as "default" | "title-asc" | "title-desc" | "rating-desc" | "likes-desc")}
               >
                 <option value="default">Urutan Bawaan</option>
-                <option value="title-asc">Judul (A - Z)</option>
-                <option value="title-desc">Judul (Z - A)</option>
+                <option value="title-asc">Judul / Nama (A - Z)</option>
+                <option value="title-desc">Judul / Nama (Z - A)</option>
+                {majorCategory === "keseharian" && (
+                  <option value="rating-desc">Rating Tertinggi (★)</option>
+                )}
+                {majorCategory === "alat" && (
+                  <option value="likes-desc">Apresiasi Terbanyak (♥)</option>
+                )}
               </select>
 
               {/* Search Box */}
               <div className="admin-search-input-wrap">
                 <input
                   type="text"
-                  placeholder="Cari item..."
+                  placeholder={
+                    majorCategory === "pengalaman"
+                      ? "Cari peran, instansi, keahlian..."
+                      : majorCategory === "riset-karya"
+                      ? "Cari karya, riset, kategori..."
+                      : majorCategory === "alat"
+                      ? "Cari nama alat, platform..."
+                      : majorCategory === "keseharian"
+                      ? "Cari judul, kreator, format..."
+                      : "Cari warta, topik, penulis..."
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="admin-search-input"
@@ -1043,99 +1539,514 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Table Container Specialized by Major Category */}
           <div className="admin-table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "80px" }}>Tipe</th>
-                  <th>Judul & Media</th>
-                  <th>Kategori / Instansi</th>
-                  <th>Metrik / Info</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: "right" }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredContents.length === 0 ? (
+            {/* 1. TABLE: PENGALAMAN */}
+            {majorCategory === "pengalaman" && (
+              <table className="admin-table">
+                <thead>
                   <tr>
-                    <td colSpan={6} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
-                      Tidak ada konten yang cocok dengan filter atau pencarian &quot;{searchQuery}&quot;.
-                    </td>
+                    <th>Peran & Posisi</th>
+                    <th>Instansi & Lokasi</th>
+                    <th>Periode</th>
+                    <th>Keahlian Terkait</th>
+                    <th style={{ textAlign: "right" }}>Aksi</th>
                   </tr>
-                ) : (
-                  filteredContents.map((row) => (
-                    <tr key={`${row.type}-${row.id}`}>
-                      <td>
-                        <span className="admin-table-badge">{row.typeLabel}</span>
-                      </td>
-                      <td>
-                        <div className="admin-table-item-cell">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={row.imageUrl}
-                            alt=""
-                            className="admin-thumb-img"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
-                            }}
-                          />
-                          <div>
-                            <div className="admin-table-title">{row.title}</div>
-                            <div className="admin-field-help" style={{ marginTop: 0 }}>
-                              ID: <code>{row.id}</code>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="admin-table-sub">{row.category}</td>
-                      <td className="admin-table-meta">{row.metric}</td>
-                      <td>
-                        <span className={`admin-status-pill ${row.status}`}>
-                          {row.statusText}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        <div className="admin-table-actions">
-                          <Link
-                            href={row.previewUrl}
-                            className="admin-btn-sm admin-btn-view"
-                            title="Buka pratinjau halaman detail"
-                          >
-                            Lihat ↗
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEditModal(row)}
-                            className="admin-btn-sm admin-btn-edit"
-                            title="Sunting konten ini"
-                          >
-                            ✎ Sunting
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDuplicateItem(row)}
-                            className="admin-btn-sm admin-btn-dup"
-                            title="Duplikasi item ini"
-                          >
-                            ⎘ Duplikat
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteItem(row.type, row.id, row.title)}
-                            className="admin-btn-sm admin-btn-del"
-                            title="Hapus item ini"
-                          >
-                            ✕ Hapus
-                          </button>
-                        </div>
+                </thead>
+                <tbody>
+                  {filteredWork.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
+                        Tidak ada riwayat pengalaman yang cocok dengan &quot;{searchQuery}&quot;.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredWork.map((w) => (
+                      <tr key={w.id}>
+                        <td>
+                          <div className="admin-table-item-cell">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={w.imageUrl}
+                              alt=""
+                              className="admin-thumb-img"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&auto=format&fit=crop&q=60";
+                              }}
+                            />
+                            <div>
+                              <div className="admin-table-title">{w.role}</div>
+                              <div className="admin-field-help" style={{ marginTop: 0 }}>
+                                ID: <code>{w.id}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{w.company}</div>
+                          <div className="admin-table-sub" style={{ fontSize: "0.74rem" }}>{w.location}</div>
+                        </td>
+                        <td className="admin-table-meta">
+                          <span className="admin-status-pill active">{w.period}</span>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap", maxWidth: "260px" }}>
+                            {w.skills.slice(0, 3).map((sk) => (
+                              <span key={sk} className="admin-table-badge">{sk}</span>
+                            ))}
+                            {w.skills.length > 3 && (
+                              <span className="admin-table-badge">+{w.skills.length - 3}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          <div className="admin-table-actions">
+                            <Link
+                              href={`/pengalaman/details?id=${w.id}`}
+                              className="admin-btn-sm admin-btn-view"
+                              title="Buka pratinjau halaman detail"
+                            >
+                              Lihat ↗
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal({ type: "work", id: w.id, title: w.role, rawItem: w } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-edit"
+                              title="Sunting riwayat ini"
+                            >
+                              ✎ Sunting
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateItem({ type: "work", id: w.id, title: w.role, rawItem: w } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-dup"
+                              title="Duplikasi riwayat ini"
+                            >
+                              ⎘ Duplikat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem("work", w.id, w.role)}
+                              className="admin-btn-sm admin-btn-del"
+                              title="Hapus riwayat ini"
+                            >
+                              ✕ Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {/* 2. TABLE: RISET & KARYA */}
+            {majorCategory === "riset-karya" && (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "90px" }}>Tipe</th>
+                    <th>Judul & Media</th>
+                    <th>Kategori / Penerbit</th>
+                    <th>Metrik / Info</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: "right" }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRisetKarya.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
+                        Tidak ada karya atau riset yang cocok dengan filter atau pencarian &quot;{searchQuery}&quot;.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRisetKarya.map((item) => (
+                      <tr key={`${item.itemType}-${item.id}`}>
+                        <td>
+                          <span
+                            className="admin-table-badge"
+                            style={{
+                              background: item.itemType === "projects" ? "rgba(37, 99, 235, 0.08)" : "rgba(124, 58, 237, 0.08)",
+                              color: item.itemType === "projects" ? "#2563eb" : "#7c3aed",
+                              borderColor: item.itemType === "projects" ? "rgba(37, 99, 235, 0.2)" : "rgba(124, 58, 237, 0.2)",
+                            }}
+                          >
+                            {item.typeLabel}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="admin-table-item-cell">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.imageUrl}
+                              alt=""
+                              className="admin-thumb-img"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&auto=format&fit=crop&q=60";
+                              }}
+                            />
+                            <div>
+                              <div className="admin-table-title">{item.title}</div>
+                              <div className="admin-field-help" style={{ marginTop: 0 }}>
+                                ID: <code>{item.id}</code>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="admin-table-sub">{item.category}</td>
+                        <td className="admin-table-meta">{item.metric}</td>
+                        <td>
+                          <span className={`admin-status-pill ${item.status}`}>
+                            {item.statusText}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          <div className="admin-table-actions">
+                            <Link
+                              href={item.previewUrl}
+                              className="admin-btn-sm admin-btn-view"
+                              title="Buka pratinjau halaman detail"
+                            >
+                              Lihat ↗
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal({ type: item.itemType, id: item.id, title: item.title, rawItem: item.rawItem } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-edit"
+                              title="Sunting item ini"
+                            >
+                              ✎ Sunting
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateItem({ type: item.itemType, id: item.id, title: item.title, rawItem: item.rawItem } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-dup"
+                              title="Duplikasi item ini"
+                            >
+                              ⎘ Duplikat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem(item.itemType, item.id, item.title)}
+                              className="admin-btn-sm admin-btn-del"
+                              title="Hapus item ini"
+                            >
+                              ✕ Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {/* 3. TABLE: ALAT / STACK */}
+            {majorCategory === "alat" && (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Alat & Ikon</th>
+                    <th>Kategori Stack</th>
+                    <th>Platform Komputasi</th>
+                    <th>Apresiasi (Likes)</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: "right" }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStack.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
+                        Tidak ada alat yang cocok dengan filter atau pencarian &quot;{searchQuery}&quot;.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredStack.map((s) => {
+                      const statusClass = s.status === "active" ? "active" : s.status === "evaluating" ? "progress" : "retired";
+                      const statusLabel = s.status === "active" ? "Aktif Dipakai" : s.status === "evaluating" ? "Evaluasi" : "Arsip";
+                      return (
+                        <tr key={s.id}>
+                          <td>
+                            <div className="admin-table-item-cell">
+                              <span style={{ fontSize: "1.4rem", marginRight: "0.25rem" }}>{s.icon || "🛠"}</span>
+                              <div>
+                                <div className="admin-table-title">{s.name}</div>
+                                <div className="admin-field-help" style={{ marginTop: 0 }}>
+                                  ID: <code>{s.id}</code>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="admin-table-sub">
+                            <span className="admin-table-badge">{s.category}</span>
+                          </td>
+                          <td className="admin-table-meta">{s.platforms.join(", ")}</td>
+                          <td>
+                            <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", color: "#e11d48", fontWeight: 700 }}>
+                              ♥ {s.likes || 1}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`admin-status-pill ${statusClass}`}>{statusLabel}</span>
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            <div className="admin-table-actions">
+                              <Link
+                                href={`/alat/details?id=${s.id}`}
+                                className="admin-btn-sm admin-btn-view"
+                                title="Buka pratinjau halaman detail"
+                              >
+                                Lihat ↗
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditModal({ type: "alat", id: s.id, title: s.name, rawItem: s } as UnifiedRow)}
+                                className="admin-btn-sm admin-btn-edit"
+                                title="Sunting alat ini"
+                              >
+                                ✎ Sunting
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDuplicateItem({ type: "alat", id: s.id, title: s.name, rawItem: s } as UnifiedRow)}
+                                className="admin-btn-sm admin-btn-dup"
+                                title="Duplikasi alat ini"
+                              >
+                                ⎘ Duplikat
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteItem("alat", s.id, s.name)}
+                                className="admin-btn-sm admin-btn-del"
+                                title="Hapus alat ini"
+                              >
+                                ✕ Hapus
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {/* 4. TABLE: KESEHARIAN */}
+            {majorCategory === "keseharian" && (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "70px" }}>Poster</th>
+                    <th>Judul & Format</th>
+                    <th>Kategori Indera</th>
+                    <th>Kreator / Pembuat</th>
+                    <th>Rating</th>
+                    <th>Tanggal</th>
+                    <th style={{ textAlign: "right" }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredDaily.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
+                        Tidak ada catatan keseharian yang cocok dengan filter &quot;{searchQuery}&quot;.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredDaily.map((d) => (
+                      <tr key={d.id}>
+                        <td>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={d.imageUrl || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&auto=format&fit=crop&q=60"}
+                            alt=""
+                            className="admin-thumb-img"
+                            style={{ width: "42px", height: "56px", objectFit: "cover", borderRadius: "4px" }}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100&auto=format&fit=crop&q=60";
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <div className="admin-table-title">{d.title}</div>
+                          <div style={{ display: "flex", gap: "0.35rem", alignItems: "center", marginTop: "0.15rem" }}>
+                            {d.itemType && (
+                              <span className="admin-table-badge" style={{ fontSize: "0.65rem", padding: "0.08rem 0.35rem" }}>
+                                {d.itemType}
+                              </span>
+                            )}
+                            {d.subtitle && (
+                              <span className="admin-table-sub" style={{ fontSize: "0.72rem" }}>
+                                {d.subtitle}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            className="admin-table-badge"
+                            style={{
+                              background:
+                                d.category === "Melihat"
+                                  ? "rgba(59, 130, 246, 0.08)"
+                                  : d.category === "Membaca"
+                                  ? "rgba(16, 185, 129, 0.08)"
+                                  : d.category === "Mendengar"
+                                  ? "rgba(168, 85, 247, 0.08)"
+                                  : "rgba(245, 158, 11, 0.08)",
+                              color:
+                                d.category === "Melihat"
+                                  ? "#2563eb"
+                                  : d.category === "Membaca"
+                                  ? "#059669"
+                                  : d.category === "Mendengar"
+                                  ? "#7c3aed"
+                                  : "#d97706",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {d.category === "Melihat"
+                              ? "👁️ Melihat"
+                              : d.category === "Membaca"
+                              ? "📖 Membaca"
+                              : d.category === "Mendengar"
+                              ? "🎧 Mendengar"
+                              : "☕ Mengecap"}
+                          </span>
+                        </td>
+                        <td className="admin-table-sub" style={{ fontSize: "0.8rem" }}>
+                          {d.creator || "—"}
+                        </td>
+                        <td>
+                          <span className="admin-table-rating">
+                            ★ {(d.rating ?? 4.8).toFixed(1)}
+                          </span>
+                        </td>
+                        <td className="admin-table-meta">{d.date}</td>
+                        <td style={{ textAlign: "right" }}>
+                          <div className="admin-table-actions">
+                            <Link
+                              href={`/keseharian/details?id=${d.id}`}
+                              className="admin-btn-sm admin-btn-view"
+                              title="Buka pratinjau catatan"
+                            >
+                              Lihat ↗
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal({ type: "keseharian", id: d.id, title: d.title, rawItem: d } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-edit"
+                              title="Sunting catatan ini"
+                            >
+                              ✎ Sunting
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateItem({ type: "keseharian", id: d.id, title: d.title, rawItem: d } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-dup"
+                              title="Duplikasi catatan ini"
+                            >
+                              ⎘ Duplikat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem("keseharian", d.id, d.title)}
+                              className="admin-btn-sm admin-btn-del"
+                              title="Hapus catatan ini"
+                            >
+                              ✕ Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {/* 5. TABLE: WARTA */}
+            {majorCategory === "warta" && (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Judul Warta</th>
+                    <th>Kategori</th>
+                    <th>Penulis / Redaksi</th>
+                    <th>Tanggal Rilis</th>
+                    <th style={{ textAlign: "right" }}>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNews.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: "center", padding: "2.5rem", color: "var(--text-dim)" }}>
+                        Tidak ada warta yang cocok dengan pencarian &quot;{searchQuery}&quot;.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredNews.map((n) => (
+                      <tr key={n.slug}>
+                        <td>
+                          <div className="admin-table-title">{n.title}</div>
+                          <div className="admin-field-help" style={{ marginTop: 0 }}>
+                            Slug: <code>{n.slug}</code>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="admin-table-badge">{n.category}</span>
+                        </td>
+                        <td className="admin-table-sub">{n.author}</td>
+                        <td className="admin-table-meta">{n.date}</td>
+                        <td style={{ textAlign: "right" }}>
+                          <div className="admin-table-actions">
+                            <Link
+                              href={`/news/details?slug=${n.slug}`}
+                              className="admin-btn-sm admin-btn-view"
+                              title="Buka pratinjau berita"
+                            >
+                              Lihat ↗
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal({ type: "news", id: n.slug, title: n.title, rawItem: n } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-edit"
+                              title="Sunting warta ini"
+                            >
+                              ✎ Sunting
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateItem({ type: "news", id: n.slug, title: n.title, rawItem: n } as UnifiedRow)}
+                              className="admin-btn-sm admin-btn-dup"
+                              title="Duplikasi warta ini"
+                            >
+                              ⎘ Duplikat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteItem("news", n.slug, n.title)}
+                              className="admin-btn-sm admin-btn-del"
+                              title="Hapus warta ini"
+                            >
+                              ✕ Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
@@ -1899,7 +2810,7 @@ export default function AdminPage() {
                       <label className="admin-label">Judul Catatan</label>
                       <input
                         type="text"
-                        placeholder="e.g. Mengamati Aliran Informasi"
+                        placeholder="e.g. Oppenheimer / Atomic Habits / Kopi V60"
                         value={formTitle}
                         onChange={(e) => setFormTitle(e.target.value)}
                         className="admin-input"
@@ -1913,22 +2824,48 @@ export default function AdminPage() {
                         value={formDailyCategory}
                         onChange={(e) => setFormDailyCategory(e.target.value as SenseCategory)}
                       >
-                        <option value="Membaca">Membaca</option>
-                        <option value="Mendengar">Mendengar</option>
-                        <option value="Mengecap">Mengecap</option>
-                        <option value="Melihat">Melihat</option>
+                        <option value="Melihat">👁️ Melihat (Watched: Film, Video, Dokumenter)</option>
+                        <option value="Membaca">📖 Membaca (Read: Buku, Esai, Artikel)</option>
+                        <option value="Mendengar">🎧 Mendengar (Listened: Album, Musik, Podcast)</option>
+                        <option value="Mengecap">☕ Mengecap (Tasted: Seduhan Kopi, Rasa)</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="admin-form-grid">
                     <div className="admin-form-group">
-                      <label className="admin-label">Subjudul / Topik</label>
+                      <label className="admin-label">Jenis / Format Media</label>
                       <input
                         type="text"
-                        placeholder="e.g. Refleksi Bacaan"
-                        value={formSubtitle}
-                        onChange={(e) => setFormSubtitle(e.target.value)}
+                        placeholder="e.g. Film Bioskop, Video Podcast, Buku, Seduh Manual"
+                        value={formItemType}
+                        onChange={(e) => setFormItemType(e.target.value)}
+                        className="admin-input"
+                      />
+                    </div>
+                    <div className="admin-form-group">
+                      <label className="admin-label">Kreator / Pembuat / Penulis</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Christopher Nolan, James Clear, Bill Evans"
+                        value={formCreator}
+                        onChange={(e) => setFormCreator(e.target.value)}
+                        className="admin-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-form-grid">
+                    <div className="admin-form-group">
+                      <label className="admin-label">Rating Pengalaman (Skala 1.0 - 5.0)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="1"
+                        max="5"
+                        placeholder="4.8"
+                        value={formRating}
+                        onChange={(e) => setFormRating(parseFloat(e.target.value) || 0)}
                         className="admin-input"
                       />
                     </div>
@@ -1942,6 +2879,17 @@ export default function AdminPage() {
                         className="admin-input"
                       />
                     </div>
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label className="admin-label">Subjudul / Topik</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Refleksi Sinematografi & Sains"
+                      value={formSubtitle}
+                      onChange={(e) => setFormSubtitle(e.target.value)}
+                      className="admin-input"
+                    />
                   </div>
 
                   <div className="admin-form-group">

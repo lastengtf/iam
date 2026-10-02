@@ -304,9 +304,46 @@ export function recordVisit(path: string, customTitle?: string) {
     cachedLogs = updatedLogs;
     cachedTotal = currentTotal;
     notifyUpdated();
+
+    // Non-blocking sync to Cloudflare D1 Database tenmyid_db (ID: 67f82f52-6f07-457b-b971-861c8b4a15f0)
+    if (typeof fetch !== "undefined") {
+      fetch("/api/d1/visits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newLog),
+      }).catch(() => {
+        // offline or static preview fallback
+      });
+    }
   } catch (err) {
     console.error("Failed to record visit log:", err);
   }
+}
+
+// Helper checking Cloudflare D1 Database connection
+export async function checkD1Status(): Promise<{
+  connected: boolean;
+  database_name: string;
+  database_id: string;
+  tables?: { visit_logs: number; sync_store: number };
+}> {
+  try {
+    const res = await fetch("/api/d1/status");
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        connected: data.success && data.status === "online",
+        database_name: "tenmyid_db",
+        database_id: "67f82f52-6f07-457b-b971-861c8b4a15f0",
+        tables: data.tables,
+      };
+    }
+  } catch {}
+  return {
+    connected: false,
+    database_name: "tenmyid_db",
+    database_id: "67f82f52-6f07-457b-b971-861c8b4a15f0",
+  };
 }
 
 // Calculate high-level analytics

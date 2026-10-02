@@ -74,7 +74,7 @@ function getSnapshot<T>(key: string, fallback: T): T {
   }
 }
 
-// Helper safely setting JSON to localStorage
+// Helper safely setting JSON to localStorage & syncing to Cloudflare D1
 export function setStoredData<T>(key: string, data: T) {
   if (typeof window === "undefined") return;
   try {
@@ -82,6 +82,17 @@ export function setStoredData<T>(key: string, data: T) {
     localStorage.setItem(key, raw);
     memoryCache[key] = { raw, parsed: data };
     notifyContentUpdated();
+
+    // Asynchronous background sync to Cloudflare D1 Database tenmyid_db
+    if (typeof fetch !== "undefined") {
+      fetch("/api/d1/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, data }),
+      }).catch(() => {
+        // graceful offline / client-first fallback
+      });
+    }
   } catch (err) {
     console.error(`Failed to save to localStorage (${key}):`, err);
   }

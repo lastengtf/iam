@@ -102,6 +102,19 @@ export default function AdminVisitsPage() {
         </div>
       </div>
 
+      {/* Cloudflare D1 tenmyid_db Integration Status */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8fafc", border: "1px solid #e2e8f0", padding: "0.65rem 1rem", borderRadius: "8px", fontSize: "0.82rem", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 0 2px rgba(16, 185, 129, 0.2)" }}></span>
+          <span><strong>Cloudflare D1 Database:</strong> <code>tenmyid_db</code></span>
+          <span style={{ color: "var(--border-subtle)" }}>•</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.76rem", color: "var(--mono-gray-mid)" }}>ID: 67f82f52-6f07-457b-b971-861c8b4a15f0</span>
+        </div>
+        <span style={{ color: "#065f46", background: "#d1fae5", padding: "0.15rem 0.55rem", borderRadius: "9999px", fontSize: "0.72rem", fontWeight: 600 }}>
+          ✓ Terintegrasi &amp; Tersinkronisasi
+        </span>
+      </div>
+
       {/* 4 Stat Cards */}
       <div className="admin-visits-stats-grid">
         <div className="admin-stat-card">

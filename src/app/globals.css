@@ -6223,4 +6223,244 @@ body.in-master-detail .footer-contact {
   }
 }
 
+/* ============================================================
+   KESEHARIAN DETAIL: RINGKAS & NYAMAN UNTUK TAMPILAN MOBILE
+   ============================================================ */
+.keseharian-mobile-friendly-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  padding-bottom: 2rem;
+}
+
+.km-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.km-badges-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.km-type-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  background: var(--bg-hover, #f1f5f9);
+  border-radius: 9999px;
+  color: var(--mono-gray-mid, #475569);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.km-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.88rem;
+  background: var(--bg-hover, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.km-main-info-block {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.km-poster-wrap {
+  width: 110px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 2/3;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  background: #f1f5f9;
+}
+
+.km-poster-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.km-title-meta-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.km-title {
+  font-size: 1.35rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--mono-black, #0f172a);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.km-creator {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.km-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-dim, #64748b);
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.km-date {
+  font-size: 0.74rem;
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-mono, monospace);
+  margin-top: 0.2rem;
+}
+
+/* Kotak Reviewku yang Bersih & Nyaman di Mata */
+.km-review-box {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.6) 100%);
+  border-left: 3.5px solid var(--mono-black, #0f172a);
+  border-radius: 8px;
+  padding: 1.15rem 1.25rem;
+}
+
+.km-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.km-review-title {
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mono-black, #0f172a);
+}
+
+.km-review-author {
+  font-size: 0.72rem;
+  color: var(--text-dim, #64748b);
+}
+
+.km-review-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-main, #334155);
+  font-weight: 450;
+  margin: 0;
+}
+
+/* Sinopsis Section */
+.km-synopsis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.km-section-heading {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--mono-black, #0f172a);
+  margin-bottom: 0.2rem;
+}
+
+.km-synopsis-text {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-dim, #475569);
+  margin: 0;
+}
+
+/* Navigasi Catatan Lainnya */
+.km-next-section {
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.km-next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.km-next-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.km-next-card:hover {
+  background: var(--bg-hover, #f8fafc);
+  border-color: var(--mono-black, #0f172a);
+}
+
+.km-next-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.km-next-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.km-next-title {
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--mono-black, #0f172a);
+}
+
+.km-next-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim, #64748b);
+}
+
+.km-next-arrow {
+  font-size: 0.85rem;
+  color: var(--mono-gray-light, #94a3b8);
+}
+
+@media (max-width: 540px) {
+  .km-main-info-block {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .km-poster-wrap {
+    width: 130px;
+  }
+  .km-title {
+    font-size: 1.25rem;
+  }
+  .km-review-box {
+    padding: 1rem;
+  }
+}
+
+
 

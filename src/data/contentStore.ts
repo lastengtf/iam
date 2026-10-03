@@ -85,12 +85,16 @@ export function setStoredData<T>(key: string, data: T) {
 
     // Asynchronous background sync to Cloudflare D1 Database tenmyid_db
     if (typeof fetch !== "undefined") {
-      fetch("/api/d1/sync", {
+      fetch("/api/public/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key, data }),
       }).catch(() => {
-        // graceful offline / client-first fallback
+        fetch("/api/d1/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, data }),
+        }).catch(() => {});
       });
     }
   } catch (err) {
@@ -112,8 +116,15 @@ export async function hydrateFromD1(): Promise<{ success: boolean; updated: bool
 
   isHydrating = true;
   try {
-    const res = await fetch("/api/d1/sync", { cache: "no-store" });
-    if (!res.ok) {
+    let res = await fetch("/api/public/content", { cache: "no-store" }).catch(() => null);
+    if (!res || !res.ok) {
+      res = await fetch("/api/content", { cache: "no-store" }).catch(() => null);
+    }
+    if (!res || !res.ok) {
+      res = await fetch("/api/d1/sync", { cache: "no-store" }).catch(() => null);
+    }
+
+    if (!res || !res.ok) {
       return { success: false, updated: false, count: 0 };
     }
 
@@ -169,11 +180,17 @@ export async function hydrateFromD1(): Promise<{ success: boolean; updated: bool
     }
 
     if (Object.keys(localBatch).length > 0) {
-      await fetch("/api/d1/sync", {
+      await fetch("/api/public/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batch: localBatch }),
-      }).catch(() => {});
+      }).catch(() => {
+        fetch("/api/d1/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ batch: localBatch }),
+        }).catch(() => {});
+      });
     }
 
     return { success: true, updated: false, count: 0 };
@@ -206,11 +223,23 @@ export async function pushAllLocalToD1(): Promise<{ success: boolean; count: num
       return { success: true, count: 0 };
     }
 
-    const res = await fetch("/api/d1/sync", {
+    let res = await fetch("/api/admin/content", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ batch }),
-    });
+    }).catch(() => null);
+
+    if (!res || !res.ok) {
+      res = await fetch("/api/d1/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batch }),
+      }).catch(() => null);
+    }
+
+    if (!res) {
+      return { success: false, count: 0, error: "Network error" };
+    }
 
     const json = (await res.json()) as { success: boolean; count?: number; error?: string };
     return {

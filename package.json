@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "deploy": "next build && wrangler deploy",
     "deploy:local": "wrangler dev --assets ./out --port 8787",
     "preview": "npm run build && npm run deploy:local",
     "lint": "eslint"

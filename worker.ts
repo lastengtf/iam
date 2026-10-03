@@ -257,7 +257,13 @@ export default {
     // 5.5. CLOUDFLARE D1 DATABASE INTEGRATION (tenmyid_db)
     // Database ID: 67f82f52-6f07-457b-b971-861c8b4a15f0
     // ========================================================
-    if (url.pathname.startsWith("/api/d1/")) {
+    const isD1OrContentApi =
+      url.pathname.startsWith("/api/d1/") ||
+      url.pathname === "/api/public/content" ||
+      url.pathname === "/api/content" ||
+      url.pathname === "/api/admin/content";
+
+    if (isD1OrContentApi) {
       const corsHeaders = {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
@@ -409,8 +415,14 @@ export default {
         }
       }
 
-      // 5.5.3. Content Store Sync in D1
-      if (url.pathname === "/api/d1/sync") {
+      // 5.5.3. Content Store Sync in D1 (Public GET & Admin POST)
+      const isContentSyncRoute =
+        url.pathname === "/api/d1/sync" ||
+        url.pathname === "/api/public/content" ||
+        url.pathname === "/api/content" ||
+        url.pathname === "/api/admin/content";
+
+      if (isContentSyncRoute) {
         await initTables();
 
         if (request.method === "POST") {

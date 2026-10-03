@@ -4,6 +4,9 @@
   "main": "./worker.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "ten.my.id/*", "zone_name": "ten.my.id" }
+  ],
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page"
